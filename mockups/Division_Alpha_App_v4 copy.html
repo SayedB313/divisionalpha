@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIVISION ALPHA — Accountability Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Cinzel:wght@400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0e0c08;
+      --bg-warm: #141108;
+      --surface: #1c1912;
+      --surface-2: #252118;
+      --surface-3: #2e2a1f;
+      --border: #3a3428;
+      --border-light: #4a4232;
+
+      --cream: #e8dcc4;
+      --cream-dim: #b8a888;
+      --cream-muted: #7a7060;
+      --cream-ghost: #4a4438;
+
+      --amber: #d4a03c;
+      --amber-glow: rgba(212, 160, 60, 0.15);
+      --amber-bright: #e8b84a;
+      --amber-dim: rgba(212, 160, 60, 0.08);
+
+      --green: #5a9a68;
+      --green-dim: rgba(90, 154, 104, 0.15);
+      --yellow: #c4a030;
+      --yellow-dim: rgba(196, 160, 48, 0.15);
+      --red: #b85a4a;
+      --red-dim: rgba(184, 90, 74, 0.15);
+
+      --font-display: 'Cinzel', serif;
+      --font-mono: 'Space Mono', monospace;
+      --font-body: 'Barlow', sans-serif;
+    }
+
+    html {
+      font-size: 130%;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--cream);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* CRT scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Warm vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(10, 8, 4, 0.6) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body > * { position: relative; z-index: 1; }
+
+    /* ══════════════════════════════════════ */
+    /* TOP BAR                               */
+    /* ══════════════════════════════════════ */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--bg);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 1000;
+    }
+
+    .topbar::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0; right: 0;
+      height: 1px;
+      background: var(--amber-dim);
+    }
+
+    .topbar-logo {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      color: var(--amber);
+      text-transform: uppercase;
+    }
+
+    .topbar-logo span {
+      color: var(--cream-muted);
+      font-weight: 400;
+    }
+
+    .topbar-nav {
+      display: flex;
+      gap: 0;
+      list-style: none;
+    }
+
+    .topbar-nav a {
+      display: block;
+      padding: 18px 20px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cream-muted);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.2s, border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .topbar-nav a:hover { color: var(--cream); }
+    .topbar-nav a.active {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .streak-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--amber);
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border: 1px solid var(--amber-glow);
+      background: var(--amber-dim);
+    }
+
+    .avatar-box {
+      width: 36px; height: 36px;
+      border: 2px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--amber);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .avatar-box:hover { border-color: var(--amber); }
+
+    /* ══════════════════════════════════════ */
+    /* LAYOUT                                */
+    /* ══════════════════════════════════════ */
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 88px 32px 80px;
+      min-height: 100vh;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* Stagger entrance */
+    .fi {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    .fi.visible {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    }
+    .fi:nth-child(1) { transition-delay: 0s; }
+    .fi:nth-child(2) { transition-delay: 0.06s; }
+    .fi:nth-child(3) { transition-delay: 0.12s; }
+    .fi:nth-child(4) { transition-delay: 0.18s; }
+    .fi:nth-child(5) { transition-delay: 0.24s; }
+    .fi:nth-child(6) { transition-delay: 0.30s; }
+    .fi:nth-child(7) { transition-delay: 0.36s; }
+    .fi:nth-child(8) { transition-delay: 0.42s; }
+
+    /* ══════════════════════════════════════ */
+    /* TYPOGRAPHY                             */
+    /* ══════════════════════════════════════ */
+    h1 {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 24px;
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 12px;
+    }
+
+    .label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--cream-muted);
+    }
+
+    .label-amber { color: var(--amber); }
+
+    .body-text {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--cream-dim);
+    }
+
+    /* ══════════════════════════════════════ */
+    /* CARDS — hard borders, no blur          */
+    /* ══════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 28px;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: var(--border-light);
+      box-shadow: 0 0 0 1px var(--amber-dim);
+    }
+
+    .card-amber {
+      border-left: 3px solid var(--amber);
+    }
+
+    .card + .card { margin-top: 12px; }
+
+    /* Corner decoration — Art Deco touch */
+    .card-deco::before,
+    .card-deco::after {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      border-color: var(--amber);
+      border-style: solid;
+      opacity: 0.4;
+    }
+    .card-deco::before {
+      top: -1px; left: -1px;
+      border-width: 2px 0 0 2px;
+    }
+    .card-deco::after {
+      bottom: -1px; right: -1px;
+      border-width: 0 2px 2px 0;
+    }
+
+    /* ══════════════════════════════════════ */
+    /* BUTTONS                               */
+    /* ══════════════════════════════════════ */
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: var(--bg);
+    }
+    .btn-primary:hover {
+      background: var(--amber-bright);
+      box-shadow: 0 0 16px var(--amber-glow);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--cream-dim);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    /* ══════════════════════════════════════ */
+    /* DIVIDERS                              */
+    /* ══════════════════════════════════════ */
+    .divider {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    .divider-label {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 36px 0;
+    }
+
+    .divider-label::before,
+    .divider-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider-label span {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--cream-muted);
+      white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════ */
+    /* HOME PAGE                             */
+    /* ══════════════════════════════════════ */
+    .hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cream-muted);
+      margin-bottom: 20px;
+    }
+
+    .hero-eyebrow::before,
+    .hero-eyebrow::after {
+      content: '───';
+      margin: 0 12px;
+      color: var(--border-light);
+    }
+
+    .streak-display {
+      margin: 40px 0 16px;
+    }
+
+    .streak-num {
+      font-family: var(--font-display);
+      font-size: 88px;
+      font-weight: 700;
+      color: var(--amber);
+      line-height: 1;
+      text-shadow: 0 0 40px rgba(212, 160, 60, 0.2);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { text-shadow: 0 0 40px rgba(212, 160, 60, 0.15); }
+      50% { text-shadow: 0 0 60px rgba(212, 160, 60, 0.3); }
+    }
+
+    .streak-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--cream-muted);
+      margin-top: 8px;
+    }
+
+    /* Sprint progress bar */
+    .sprint-track {
+      margin: 32px auto;
+      max-width: 400px;
+    }
+
+    .sprint-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .sprint-bar {
+      height: 4px;
+      background: var(--surface-2);
+      position: relative;
+    }
+
+    .sprint-fill {
+      height: 100%;
+      background: var(--amber);
+      transition: width 0.6s ease;
+      position: relative;
+    }
+
+    .sprint-fill::after {
+      content: '';
+      position: absolute;
+      right: 0; top: -2px;
+      width: 8px; height: 8px;
+      background: var(--amber);
+      border: 2px solid var(--bg);
+    }
+
+    /* Today's focus card */
+    .focus-card {
+      text-align: left;
+      margin-top: 48px;
+    }
+
+    .focus-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pulse-dot {
+      width: 8px; height: 8px;
+      background: var(--amber);
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .focus-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+
+    .focus-body {
+      font-size: 14px;
+      color: var(--cream-dim);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .focus-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Goals grid */
+    .goals-section { margin-top: 48px; }
+
+    .goal-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .goal-item:hover { border-color: var(--border-light); }
+
+    .goal-indicator {
+      width: 3px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    .goal-indicator.professional { background: var(--amber); }
+    .goal-indicator.personal { background: var(--red); }
+    .goal-indicator.spiritual { background: var(--green); }
+
+    .goal-info { flex: 1; }
+
+    .goal-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+
+    .goal-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--cream-muted);
+      text-transform: uppercase;
+    }
+
+    .goal-pct {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cream-dim);
+    }
+
+    .goal-bar {
+      width: 80px; height: 3px;
+      background: var(--surface-3);
+    }
+
+    .goal-bar-fill {
+      height: 100%;
+      transition: width 0.5s ease;
+    }
+
+    .goal-bar-fill.professional { background: var(--amber); }
+    .goal-bar-fill.personal { background: var(--red); }
+    .goal-bar-fill.spiritual { background: var(--green); }
+
+    .goal-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    /* Squad pulse row */
+    .squad-pulse {
+      margin-top: 48px;
+    }
+
+    .pulse-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .pulse-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .pulse-stat-num {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+
+    .pulse-stat-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream-muted);
+    }
+
+    /* ══════════════════════════════════════ */
+    /* SQUAD PAGE                            */
+    /* ══════════════════════════════════════ */
+    .squad-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .squad-roster {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+
+    .roster-member {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .roster-avatar {
+      width: 48px; height: 48px;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--cream-dim);
+      transition: border-color 0.2s;
+    }
+
+    .roster-avatar.captain {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    .roster-name {
+      font-size: 11px;
+      color: var(--cream-muted);
+    }
+
+    .roster-status {
+      width: 8px; height: 8px;
+      margin-top: -4px;
+    }
+
+    .status-green { background: var(--green); }
+    .status-yellow { background: var(--yellow); }
+    .status-red { background: var(--red); }
+
+    /* Squad feed */
+    .feed { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; }
+
+    .msg-system {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      padding: 16px 20px;
+    }
+
+    .msg-system-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .msg-system-icon {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--amber);
+      padding: 2px 6px;
+      border: 1px solid var(--amber-glow);
+      background: var(--amber-dim);
+    }
+
+    .msg-system-text {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--cream-dim);
+    }
+
+    .msg-member {
+      display: flex;
+      gap: 12px;
+    }
+
+    .msg-member-avatar {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--cream-dim);
+    }
+
+    .msg-member-body {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px 18px;
+      flex: 1;
+    }
+
+    .msg-member-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--amber);
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .msg-member-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--cream-dim);
+    }
+
+    .msg-checkin {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .checkin-badge {
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .checkin-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(90, 154, 104, 0.3); }
+    .checkin-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(196, 160, 48, 0.3); }
+    .checkin-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(184, 90, 74, 0.3); }
+
+    .checkin-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 14px 18px;
+      flex: 1;
+    }
+
+    /* ══════════════════════════════════════ */
+    /* COACH PAGE                            */
+    /* ══════════════════════════════════════ */
+    .coach-hero {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .coach-prompt-area {
+      margin-top: 32px;
+    }
+
+    .coach-input-wrap {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .coach-input-wrap:focus-within {
+      border-color: var(--amber);
+    }
+
+    .coach-input {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      min-height: 60px;
+    }
+
+    .coach-input::placeholder { color: var(--cream-ghost); }
+
+    .coach-input-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .coach-response {
+      margin-top: 24px;
+    }
+
+    .coach-response .card {
+      border-left: 3px solid var(--amber);
+    }
+
+    .coach-response-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .coach-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--amber);
+      padding: 3px 8px;
+      border: 1px solid var(--amber-glow);
+      background: var(--amber-dim);
+    }
+
+    .coach-response-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--cream-dim);
+    }
+
+    .coach-response-text strong {
+      color: var(--cream);
+      font-weight: 600;
+    }
+
+    .suggested-prompts {
+      margin-top: 32px;
+    }
+
+    .prompt-chip {
+      display: inline-block;
+      padding: 8px 16px;
+      margin: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--cream-muted);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .prompt-chip:hover {
+      border-color: var(--amber);
+      color: var(--amber);
+      background: var(--amber-dim);
+    }
+
+    /* ══════════════════════════════════════ */
+    /* INSIGHTS PAGE                         */
+    /* ══════════════════════════════════════ */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .insight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+    }
+
+    .insight-card.wide {
+      grid-column: span 2;
+    }
+
+    .insight-value {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--cream);
+      margin: 8px 0 4px;
+    }
+
+    .insight-change {
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .insight-change.up { color: var(--green); }
+    .insight-change.down { color: var(--red); }
+    .insight-change.neutral { color: var(--cream-muted); }
+
+    /* Mini bar chart */
+    .mini-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 48px;
+      margin-top: 16px;
+    }
+
+    .mini-bar {
+      flex: 1;
+      background: var(--amber-dim);
+      border-top: 2px solid var(--amber);
+      min-height: 4px;
+      transition: height 0.5s ease;
+    }
+
+    /* Consistency grid — 6 weeks × 7 days */
+    .consistency-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-top: 16px;
+    }
+
+    .consistency-cell {
+      aspect-ratio: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .consistency-cell.l1 { background: rgba(212, 160, 60, 0.15); border-color: rgba(212, 160, 60, 0.2); }
+    .consistency-cell.l2 { background: rgba(212, 160, 60, 0.3); border-color: rgba(212, 160, 60, 0.35); }
+    .consistency-cell.l3 { background: rgba(212, 160, 60, 0.5); border-color: rgba(212, 160, 60, 0.55); }
+    .consistency-cell.l4 { background: var(--amber); border-color: var(--amber); }
+
+    .consistency-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-bottom: 4px;
+    }
+
+    .consistency-days span {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--cream-ghost);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    /* Operator Score breakdown */
+    .score-bars { margin-top: 16px; }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .score-label-text {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      color: var(--cream-muted);
+      width: 100px;
+      text-transform: uppercase;
+    }
+
+    .score-track {
+      flex: 1;
+      height: 6px;
+      background: var(--surface-2);
+    }
+
+    .score-fill {
+      height: 100%;
+      background: var(--amber);
+      transition: width 0.6s ease;
+    }
+
+    .score-val {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--cream-dim);
+      width: 32px;
+      text-align: right;
+    }
+
+    /* ══════════════════════════════════════ */
+    /* SPRINT END PAGE                       */
+    /* ══════════════════════════════════════ */
+    .ceremony-hero {
+      text-align: center;
+      padding: 48px 0;
+    }
+
+    .ceremony-badge {
+      display: inline-block;
+      padding: 12px 32px;
+      border: 2px solid var(--amber);
+      font-family: var(--font-display);
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    /* Deco corners on badge */
+    .ceremony-badge::before,
+    .ceremony-badge::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-color: var(--amber);
+      border-style: solid;
+    }
+    .ceremony-badge::before {
+      top: -4px; left: -4px;
+      border-width: 2px 0 0 2px;
+    }
+    .ceremony-badge::after {
+      bottom: -4px; right: -4px;
+      border-width: 0 2px 2px 0;
+    }
+
+    .ceremony-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .ceremony-sub {
+      font-size: 15px;
+      color: var(--cream-dim);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .ceremony-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 48px;
+    }
+
+    .ceremony-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px 16px;
+      text-align: center;
+    }
+
+    .ceremony-stat-num {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--amber);
+    }
+
+    .ceremony-stat-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream-muted);
+      margin-top: 4px;
+    }
+
+    /* Vote section */
+    .vote-section {
+      margin-top: 48px;
+      text-align: center;
+    }
+
+    .vote-options {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .vote-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 24px 32px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 160px;
+    }
+
+    .vote-card:hover {
+      border-color: var(--amber);
+      box-shadow: 0 0 24px var(--amber-dim);
+    }
+
+    .vote-card-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+
+    .vote-card-desc {
+      font-size: 12px;
+      color: var(--cream-muted);
+      line-height: 1.5;
+    }
+
+    /* Tier 3 CTA */
+    .tier3-cta {
+      margin-top: 48px;
+      background: var(--surface);
+      border: 2px solid var(--amber);
+      padding: 32px;
+      text-align: center;
+      position: relative;
+    }
+
+    .tier3-cta::before,
+    .tier3-cta::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border-color: var(--amber);
+      border-style: solid;
+    }
+    .tier3-cta::before {
+      top: -4px; left: -4px;
+      border-width: 2px 0 0 2px;
+    }
+    .tier3-cta::after {
+      bottom: -4px; right: -4px;
+      border-width: 0 2px 2px 0;
+    }
+
+    .tier3-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--amber);
+      margin-bottom: 12px;
+    }
+
+    .tier3-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .tier3-desc {
+      font-size: 14px;
+      color: var(--cream-dim);
+      line-height: 1.6;
+      max-width: 460px;
+      margin: 0 auto 24px;
+    }
+
+    /* ══════════════════════════════════════ */
+    /* RESPONSIVE                            */
+    /* ══════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .topbar-nav { display: none; }
+      .container { padding: 80px 16px 60px; }
+      h1 { font-size: 24px; }
+      .streak-num { font-size: 64px; }
+      .insights-grid { grid-template-columns: 1fr; }
+      .insights-grid .wide { grid-column: span 1; }
+      .ceremony-stats { grid-template-columns: repeat(2, 1fr); }
+      .pulse-grid { grid-template-columns: 1fr; }
+      .vote-options { flex-direction: column; align-items: center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <nav class="topbar">
+    <div class="topbar-logo">Division <span>Alpha</span></div>
+    <ul class="topbar-nav">
+      <a class="active" onclick="showPage('home')">Home</a>
+      <a onclick="showPage('squad')">Squad</a>
+      <a onclick="showPage('coach')">Coach</a>
+      <a onclick="showPage('insights')">Insights</a>
+      <a onclick="showPage('ceremony')">Sprint End</a>
+    </ul>
+    <div class="topbar-right">
+      <div class="streak-badge">◆ 23 DAYS</div>
+      <div class="avatar-box">SB</div>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ════════════════════════════════════ -->
+    <!-- HOME                                -->
+    <!-- ════════════════════════════════════ -->
+    <div id="page-home" class="page active">
+
+      <div class="hero fi">
+        <div class="hero-eyebrow">Sprint 02 · Week 4 of 6</div>
+        <h1>Your Streak Is<br>Your Reputation</h1>
+        <div class="streak-display">
+          <div class="streak-num">23</div>
+          <div class="streak-text">Consecutive Days Declared</div>
+        </div>
+
+        <div class="sprint-track">
+          <div class="sprint-meta">
+            <span class="label">Week 4 / 6</span>
+            <span class="label label-amber">67%</span>
+          </div>
+          <div class="sprint-bar">
+            <div class="sprint-fill" style="width: 67%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="focus-card fi">
+        <div class="card card-amber card-deco">
+          <div class="card-header">
+            <div class="pulse-dot"></div>
+            <span class="label">Today's Focus · Wednesday Check-In</span>
+          </div>
+          <div class="focus-title">Mid-Week Status Report</div>
+          <div class="focus-body">
+            Your squad is waiting for your Green / Yellow / Red check-in.
+            How's progress on your declared goals this week?
+          </div>
+          <div class="focus-actions">
+            <button class="btn btn-primary">Submit Check-In</button>
+            <button class="btn btn-ghost">View Declaration</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="goals-section fi">
+        <div class="divider-label">
+          <span>Active Goals</span>
+        </div>
+
+        <div class="goal-item">
+          <div class="goal-indicator professional"></div>
+          <div class="goal-info">
+            <div class="goal-name">Launch MVP by March 28</div>
+            <div class="goal-sub">Professional · Sprint Goal</div>
+          </div>
+          <div class="goal-right">
+            <div class="goal-pct">72%</div>
+            <div class="goal-bar"><div class="goal-bar-fill professional" style="width:72%"></div></div>
+          </div>
+        </div>
+
+        <div class="goal-item">
+          <div class="goal-indicator personal"></div>
+          <div class="goal-info">
+            <div class="goal-name">Read 2 Books This Sprint</div>
+            <div class="goal-sub">Personal · Habit</div>
+          </div>
+          <div class="goal-right">
+            <div class="goal-pct">50%</div>
+            <div class="goal-bar"><div class="goal-bar-fill personal" style="width:50%"></div></div>
+          </div>
+        </div>
+
+        <div class="goal-item">
+          <div class="goal-indicator spiritual"></div>
+          <div class="goal-info">
+            <div class="goal-name">Fajr On Time — 42 Day Streak</div>
+            <div class="goal-sub">Spiritual · Daily</div>
+          </div>
+          <div class="goal-right">
+            <div class="goal-pct">100%</div>
+            <div class="goal-bar"><div class="goal-bar-fill spiritual" style="width:100%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="squad-pulse fi">
+        <div class="divider-label">
+          <span>Squad Pulse</span>
+        </div>
+        <div class="pulse-grid">
+          <div class="pulse-stat">
+            <div class="pulse-stat-num">6/7</div>
+            <div class="pulse-stat-label">Checked In</div>
+          </div>
+          <div class="pulse-stat">
+            <div class="pulse-stat-num">89%</div>
+            <div class="pulse-stat-label">Avg. Completion</div>
+          </div>
+          <div class="pulse-stat">
+            <div class="pulse-stat-num">4</div>
+            <div class="pulse-stat-label">Green Status</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════ -->
+    <!-- SQUAD                               -->
+    <!-- ════════════════════════════════════ -->
+    <div id="page-squad" class="page">
+
+      <div class="squad-header fi">
+        <div class="label" style="margin-bottom:16px">Squad Bravo-7 · Sprint 02</div>
+        <h1>Your People.<br>Your Standard.</h1>
+      </div>
+
+      <div class="squad-roster fi">
+        <div class="roster-member">
+          <div class="roster-avatar captain">SB</div>
+          <div class="roster-name">Sayed</div>
+          <div class="roster-status status-green"></div>
+        </div>
+        <div class="roster-member">
+          <div class="roster-avatar">AK</div>
+          <div class="roster-name">Amir</div>
+          <div class="roster-status status-green"></div>
+        </div>
+        <div class="roster-member">
+          <div class="roster-avatar">FR</div>
+          <div class="roster-name">Fatima</div>
+          <div class="roster-status status-yellow"></div>
+        </div>
+        <div class="roster-member">
+          <div class="roster-avatar">ZH</div>
+          <div class="roster-name">Zain</div>
+          <div class="roster-status status-green"></div>
+        </div>
+        <div class="roster-member">
+          <div class="roster-avatar">NM</div>
+          <div class="roster-name">Nadia</div>
+          <div class="roster-status status-green"></div>
+        </div>
+        <div class="roster-member">
+          <div class="roster-avatar">YS</div>
+          <div class="roster-name">Yusuf</div>
+          <div class="roster-status status-red"></div>
+        </div>
+        <div class="roster-member">
+          <div class="roster-avatar">LK</div>
+          <div class="roster-name">Leila</div>
+          <div class="roster-status status-green"></div>
+        </div>
+      </div>
+
+      <div class="divider-label fi"><span>Wednesday · Mar 24</span></div>
+
+      <div class="feed fi">
+        <div class="msg-system">
+          <div class="msg-system-header">
+            <div class="msg-system-icon">AI</div>
+            <span class="label">Facilitator Agent</span>
+          </div>
+          <div class="msg-system-text">
+            Mid-week check-in time. 6 of 7 squad members have submitted.
+            Yusuf — you've been quiet since Monday. No judgment, just checking in.
+            Drop a quick Red/Yellow/Green when you can.
+          </div>
+        </div>
+
+        <div class="msg-checkin">
+          <div class="checkin-badge checkin-green">Green</div>
+          <div class="checkin-content">
+            <div class="msg-member-name">Sayed</div>
+            <div class="msg-member-text">MVP backend is live. Working on auth flow today. On track for Friday deploy.</div>
+          </div>
+        </div>
+
+        <div class="msg-checkin">
+          <div class="checkin-badge checkin-green">Green</div>
+          <div class="checkin-content">
+            <div class="msg-member-name">Amir</div>
+            <div class="msg-member-text">First draft of pitch deck done. Running it by mentor tomorrow.</div>
+          </div>
+        </div>
+
+        <div class="msg-checkin">
+          <div class="checkin-badge checkin-yellow">Yellow</div>
+          <div class="checkin-content">
+            <div class="msg-member-name">Fatima</div>
+            <div class="msg-member-text">Content calendar is behind. Client feedback loop took longer than expected. Adjusting timeline.</div>
+          </div>
+        </div>
+
+        <div class="msg-checkin">
+          <div class="checkin-badge checkin-red">Red</div>
+          <div class="checkin-content">
+            <div class="msg-member-name">Yusuf</div>
+            <div class="msg-member-text">Honestly struggling this week. Family emergency pulled me off track. Need to reset goals for the remaining 2 weeks.</div>
+          </div>
+        </div>
+
+        <div class="msg-system">
+          <div class="msg-system-header">
+            <div class="msg-system-icon">AI</div>
+            <span class="label">Coach Agent → Yusuf</span>
+          </div>
+          <div class="msg-system-text">
+            Respect for the honesty, Yusuf. That takes more courage than a green check-in.
+            I've flagged your Captain (Sayed) for a quick 1-on-1. Let's build a realistic plan for the final stretch together — no heroics needed.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════ -->
+    <!-- COACH                               -->
+    <!-- ════════════════════════════════════ -->
+    <div id="page-coach" class="page">
+
+      <div class="coach-hero fi">
+        <div class="label" style="margin-bottom:16px">AI Performance Coach</div>
+        <h1>Ask. Reflect.<br>Recalibrate.</h1>
+        <p class="body-text" style="max-width:440px;margin:0 auto">Your private coaching space. Every conversation is confidential and tailored to your operator profile.</p>
+      </div>
+
+      <div class="coach-prompt-area fi">
+        <div class="coach-input-wrap">
+          <textarea class="coach-input" placeholder="What's on your mind? Ask for strategy, accountability advice, or help breaking through a blocker..."></textarea>
+          <div class="coach-input-footer">
+            <span class="label">Private · Not shared with squad</span>
+            <button class="btn btn-primary" style="padding:8px 20px">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-response fi">
+        <div class="card card-amber">
+          <div class="coach-response-header">
+            <div class="coach-tag">Coach</div>
+            <span class="label">Re: MVP Launch Anxiety</span>
+          </div>
+          <div class="coach-response-text">
+            <strong>You're not behind — you're in the compression zone.</strong> Week 4 of a sprint is where most operators feel the squeeze between ambition and reality.
+            <br><br>
+            Here's what the data shows: your completion rate is 72%, which puts you in the top quartile of your cohort. The anxiety isn't about capability — it's about the gap between your standard and your timeline.
+            <br><br>
+            <strong>My recommendation:</strong> Ship the 80% version Friday. Declare the remaining 20% as Week 5's focus. Your squad will respect the transparency more than a last-minute crunch.
+          </div>
+        </div>
+      </div>
+
+      <div class="suggested-prompts fi">
+        <div class="divider-label"><span>Try Asking</span></div>
+        <div style="text-align:center">
+          <div class="prompt-chip">How do I improve my operator score?</div>
+          <div class="prompt-chip">What does my check-in pattern say about me?</div>
+          <div class="prompt-chip">Help me write Monday's declaration</div>
+          <div class="prompt-chip">Am I ready for Tier 3?</div>
+          <div class="prompt-chip">What can I learn from my squad's top performer?</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════ -->
+    <!-- INSIGHTS                            -->
+    <!-- ════════════════════════════════════ -->
+    <div id="page-insights" class="page">
+
+      <div class="fi">
+        <div class="label" style="margin-bottom:16px">Performance Data · Sprint 02</div>
+        <h1>The Numbers<br>Don't Lie</h1>
+      </div>
+
+      <div class="insights-grid fi">
+        <div class="insight-card">
+          <div class="label">Operator Score</div>
+          <div class="insight-value">847</div>
+          <div class="insight-change up">▲ 34 from Sprint 01</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="label">Goal Completion</div>
+          <div class="insight-value">72%</div>
+          <div class="insight-change up">▲ 8% vs. last sprint</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="label">Squad Rank</div>
+          <div class="insight-value">#2</div>
+          <div class="insight-change neutral">of 7 operators</div>
+        </div>
+
+        <div class="insight-card">
+          <div class="label">Attendance</div>
+          <div class="insight-value">96%</div>
+          <div class="insight-change up">▲ perfect last 3 weeks</div>
+        </div>
+
+        <div class="insight-card wide">
+          <div class="label">Weekly Completion Rate</div>
+          <div class="mini-bars">
+            <div class="mini-bar" style="height:30%"></div>
+            <div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:70%"></div>
+            <div class="mini-bar" style="height:65%"></div>
+            <div class="mini-bar" style="height:85%"></div>
+            <div class="mini-bar" style="height:72%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px">
+            <span class="label">Wk 1</span>
+            <span class="label">Wk 2</span>
+            <span class="label">Wk 3</span>
+            <span class="label">Wk 4</span>
+            <span class="label">Wk 5</span>
+            <span class="label">Wk 6</span>
+          </div>
+        </div>
+
+        <div class="insight-card wide">
+          <div class="label">Consistency Heatmap · 42 Days</div>
+          <div class="consistency-days">
+            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+          </div>
+          <div class="consistency-grid">
+            <div class="consistency-cell l2"></div><div class="consistency-cell l3"></div><div class="consistency-cell l1"></div><div class="consistency-cell l2"></div><div class="consistency-cell l4"></div><div class="consistency-cell l1"></div><div class="consistency-cell"></div>
+            <div class="consistency-cell l3"></div><div class="consistency-cell l4"></div><div class="consistency-cell l3"></div><div class="consistency-cell l2"></div><div class="consistency-cell l4"></div><div class="consistency-cell l2"></div><div class="consistency-cell l1"></div>
+            <div class="consistency-cell l4"></div><div class="consistency-cell l3"></div><div class="consistency-cell l4"></div><div class="consistency-cell l4"></div><div class="consistency-cell l4"></div><div class="consistency-cell l3"></div><div class="consistency-cell l2"></div>
+            <div class="consistency-cell l4"></div><div class="consistency-cell l4"></div><div class="consistency-cell l3"></div><div class="consistency-cell l4"></div><div class="consistency-cell l4"></div><div class="consistency-cell l4"></div><div class="consistency-cell l3"></div>
+            <div class="consistency-cell l3"></div><div class="consistency-cell l4"></div><div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div>
+            <div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div><div class="consistency-cell"></div>
+          </div>
+        </div>
+
+        <div class="insight-card wide">
+          <div class="label">Operator Score Breakdown</div>
+          <div class="score-bars">
+            <div class="score-row">
+              <span class="score-label-text">Goals</span>
+              <div class="score-track"><div class="score-fill" style="width:72%"></div></div>
+              <span class="score-val">72</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label-text">Attendance</span>
+              <div class="score-track"><div class="score-fill" style="width:96%"></div></div>
+              <span class="score-val">96</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label-text">Contribution</span>
+              <div class="score-track"><div class="score-fill" style="width:84%"></div></div>
+              <span class="score-val">84</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label-text">Leadership</span>
+              <div class="score-track"><div class="score-fill" style="width:90%"></div></div>
+              <span class="score-val">90</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label-text">Growth</span>
+              <div class="score-track"><div class="score-fill" style="width:68%"></div></div>
+              <span class="score-val">68</span>
+            </div>
+            <div class="score-row">
+              <span class="score-label-text">Comms</span>
+              <div class="score-track"><div class="score-fill" style="width:88%"></div></div>
+              <span class="score-val">88</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════ -->
+    <!-- SPRINT END / CEREMONY               -->
+    <!-- ════════════════════════════════════ -->
+    <div id="page-ceremony" class="page">
+
+      <div class="ceremony-hero fi">
+        <div class="ceremony-badge">Sprint 02 Complete</div>
+        <div class="ceremony-title">You Showed Up.<br>Every Week.</div>
+        <div class="ceremony-sub">
+          Six weeks of declarations, check-ins, and real accountability.
+          The results speak for themselves.
+        </div>
+      </div>
+
+      <div class="ceremony-stats fi">
+        <div class="ceremony-stat">
+          <div class="ceremony-stat-num">23</div>
+          <div class="ceremony-stat-label">Day Streak</div>
+        </div>
+        <div class="ceremony-stat">
+          <div class="ceremony-stat-num">72%</div>
+          <div class="ceremony-stat-label">Goals Hit</div>
+        </div>
+        <div class="ceremony-stat">
+          <div class="ceremony-stat-num">#2</div>
+          <div class="ceremony-stat-label">Squad Rank</div>
+        </div>
+        <div class="ceremony-stat">
+          <div class="ceremony-stat-num">847</div>
+          <div class="ceremony-stat-label">Operator Score</div>
+        </div>
+      </div>
+
+      <div class="vote-section fi">
+        <h2>Continuation Vote</h2>
+        <p class="body-text" style="max-width:400px;margin:0 auto">Your squad decides together. Do you run it back with the same crew, or reshuffle for fresh energy?</p>
+        <div class="vote-options">
+          <div class="vote-card">
+            <div class="vote-card-title">Continue</div>
+            <div class="vote-card-desc">Same squad.<br>New sprint.<br>Deeper trust.</div>
+          </div>
+          <div class="vote-card">
+            <div class="vote-card-title">Reshuffle</div>
+            <div class="vote-card-desc">New faces.<br>Fresh energy.<br>New challenge.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tier3-cta fi">
+        <div class="tier3-label">◆ Invitation Only ◆</div>
+        <div class="tier3-title">The Operator Fund</div>
+        <div class="tier3-desc">
+          Your score qualifies you for Tier 3 — where proven operators
+          build real businesses together. Musharakah-compliant.
+          Equity-backed. No excuses.
+        </div>
+        <button class="btn btn-primary">Learn More About Tier 3</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // Navigation
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.topbar-nav a').forEach(a => a.classList.remove('active'));
+
+      const page = document.getElementById('page-' + id);
+      if (page) {
+        page.classList.add('active');
+        // Trigger fade-in
+        setTimeout(() => {
+          page.querySelectorAll('.fi').forEach(el => el.classList.add('visible'));
+        }, 50);
+      }
+
+      // Highlight active nav
+      const navLinks = document.querySelectorAll('.topbar-nav a');
+      const map = { home: 0, squad: 1, coach: 2, insights: 3, ceremony: 4 };
+      if (map[id] !== undefined && navLinks[map[id]]) {
+        navLinks[map[id]].classList.add('active');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Init: show home page elements
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.querySelectorAll('#page-home .fi').forEach(el => el.classList.add('visible'));
+      }, 100);
+    });
+  </script>
+
+</body>
+</html>

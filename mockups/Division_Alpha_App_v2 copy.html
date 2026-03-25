@@ -1,0 +1,2758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Division Alpha - Elite Peer Accountability</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-0: #08080a;
+            --bg-1: #0f1012;
+            --bg-2: #151618;
+            --bg-3: #1c1d20;
+            --text-primary: #eae8e3;
+            --text-muted: #7d7b76;
+            --text-dim: #4a4843;
+            --accent-gold: #c8aa78;
+            --accent-light: #dac49a;
+            --green: #4ade80;
+            --yellow: #facc15;
+            --red: #f87171;
+            --purple: #a78bfa;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-accent: rgba(200,170,120,0.2);
+            --easing: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-0);
+            color: var(--text-primary);
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* Grain Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' seed='2' /%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noiseFilter)' opacity='0.5'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Ambient Glow */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(218,196,154,0.08) 0%, rgba(218,196,154,0) 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            background: var(--bg-1);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .sidebar-brand {
+            padding: 24px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .brand-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            color: var(--accent-gold);
+            letter-spacing: 0.12em;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .brand-tagline {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.22em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 0;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.25s var(--easing);
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            color: var(--text-primary);
+            background: rgba(200,170,120,0.08);
+            border-left-color: var(--accent-gold);
+            box-shadow: inset 0 0 12px rgba(200,170,120,0.06);
+        }
+
+        .nav-icon {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .nav-badge {
+            background: var(--red);
+            color: var(--bg-0);
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border-subtle);
+            margin: 12px 16px;
+        }
+
+        .squad-label {
+            padding: 16px 16px 12px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .squad-member {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.25s var(--easing);
+            border-left: 3px solid transparent;
+        }
+
+        .squad-member:hover {
+            background: rgba(200,170,120,0.06);
+            border-left-color: var(--accent-gold);
+        }
+
+        .member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .member-avatar.online::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--green);
+            border-radius: 50%;
+            bottom: -2px;
+            right: -2px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .member-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .member-name {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .member-rank {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #5cb97a, #2a6a3a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .user-tier {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--bg-0);
+        }
+
+        .page {
+            display: none;
+            min-height: 100%;
+            padding: 40px;
+            animation: pageEnter 0.45s var(--easing) both;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stagger-item {
+            animation: pageEnter 0.45s var(--easing) both;
+        }
+
+        /* Stagger helper */
+        .page.active .stagger-item:nth-child(1) { animation-delay: 0.05s; }
+        .page.active .stagger-item:nth-child(2) { animation-delay: 0.1s; }
+        .page.active .stagger-item:nth-child(3) { animation-delay: 0.15s; }
+        .page.active .stagger-item:nth-child(4) { animation-delay: 0.2s; }
+        .page.active .stagger-item:nth-child(5) { animation-delay: 0.25s; }
+        .page.active .stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+        /* HOME PAGE */
+        .overline {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .page-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            line-height: 1.1;
+            color: var(--text-primary);
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        .sprint-stripe {
+            background: var(--bg-2);
+            border: 1px solid var(--border-accent);
+            border-left: 3px solid var(--accent-gold);
+            border-radius: 5px;
+            padding: 24px;
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .stripe-block h4 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .stripe-block p {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .stripe-block .meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: var(--bg-3);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-gold), var(--green));
+            width: 50%;
+            animation: fillAnimation 1.2s var(--easing) forwards;
+        }
+
+        @keyframes fillAnimation {
+            from { width: 0; }
+        }
+
+        .today-cta {
+            background: var(--bg-2);
+            border: 2px solid var(--border-accent);
+            border-radius: 5px;
+            padding: 28px;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .cta-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .cta-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+
+        .cta-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.8;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: 4px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s var(--easing);
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: var(--bg-0);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(200,170,120,0.2);
+        }
+
+        .btn-secondary {
+            background: var(--bg-3);
+            color: var(--text-primary);
+            border: 1px solid var(--border-accent);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-3);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .targets-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .target-row {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 24px 1fr auto;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: all 0.25s var(--easing);
+        }
+
+        .target-row:hover {
+            border-color: var(--border-accent);
+            background: rgba(200,170,120,0.04);
+        }
+
+        .status-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-indicator.green {
+            background: rgba(74,222,128,0.2);
+            border: 2px solid var(--green);
+        }
+
+        .status-indicator.yellow {
+            background: rgba(250,204,21,0.2);
+            border: 2px solid var(--yellow);
+        }
+
+        .status-indicator.red {
+            background: rgba(248,113,113,0.2);
+            border: 2px solid var(--red);
+        }
+
+        .target-content h3 {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .target-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(200,170,120,0.1);
+            border: 1px solid var(--border-accent);
+            color: var(--accent-gold);
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-family: 'Barlow Condensed', sans-serif;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .target-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .mini-progress {
+            width: 80px;
+            height: 2px;
+            background: var(--bg-3);
+            border-radius: 1px;
+            overflow: hidden;
+        }
+
+        .mini-progress-fill {
+            height: 100%;
+            background: var(--green);
+            width: 65%;
+        }
+
+        .target-percent {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .activity-feed {
+            margin-bottom: 32px;
+        }
+
+        .feed-item {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .feed-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .feed-content h4 {
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .feed-message {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            line-height: 1.6;
+        }
+
+        .feed-time {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: 'Barlow Condensed', sans-serif;
+            letter-spacing: 0.08em;
+        }
+
+        /* SQUAD ROOM */
+        .squad-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .squad-header-left h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .squad-header-left p {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .squad-header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .squad-stat {
+            text-align: right;
+        }
+
+        .squad-stat-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .squad-stat-value {
+            font-size: 20px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .avatar-stack {
+            display: flex;
+            margin-left: 24px;
+        }
+
+        .avatar-stack .member-avatar {
+            width: 40px;
+            height: 40px;
+            margin-left: -12px;
+            border: 2px solid var(--bg-0);
+        }
+
+        .avatar-stack .member-avatar:first-child {
+            margin-left: 0;
+        }
+
+        .facilitator-card {
+            background: var(--bg-2);
+            border: 2px solid var(--border-accent);
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .facilitator-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .facilitator-badge {
+            background: rgba(200,170,120,0.1);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .facilitator-message {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .facilitator-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .facilitator-stat {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .facilitator-stat strong {
+            color: var(--accent-gold);
+        }
+
+        .day-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .day-divider::before,
+        .day-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .day-divider-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .declaration-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .declaration-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .declaration-meta {
+            flex: 1;
+        }
+
+        .declaration-name {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .declaration-time {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            color: var(--text-dim);
+            letter-spacing: 0.08em;
+        }
+
+        .declaration-items {
+            margin-bottom: 12px;
+        }
+
+        .declaration-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .declaration-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-accent);
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .declaration-checkbox:hover {
+            border-color: var(--accent-gold);
+        }
+
+        .declaration-checkbox.checked {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+        }
+
+        .declaration-checkbox.checked::after {
+            content: '✓';
+            color: var(--bg-0);
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .blocker-callout {
+            background: rgba(250,204,21,0.08);
+            border-left: 3px solid var(--yellow);
+            padding: 8px 12px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: var(--text-primary);
+            margin-top: 12px;
+        }
+
+        .blocker-callout strong {
+            color: var(--yellow);
+        }
+
+        .input-bar {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 24px;
+        }
+
+        .input-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .input-bar input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .btn-send {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-accent);
+            background: transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-send:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 8px rgba(200,170,120,0.2);
+        }
+
+        .btn-send svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .btn-send:hover svg {
+            stroke: var(--accent-gold);
+        }
+
+        /* AI COACH */
+        .coach-container {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .coach-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .coach-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-light));
+            border-radius: 4px;
+            font-size: 28px;
+        }
+
+        .coach-header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 32px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .coach-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .coach-status .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s var(--easing);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.coach {
+            justify-content: flex-start;
+        }
+
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .chat-message.coach .chat-bubble {
+            background: var(--bg-2);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            border-bottom-left-radius: 0;
+        }
+
+        .chat-message.user .chat-bubble {
+            background: rgba(200,170,120,0.15);
+            color: var(--text-primary);
+            border: 1px solid var(--border-accent);
+            border-bottom-right-radius: 0;
+        }
+
+        .chat-bubble strong {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quick-btn {
+            padding: 10px 12px;
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: 'Barlow Condensed', sans-serif;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+            background: rgba(200,170,120,0.06);
+        }
+
+        .coach-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ANALYTICS/DASH */
+        .analytics-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 48px;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .analytics-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-card-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 36px;
+            color: var(--green);
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+
+        .stat-card-subtext {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .chart-section {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+
+        .sprint-pills {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pill {
+            background: var(--bg-3);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pill.active {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            color: var(--bg-0);
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            gap: 12px;
+        }
+
+        .bar {
+            flex: 1;
+            background: var(--bg-3);
+            border-radius: 3px 3px 0 0;
+            min-height: 12px;
+            transition: all 0.4s var(--easing);
+            position: relative;
+        }
+
+        .bar.filled {
+            background: linear-gradient(180deg, var(--accent-light), var(--accent-gold));
+        }
+
+        .bar.current {
+            background: linear-gradient(180deg, var(--green), var(--green));
+            box-shadow: 0 0 12px rgba(74,222,128,0.4);
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .report-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-top: 2px solid;
+            border-image: linear-gradient(90deg, var(--accent-light), var(--green), var(--accent-light)) 1;
+            border-radius: 5px;
+            padding: 24px;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .report-cell {
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        .report-cell:nth-child(odd):nth-last-child(-n+2) {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .report-cell-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .report-cell-value {
+            font-size: 18px;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .report-cell-detail {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .report-cell-quote {
+            font-style: italic;
+            color: var(--accent-gold);
+        }
+
+        /* SPRINT TRANSITION */
+        .transition-hero {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .sprint-badge {
+            display: inline-block;
+            background: transparent;
+            border: 2px solid var(--border-accent);
+            color: var(--accent-gold);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .transition-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .transition-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+
+        .retro-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .retro-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .retro-card-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            color: var(--accent-gold);
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .retro-card-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .retro-card.success .retro-card-value {
+            color: var(--green);
+        }
+
+        .vote-section {
+            background: var(--bg-2);
+            border: 2px solid var(--border-accent);
+            border-radius: 5px;
+            padding: 28px;
+            margin-bottom: 32px;
+        }
+
+        .vote-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 18px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .vote-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .vote-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .vote-btn {
+            padding: 14px 16px;
+            border-radius: 4px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s var(--easing);
+            border: 2px solid;
+            font-weight: 600;
+        }
+
+        .vote-btn.continue {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            color: var(--bg-0);
+        }
+
+        .vote-btn.continue:hover {
+            box-shadow: 0 0 16px rgba(200,170,120,0.4);
+            transform: translateY(-2px);
+        }
+
+        .vote-btn.continue.voted {
+            box-shadow: 0 0 20px rgba(200,170,120,0.6);
+            background: var(--accent-light);
+        }
+
+        .vote-btn.reshuffle {
+            background: transparent;
+            border-color: var(--border-subtle);
+            color: var(--text-primary);
+        }
+
+        .vote-btn.reshuffle:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .vote-btn.reshuffle.voted {
+            background: var(--bg-3);
+            border-color: var(--yellow);
+            color: var(--yellow);
+        }
+
+        .vote-btn.pause {
+            background: transparent;
+            border-color: var(--border-subtle);
+            color: var(--text-dim);
+        }
+
+        .vote-btn.pause:hover {
+            border-color: var(--text-muted);
+            color: var(--text-muted);
+        }
+
+        .vote-btn.pause.voted {
+            background: rgba(248,113,113,0.1);
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .vote-progress {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .vote-progress-bar {
+            height: 6px;
+            background: var(--bg-3);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .vote-progress-fill {
+            height: 100%;
+            background: var(--green);
+            width: 83%;
+            border-radius: 3px;
+        }
+
+        .reflections {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .reflection-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .reflection-quote {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-style: italic;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 16px;
+        }
+
+        .reflection-quote::before {
+            content: '"';
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+            color: var(--accent-gold);
+            opacity: 0.6;
+        }
+
+        .reflection-credit {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reflection-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .reflection-name {
+            font-size: 12px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* CHECK-IN PAGE */
+        .checkin-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 42px;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .checkin-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            max-width: 600px;
+        }
+
+        .checkin-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .checkin-card {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .checkin-card h3 {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .checkin-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 2px solid;
+            cursor: pointer;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .status-btn.green {
+            border-color: var(--green);
+            color: var(--green);
+            background: transparent;
+        }
+
+        .status-btn.green.selected {
+            background: rgba(74,222,128,0.15);
+            border-color: var(--green);
+        }
+
+        .status-btn.yellow {
+            border-color: var(--yellow);
+            color: var(--yellow);
+            background: transparent;
+        }
+
+        .status-btn.yellow.selected {
+            background: rgba(250,204,21,0.15);
+            border-color: var(--yellow);
+        }
+
+        .status-btn.red {
+            border-color: var(--red);
+            color: var(--red);
+            background: transparent;
+        }
+
+        .status-btn.red.selected {
+            background: rgba(248,113,113,0.15);
+            border-color: var(--red);
+        }
+
+        .checkin-note {
+            width: 100%;
+            background: var(--bg-3);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12px;
+            resize: vertical;
+            min-height: 80px;
+            display: none;
+        }
+
+        .checkin-note.show {
+            display: block;
+        }
+
+        .checkin-note::placeholder {
+            color: var(--text-dim);
+        }
+
+        .submit-section {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 14px 20px;
+            background: var(--accent-gold);
+            color: var(--bg-0);
+            border-radius: 4px;
+            border: none;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s var(--easing);
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(200,170,120,0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8,8,10,0.85);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: fadeIn 0.2s var(--easing);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-1);
+            border: 1px solid var(--border-subtle);
+            border-radius: 5px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s var(--easing);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 24px;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .profile-item {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .profile-item-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .profile-item-value {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .profile-goals {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .profile-goals h3 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 16px;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .profile-goal-item {
+            background: var(--bg-2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .page {
+                padding: 32px 24px;
+            }
+
+            .page-title {
+                font-size: 42px;
+            }
+
+            .stat-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .retro-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .checkin-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .reflections {
+                grid-template-columns: 1fr;
+            }
+
+            .sprint-stripe {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column-reverse;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-top: 1px solid var(--border-subtle);
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+                max-height: 60px;
+            }
+
+            .sidebar-brand {
+                padding: 12px 16px;
+                border-right: 1px solid var(--border-subtle);
+                border-bottom: none;
+                min-width: 200px;
+            }
+
+            .sidebar-nav {
+                display: flex;
+                padding: 0;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .nav-item {
+                padding: 8px 16px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                white-space: nowrap;
+            }
+
+            .nav-item.active {
+                border-left: none;
+                border-bottom-color: var(--accent-gold);
+                background: none;
+                box-shadow: none;
+            }
+
+            .squad-label,
+            .squad-member,
+            .sidebar-footer {
+                display: none;
+            }
+
+            .main-content {
+                height: calc(100% - 60px);
+            }
+
+            .page {
+                padding: 24px;
+            }
+
+            .page-title {
+                font-size: 32px;
+            }
+
+            .stat-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .vote-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .sprint-stripe {
+                grid-template-columns: 1fr;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chat-area {
+                max-width: 100%;
+            }
+
+            .chat-bubble {
+                max-width: 100%;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-title">DIVISION ALPHA</div>
+                <div class="brand-tagline">No Excuses. No Exceptions.</div>
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="nav-item active" data-page="home">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M3 12l9-9 9 9v3H3z" />
+                    </svg>
+                    <span>Home</span>
+                </div>
+                <div class="nav-item" data-page="squad">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <circle cx="8" cy="9" r="2" />
+                        <circle cx="16" cy="9" r="2" />
+                        <circle cx="12" cy="17" r="2" />
+                        <path d="M8 11c-2 1-3 3-3 5" />
+                        <path d="M16 11c2 1 3 3 3 5" />
+                    </svg>
+                    <span>Squad Room</span>
+                    <span class="nav-badge">3</span>
+                </div>
+                <div class="nav-item" data-page="coach">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+                    </svg>
+                    <span>AI Coach</span>
+                </div>
+                <div class="nav-item" data-page="dash">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="8" height="8" />
+                        <rect x="13" y="3" width="8" height="8" />
+                        <rect x="3" y="13" width="8" height="8" />
+                        <rect x="13" y="13" width="8" height="8" />
+                    </svg>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item" data-page="transition">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M12 2v20M2 12h20" />
+                    </svg>
+                    <span>Sprint End</span>
+                </div>
+                <div class="nav-item" data-page="checkin">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M5 12l3 3 7-7" />
+                        <rect x="3" y="3" width="18" height="18" />
+                    </svg>
+                    <span>Check-in</span>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="squad-label">Your Squad — Echo Unit</div>
+            <div class="squad-member online" onclick="openMemberModal('Marcus', 'Builder', '#5cb97a')">
+                <div class="member-avatar online" style="background: linear-gradient(135deg, #5cb97a, #2a6a3a);">M</div>
+                <div class="member-info">
+                    <div class="member-name">Marcus</div>
+                    <div class="member-rank">Builder</div>
+                </div>
+            </div>
+            <div class="squad-member online" onclick="openMemberModal('Sarah', 'Rewirer', '#6b7adb')">
+                <div class="member-avatar online" style="background: linear-gradient(135deg, #6b7adb, #3b4a8b);">S</div>
+                <div class="member-info">
+                    <div class="member-name">Sarah</div>
+                    <div class="member-rank">Rewirer</div>
+                </div>
+            </div>
+            <div class="squad-member" onclick="openMemberModal('Jordan', 'Pivot', '#d97706')">
+                <div class="member-avatar" style="background: linear-gradient(135deg, #d97706, #8b4513);">J</div>
+                <div class="member-info">
+                    <div class="member-name">Jordan</div>
+                    <div class="member-rank">Pivot</div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-avatar">Y</div>
+                <div class="user-info">
+                    <div class="user-name">You</div>
+                    <div class="user-tier">ALPHA TIER</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- HOME PAGE -->
+            <div class="page active" id="home-page">
+                <div class="stagger-item">
+                    <p class="overline">Week 3 · Monday</p>
+                    <h1 class="page-title">DECLARE OR<br>BE DECLARED<br>UPON.</h1>
+                    <p class="page-subtitle">Monday mornings separate the committed from the casual. You've got a squad watching. You've got numbers to prove. Declare what you're shipping this week, or watch others declare your irrelevance.</p>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="sprint-stripe">
+                        <div class="stripe-block">
+                            <h4>Current Sprint</h4>
+                            <p>Sprint 3 — Echo Unit</p>
+                            <p class="meta">FOUNDERS WHO SHIP</p>
+                        </div>
+                        <div class="stripe-block">
+                            <h4>Duration</h4>
+                            <p>Jan 15 – Feb 26</p>
+                            <p class="meta">6 weeks of commitment</p>
+                        </div>
+                        <div class="stripe-block">
+                            <h4>Progress</h4>
+                            <p>50% Complete</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="today-cta">
+                        <div class="cta-header">
+                            <div class="status-dot"></div>
+                            <div class="cta-title">What are you committing to?</div>
+                        </div>
+                        <p class="cta-desc">Your squad sees every declaration. Every update. Every moment you ship. No vague goals. No "trying." Specificity is accountability. Commit to what you'll have shipped by Friday midnight.</p>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="document.getElementById('checkin-page').click()">DECLARE YOUR WEEK</button>
+                            <button class="btn btn-secondary">VIEW RULES</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="targets-section">
+                        <h2 class="section-title">Active Targets</h2>
+                        <div class="target-row">
+                            <div class="status-indicator green"></div>
+                            <div class="target-content">
+                                <h3>Land 3 client meetings</h3>
+                                <div class="target-tags">
+                                    <span class="tag">Professional</span>
+                                </div>
+                            </div>
+                            <div class="target-meta">
+                                <div class="mini-progress">
+                                    <div class="mini-progress-fill" style="width: 100%;"></div>
+                                </div>
+                                <div class="target-percent">100%</div>
+                            </div>
+                        </div>
+                        <div class="target-row">
+                            <div class="status-indicator yellow"></div>
+                            <div class="target-content">
+                                <h3>Refactor authentication module</h3>
+                                <div class="target-tags">
+                                    <span class="tag">Professional</span>
+                                    <span class="tag">Technical</span>
+                                </div>
+                            </div>
+                            <div class="target-meta">
+                                <div class="mini-progress">
+                                    <div class="mini-progress-fill" style="width: 65%;"></div>
+                                </div>
+                                <div class="target-percent">65%</div>
+                            </div>
+                        </div>
+                        <div class="target-row">
+                            <div class="status-indicator green"></div>
+                            <div class="target-content">
+                                <h3>Ship mobile design system iteration</h3>
+                                <div class="target-tags">
+                                    <span class="tag">Personal Growth</span>
+                                </div>
+                            </div>
+                            <div class="target-meta">
+                                <div class="mini-progress">
+                                    <div class="mini-progress-fill" style="width: 80%;"></div>
+                                </div>
+                                <div class="target-percent">80%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="activity-feed">
+                        <h2 class="section-title">Squad Activity</h2>
+                        <div class="feed-item">
+                            <div class="feed-avatar" style="background: linear-gradient(135deg, #6b7adb, #3b4a8b);">S</div>
+                            <div class="feed-content">
+                                <h4>Sarah shipped the API integration</h4>
+                                <p class="feed-message">Completed "Build REST API for mobile clients" — three days ahead of schedule. Squad moved from blockers to momentum.</p>
+                                <p class="feed-time">28 minutes ago</p>
+                            </div>
+                        </div>
+                        <div class="feed-item">
+                            <div class="feed-avatar" style="background: linear-gradient(135deg, #d97706, #8b4513);">J</div>
+                            <div class="feed-content">
+                                <h4>Jordan declared Monday's commitment</h4>
+                                <p class="feed-message">"Complete design audit" + "User research interviews with 10 founders." Specific. Measurable. No excuses.</p>
+                                <p class="feed-time">3 hours ago</p>
+                            </div>
+                        </div>
+                        <div class="feed-item">
+                            <div class="feed-avatar" style="background: linear-gradient(135deg, #5cb97a, #2a6a3a);">M</div>
+                            <div class="feed-content">
+                                <h4>Marcus flagged a blocker for review</h4>
+                                <p class="feed-message">Infrastructure dependency blocking the database migration. Sarah just offered a workaround. Squad > individual strength.</p>
+                                <p class="feed-time">6 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SQUAD ROOM PAGE -->
+            <div class="page" id="squad-page">
+                <div class="stagger-item">
+                    <div class="squad-header">
+                        <div class="squad-header-left">
+                            <h1>FOUNDERS WHO SHIP</h1>
+                            <p>Echo Unit · Sprint 3</p>
+                        </div>
+                        <div class="squad-header-right">
+                            <div class="squad-stat">
+                                <p class="squad-stat-label">Active Goals</p>
+                                <p class="squad-stat-value">12</p>
+                            </div>
+                            <div class="squad-stat">
+                                <p class="squad-stat-label">Avg Check-in</p>
+                                <p class="squad-stat-value">94%</p>
+                            </div>
+                            <div class="avatar-stack">
+                                <div class="member-avatar" style="background: linear-gradient(135deg, #5cb97a, #2a6a3a);">M</div>
+                                <div class="member-avatar" style="background: linear-gradient(135deg, #6b7adb, #3b4a8b);">S</div>
+                                <div class="member-avatar" style="background: linear-gradient(135deg, #d97706, #8b4513);">J</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="facilitator-card">
+                        <div class="facilitator-header">
+                            <div class="facilitator-badge">AI Facilitator</div>
+                            <span>Standing By</span>
+                        </div>
+                        <p class="facilitator-message"><strong>Monday — Goal Declaration.</strong> Echo Unit is declaring this week. Marcus landing client partnerships. Sarah pushing API completion. Jordan finishing design audit. Three clear vectors. Squad velocity: 94% check-in. Last sprint: 73% goals shipped. The bar is set. What's your number?</p>
+                        <div class="facilitator-stats">
+                            <div class="facilitator-stat"><strong>3/4</strong> Declarations Posted</div>
+                            <div class="facilitator-stat"><strong>12</strong> Goals on the Board</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="day-divider">
+                        <span class="day-divider-label">Monday Declarations</span>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="declaration-card">
+                        <div class="declaration-header">
+                            <div class="member-avatar online" style="background: linear-gradient(135deg, #5cb97a, #2a6a3a); width: 32px; height: 32px;">M</div>
+                            <div class="declaration-meta">
+                                <div class="declaration-name">Marcus Wells</div>
+                                <div class="declaration-time">Posted 2 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="declaration-items">
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox" onclick="toggleCheckbox(this)"></div>
+                                <div>Land 3 client meetings with Fortune 500 prospects</div>
+                            </div>
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox checked" onclick="toggleCheckbox(this)"></div>
+                                <div>Finalize negotiation on Series A round terms</div>
+                            </div>
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox" onclick="toggleCheckbox(this)"></div>
+                                <div>Host weekly leadership sync with entire team</div>
+                            </div>
+                        </div>
+                        <div class="blocker-callout"><strong>BLOCKER:</strong> Legal review needed on contract language before Friday delivery.</div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="declaration-card">
+                        <div class="declaration-header">
+                            <div class="member-avatar online" style="background: linear-gradient(135deg, #6b7adb, #3b4a8b); width: 32px; height: 32px;">S</div>
+                            <div class="declaration-meta">
+                                <div class="declaration-name">Sarah Chen</div>
+                                <div class="declaration-time">Posted 8 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="declaration-items">
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox checked" onclick="toggleCheckbox(this)"></div>
+                                <div>Deploy API v2 with full mobile client integration</div>
+                            </div>
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox checked" onclick="toggleCheckbox(this)"></div>
+                                <div>Write comprehensive system documentation</div>
+                            </div>
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox" onclick="toggleCheckbox(this)"></div>
+                                <div>Conduct security audit and penetration test</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="declaration-card">
+                        <div class="declaration-header">
+                            <div class="member-avatar online" style="background: linear-gradient(135deg, #d97706, #8b4513); width: 32px; height: 32px;">J</div>
+                            <div class="declaration-meta">
+                                <div class="declaration-name">Jordan Liu</div>
+                                <div class="declaration-time">Posted 5 hours ago</div>
+                            </div>
+                        </div>
+                        <div class="declaration-items">
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox checked" onclick="toggleCheckbox(this)"></div>
+                                <div>Complete full design system audit across all platforms</div>
+                            </div>
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox" onclick="toggleCheckbox(this)"></div>
+                                <div>Conduct user research interviews with 10 founders</div>
+                            </div>
+                            <div class="declaration-item">
+                                <div class="declaration-checkbox" onclick="toggleCheckbox(this)"></div>
+                                <div>Deliver redesigned onboarding flow</div>
+                            </div>
+                        </div>
+                        <div class="blocker-callout"><strong>BLOCKER:</strong> Waiting on engineering bandwidth to implement component updates.</div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="input-bar">
+                        <input type="text" placeholder="Post your declaration to the squad..." />
+                        <button class="btn-send">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI COACH PAGE -->
+            <div class="page" id="coach-page">
+                <div class="coach-container">
+                    <div class="stagger-item coach-header">
+                        <div class="coach-icon">◆</div>
+                        <h1>YOUR ALPHA COACH</h1>
+                        <div class="coach-status">
+                            <span class="dot"></span>
+                            <span>Online — Standing By</span>
+                        </div>
+                    </div>
+
+                    <div class="stagger-item chat-area" id="chat-area">
+                        <div class="chat-message coach">
+                            <div class="chat-bubble">I've been watching your sprint patterns. Wednesday check-ins have slipped for <strong>two sprints straight.</strong> What's happening?</div>
+                        </div>
+                        <div class="chat-message user">
+                            <div class="chat-bubble">I'm deep in execution. Wednesday updates feel like noise when I'm shipping.</div>
+                        </div>
+                        <div class="chat-message coach">
+                            <div class="chat-bubble">That frame is wrong. Sarah specifically said your updates motivate her. You think you're being efficient by skipping check-ins — <strong>you're actually creating friction in your squad.</strong> Data doesn't lie.</div>
+                        </div>
+                        <div class="chat-message user">
+                            <div class="chat-bubble">Point taken. I didn't think about how it landed on them.</div>
+                        </div>
+                        <div class="chat-message coach">
+                            <div class="chat-bubble">Exactly. You're not just shipping — you're <strong>leading by showing up.</strong> Wednesday, 2pm. Set a hard reminder. Under 30 seconds. "Here's what shipped. Here's what's next." No essays. You'll hit 100% attendance.</div>
+                        </div>
+                    </div>
+
+                    <div class="stagger-item quick-actions">
+                        <button class="quick-btn" onclick="addCoachMessage('Coach', 'Your goal completion on 22/30 shipped is solid. But Friday shipping percentage matters more than volume. Quality variance is killing momentum.')">Sprint Stats</button>
+                        <button class="quick-btn" onclick="addCoachMessage('Coach', 'Your goals blend too many domains. Pick your ONE keystone — the one that unlocks everything else. Then stack the rest.')">Refine Goals</button>
+                        <button class="quick-btn" onclick="addCoachMessage('Coach', 'Mindset check: You're thinking like a solo operator. You're in a SQUAD. Your wins ripple. Your silence costs.')">Mindset Reset</button>
+                        <button class="quick-btn" onclick="addCoachMessage('Coach', 'Your leverage point right now: Marketing. You ship product. But your founder narrative — that story — is what moves people.')">What Should I Focus On?</button>
+                        <button class="quick-btn" onclick="addCoachMessage('Coach', 'If the pace is unsustainable, SAY IT. This sprint or next — we pause and recalibrate. But running silent while burning out? That costs the squad.')">Request Pause</button>
+                    </div>
+
+                    <div class="stagger-item coach-input">
+                        <div class="input-bar">
+                            <input type="text" id="coach-input" placeholder="Ask your coach anything..." onkeypress="handleCoachInput(event)" />
+                            <button class="btn-send" onclick="sendCoachMessage()">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANALYTICS PAGE -->
+            <div class="page" id="dash-page">
+                <div class="stagger-item">
+                    <h1 class="analytics-title">YOUR NUMBERS.</h1>
+                    <p class="analytics-subtitle">Data doesn't lie. Here's what your effort looks like in cold, clear metrics.</p>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="stat-cards">
+                        <div class="stat-card">
+                            <p class="stat-card-label">Goal Completion</p>
+                            <p class="stat-card-value">73%</p>
+                            <p class="stat-card-subtext">22/30 shipped</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-card-label">Check-in Streak</p>
+                            <p class="stat-card-value" style="color: var(--green);">8</p>
+                            <p class="stat-card-subtext">Weeks consecutive</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-card-label">Squad Attendance</p>
+                            <p class="stat-card-value" style="color: var(--green);">92%</p>
+                            <p class="stat-card-subtext">4/6 check-ins</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="stat-card-label">Goals Closed</p>
+                            <p class="stat-card-value">22</p>
+                            <p class="stat-card-subtext">Last 3 sprints</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="chart-section">
+                        <div class="chart-header">
+                            <div class="chart-title">Weekly Completion Rate</div>
+                            <div class="sprint-pills">
+                                <button class="pill">S1</button>
+                                <button class="pill">S2</button>
+                                <button class="pill active">S3</button>
+                            </div>
+                        </div>
+                        <div class="chart-bars" id="chart-bars">
+                            <div class="bar" style="height: 60%;"></div>
+                            <div class="bar filled" style="height: 78%;"></div>
+                            <div class="bar filled" style="height: 82%;"></div>
+                            <div class="bar filled" style="height: 73%;"></div>
+                            <div class="bar current" style="height: 85%;"></div>
+                            <div class="bar" style="height: 20%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-around; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-subtle);">
+                            <span class="bar-label" style="position: relative; bottom: auto;">Wk1</span>
+                            <span class="bar-label" style="position: relative; bottom: auto;">Wk2</span>
+                            <span class="bar-label" style="position: relative; bottom: auto;">Wk3</span>
+                            <span class="bar-label" style="position: relative; bottom: auto;">Wk4</span>
+                            <span class="bar-label" style="position: relative; bottom: auto;">Wk5</span>
+                            <span class="bar-label" style="position: relative; bottom: auto;">Wk6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="report-card">
+                        <div class="report-grid">
+                            <div class="report-cell">
+                                <p class="report-cell-label">Keystone Goal</p>
+                                <p class="report-cell-value">API v2 Shipped</p>
+                                <p class="report-cell-detail">Unlocked 3 downstream goals</p>
+                            </div>
+                            <div class="report-cell">
+                                <p class="report-cell-label">Squad Rank</p>
+                                <p class="report-cell-value">2 of 4</p>
+                                <p class="report-cell-detail">4% ahead of average</p>
+                            </div>
+                            <div class="report-cell">
+                                <p class="report-cell-label">Categories</p>
+                                <p class="report-cell-value">5 | 3</p>
+                                <p class="report-cell-detail">Professional | Personal</p>
+                            </div>
+                            <div class="report-cell">
+                                <p class="report-cell-label">Coach Assessment</p>
+                                <p class="report-cell-value report-cell-quote">"Execution momentum increasing. Focus consistency improving. Keep the Wednesday commitment."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SPRINT TRANSITION PAGE -->
+            <div class="page" id="transition-page">
+                <div class="stagger-item transition-hero">
+                    <div class="sprint-badge">SPRINT COMPLETE</div>
+                    <h1 class="transition-title">ECHO UNIT<br>SPRINT 3</h1>
+                    <p class="transition-subtitle">6 weeks of commitment. Blockers broken. Goals shipped. Now: what's next?</p>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="retro-cards">
+                        <div class="retro-card">
+                            <div class="retro-card-value">73%</div>
+                            <div class="retro-card-label">Goals Hit</div>
+                        </div>
+                        <div class="retro-card success">
+                            <div class="retro-card-value">92%</div>
+                            <div class="retro-card-label">Attendance</div>
+                        </div>
+                        <div class="retro-card">
+                            <div class="retro-card-value">22</div>
+                            <div class="retro-card-label">Goals Shipped</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="vote-section">
+                        <h3 class="vote-title">Echo Unit is deciding its future.</h3>
+                        <p class="vote-desc">Sprint 3 is complete. The squad proved they can ship. Now: do we continue together, reshuffle, or pause? Your vote counts.</p>
+                        <div class="vote-buttons">
+                            <button class="vote-btn continue" onclick="castVote(this, 'continue')">CONTINUE TOGETHER</button>
+                            <button class="vote-btn reshuffle" onclick="castVote(this, 'reshuffle')">RESHUFFLE</button>
+                            <button class="vote-btn pause" onclick="castVote(this, 'pause')">PAUSE</button>
+                        </div>
+                        <div class="vote-progress">5 of 6 voted · 83% continue</div>
+                        <div class="vote-progress-bar">
+                            <div class="vote-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item">
+                    <h2 class="section-title">Member Reflections</h2>
+                    <div class="reflections">
+                        <div class="reflection-card">
+                            <p class="reflection-quote">This sprint showed me what "real execution" looks like. We stopped talking and started shipping.</p>
+                            <div class="reflection-credit">
+                                <div class="reflection-avatar" style="background: linear-gradient(135deg, #5cb97a, #2a6a3a);">M</div>
+                                <div class="reflection-name">Marcus Wells</div>
+                            </div>
+                        </div>
+                        <div class="reflection-card">
+                            <p class="reflection-quote">The Wednesday check-ins seemed small until we hit a blocker. Then it mattered. Squad > individual strength, every time.</p>
+                            <div class="reflection-credit">
+                                <div class="reflection-avatar" style="background: linear-gradient(135deg, #6b7adb, #3b4a8b);">S</div>
+                                <div class="reflection-name">Sarah Chen</div>
+                            </div>
+                        </div>
+                        <div class="reflection-card">
+                            <p class="reflection-quote">I learned I ship better when I know people are watching. Not in a scary way — in a "I'm not alone" way. That changes everything.</p>
+                            <div class="reflection-credit">
+                                <div class="reflection-avatar" style="background: linear-gradient(135deg, #d97706, #8b4513);">J</div>
+                                <div class="reflection-name">Jordan Liu</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHECK-IN PAGE -->
+            <div class="page" id="checkin-page">
+                <div class="stagger-item">
+                    <h1 class="checkin-title">MIDWEEK STATUS</h1>
+                    <p class="checkin-subtitle">Wednesday. Three signals. No essays. Green, Yellow, or Red.</p>
+                </div>
+
+                <div class="stagger-item">
+                    <div class="checkin-cards">
+                        <div class="checkin-card">
+                            <h3>Land 3 client meetings</h3>
+                            <div class="target-tags" style="margin-bottom: 12px;">
+                                <span class="tag">Professional</span>
+                            </div>
+                            <div class="checkin-buttons">
+                                <button class="status-btn green" onclick="selectStatus(this, 'green')">Green</button>
+                                <button class="status-btn yellow" onclick="selectStatus(this, 'yellow')">Yellow</button>
+                                <button class="status-btn red" onclick="selectStatus(this, 'red')">Red</button>
+                            </div>
+                            <textarea class="checkin-note" placeholder="Optional note (Yellow/Red only)"></textarea>
+                        </div>
+
+                        <div class="checkin-card">
+                            <h3>Refactor authentication module</h3>
+                            <div class="target-tags" style="margin-bottom: 12px;">
+                                <span class="tag">Professional</span>
+                            </div>
+                            <div class="checkin-buttons">
+                                <button class="status-btn green" onclick="selectStatus(this, 'green')">Green</button>
+                                <button class="status-btn yellow" onclick="selectStatus(this, 'yellow')">Yellow</button>
+                                <button class="status-btn red" onclick="selectStatus(this, 'red')">Red</button>
+                            </div>
+                            <textarea class="checkin-note" placeholder="Optional note (Yellow/Red only)"></textarea>
+                        </div>
+
+                        <div class="checkin-card">
+                            <h3>Ship mobile design system iteration</h3>
+                            <div class="target-tags" style="margin-bottom: 12px;">
+                                <span class="tag">Personal Growth</span>
+                            </div>
+                            <div class="checkin-buttons">
+                                <button class="status-btn green" onclick="selectStatus(this, 'green')">Green</button>
+                                <button class="status-btn yellow" onclick="selectStatus(this, 'yellow')">Yellow</button>
+                                <button class="status-btn red" onclick="selectStatus(this, 'red')">Red</button>
+                            </div>
+                            <textarea class="checkin-note" placeholder="Optional note (Yellow/Red only)"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stagger-item submit-section">
+                    <button class="btn-submit" onclick="submitCheckin()">SUBMIT CHECK-IN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEMBER MODAL -->
+    <div class="modal" id="member-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-member-name">Marcus Wells</h2>
+                <button class="modal-close" onclick="closeMemberModal()">✕</button>
+            </div>
+            <div id="modal-member-profile"></div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const pageId = this.dataset.page + '-page';
+                navigateToPage(pageId);
+
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Programmatic navigation helpers
+        document.getElementById('checkin-page').addEventListener('click', function(e) {
+            if (!e.target.matches('button')) return;
+        });
+
+        function navigateToPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Check-in status selection
+        function selectStatus(btn, status) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.status-btn').forEach(b => {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+
+            const textarea = btn.closest('.checkin-card').querySelector('.checkin-note');
+            if (status === 'yellow' || status === 'red') {
+                textarea.classList.add('show');
+            } else {
+                textarea.classList.remove('show');
+            }
+        }
+
+        function submitCheckin() {
+            alert('Check-in submitted! Squad sees your status.');
+        }
+
+        // Checkbox toggle in squad room
+        function toggleCheckbox(el) {
+            el.classList.toggle('checked');
+        }
+
+        // Coach chat
+        function handleCoachInput(e) {
+            if (e.key === 'Enter') {
+                sendCoachMessage();
+            }
+        }
+
+        function sendCoachMessage() {
+            const input = document.getElementById('coach-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addCoachMessage('user', message);
+            input.value = '';
+
+            setTimeout(() => {
+                const responses = [
+                    "Data shows you're underutilizing your network right now. Three referrals could change your trajectory.",
+                    "That's the right frame. But execution beats philosophy every time. What's the first concrete step?",
+                    "Your shipping pace is solid. Your communication discipline is the gap. Close that, and watch everything else compound.",
+                    "Squad dynamics shift when you show up consistently. Even small wins, shared. That's how trust builds.",
+                    "You're thinking about the goal. Think about the identity. Who do you want to be known as by Friday?"
+                ];
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addCoachMessage('Coach', randomResponse);
+            }, 800);
+        }
+
+        function addCoachMessage(sender, message) {
+            const chatArea = document.getElementById('chat-area');
+            const msgClass = sender === 'Coach' ? 'coach' : 'user';
+            const bubble = document.createElement('div');
+            bubble.className = `chat-message ${msgClass}`;
+            bubble.innerHTML = `<div class="chat-bubble">${message}</div>`;
+            chatArea.appendChild(bubble);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // Vote casting
+        function castVote(btn, voteType) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.vote-btn').forEach(b => {
+                b.classList.remove('voted');
+            });
+            btn.classList.add('voted');
+        }
+
+        // Member modal
+        function openMemberModal(name, rank, gradient) {
+            const modal = document.getElementById('member-modal');
+            const memberName = document.getElementById('modal-member-name');
+            const memberProfile = document.getElementById('modal-member-profile');
+
+            memberName.textContent = name;
+
+            const gradients = {
+                'Marcus': 'linear-gradient(135deg, #5cb97a, #2a6a3a)',
+                'Sarah': 'linear-gradient(135deg, #6b7adb, #3b4a8b)',
+                'Jordan': 'linear-gradient(135deg, #d97706, #8b4513)'
+            };
+
+            const initials = {
+                'Marcus': 'M',
+                'Sarah': 'S',
+                'Jordan': 'J'
+            };
+
+            const cities = {
+                'Marcus': 'Austin, TX',
+                'Sarah': 'San Francisco, CA',
+                'Jordan': 'Los Angeles, CA'
+            };
+
+            const goals = {
+                'Marcus': ['Land 3 client meetings', 'Finalize Series A terms', 'Host leadership sync'],
+                'Sarah': ['Deploy API v2', 'System documentation', 'Security audit'],
+                'Jordan': ['Complete design audit', 'User research interviews', 'Redesign onboarding']
+            };
+
+            memberProfile.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                    <div class="member-avatar online" style="background: ${gradients[name]}; width: 60px; height: 60px; font-size: 24px;">${initials[name]}</div>
+                    <div>
+                        <h3 style="font-size: 18px; color: var(--text-primary); margin-bottom: 4px;">${name}</h3>
+                        <p style="color: var(--text-muted); font-size: 12px;">${cities[name]}</p>
+                    </div>
+                </div>
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <p class="profile-item-label">Role Type</p>
+                        <p class="profile-item-value">${rank}</p>
+                    </div>
+                    <div class="profile-item">
+                        <p class="profile-item-label">Sprint Status</p>
+                        <p class="profile-item-value">Active</p>
+                    </div>
+                    <div class="profile-item">
+                        <p class="profile-item-label">Goals Shipped</p>
+                        <p class="profile-item-value">${rank === 'Builder' ? '22' : rank === 'Rewirer' ? '18' : '15'}</p>
+                    </div>
+                    <div class="profile-item">
+                        <p class="profile-item-label">Attendance</p>
+                        <p class="profile-item-value">92%</p>
+                    </div>
+                </div>
+                <div class="profile-goals">
+                    <h3>This Sprint's Goals</h3>
+                    ${goals[name].map(g => `<div class="profile-goal-item">✓ ${g}</div>`).join('')}
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeMemberModal() {
+            document.getElementById('member-modal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        document.getElementById('member-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeMemberModal();
+            }
+        });
+
+        // Bar chart animation on scroll
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const bars = entry.target.querySelectorAll('.bar');
+                    bars.forEach((bar, idx) => {
+                        setTimeout(() => {
+                            if (!bar.classList.contains('current')) {
+                                const height = bar.style.height;
+                                bar.style.height = '0';
+                                setTimeout(() => {
+                                    bar.style.transition = 'height 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+                                    bar.style.height = height;
+                                }, 50);
+                            }
+                        }, idx * 80);
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        const chartBars = document.getElementById('chart-bars');
+        if (chartBars) {
+            observer.observe(chartBars);
+        }
+
+        // Mobile navigation fallback
+        if (window.innerWidth < 768) {
+            document.querySelector('.sidebar-nav').style.width = 'auto';
+        }
+    </script>
+</body>
+</html>

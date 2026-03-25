@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Division Alpha — Elite Peer Accountability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   DIVISION ALPHA — DESIGN SYSTEM
+   Industrial Luxury / Midnight Ops
+   ═══════════════════════════════════════ */
+
+:root {
+  --bg: #08080a;
+  --surface: #0f1012;
+  --surface-2: #151618;
+  --surface-3: #1c1d20;
+  --surface-4: #222326;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --border-accent: rgba(200,170,120,0.2);
+  --text: #eae8e3;
+  --text-muted: #7d7b76;
+  --text-dim: #4a4843;
+  --cream: #c8aa78;
+  --cream-light: #dac49a;
+  --cream-glow: rgba(200,170,120,0.08);
+  --cream-glow-strong: rgba(200,170,120,0.15);
+  --green: #4ade80;
+  --green-dim: rgba(74,222,128,0.12);
+  --yellow: #facc15;
+  --yellow-dim: rgba(250,204,21,0.1);
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,0.1);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.1);
+  --white-5: rgba(255,255,255,0.05);
+  --white-8: rgba(255,255,255,0.08);
+  --white-12: rgba(255,255,255,0.12);
+  --font-display: 'Bebas Neue', Impact, sans-serif;
+  --font-condensed: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══ LAYOUT SHELL ═══ */
+.shell { display: flex; height: 100vh; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 250px;
+  min-width: 250px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sidebar::-webkit-scrollbar { width: 0; }
+
+.brand { padding: 28px 24px 24px; border-bottom: 1px solid var(--border); }
+.brand-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  color: var(--cream);
+}
+.brand-tag {
+  font-family: var(--font-condensed);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+.nav { padding: 16px 12px; flex: 1; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-condensed);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: all 0.2s var(--ease-out);
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  user-select: none;
+}
+.nav-item:hover { color: var(--text-muted); background: var(--white-5); }
+.nav-item.active {
+  color: var(--cream);
+  background: var(--cream-glow);
+  border-color: rgba(200,170,120,0.1);
+}
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.5; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-badge {
+  margin-left: auto;
+  min-width: 18px; height: 18px;
+  background: var(--cream);
+  color: var(--bg);
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  padding: 0 4px;
+}
+.nav-sep { height: 1px; background: var(--border); margin: 14px 14px; }
+.nav-label {
+  font-family: var(--font-condensed);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 6px 14px 8px;
+}
+
+/* squad members */
+.squad-member-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.squad-member-row:hover { background: var(--white-5); }
+.member-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.member-dot.online { background: var(--green); box-shadow: 0 0 6px rgba(74,222,128,0.4); }
+.member-dot.offline { background: var(--text-dim); }
+.member-name-sm { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.member-rank {
+  margin-left: auto;
+  font-family: var(--font-condensed);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* avatars */
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-condensed);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  color: var(--bg);
+}
+.avatar.sm { width: 28px; height: 28px; font-size: 10px; }
+.avatar.lg { width: 44px; height: 44px; font-size: 16px; }
+.user-meta { flex: 1; }
+.user-display { font-size: 12px; font-weight: 600; }
+.user-rank-tag {
+  font-family: var(--font-condensed);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cream);
+}
+
+/* ═══ MAIN ═══ */
+.main { flex: 1; overflow-y: auto; position: relative; }
+.main::-webkit-scrollbar { width: 5px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+
+.main::before {
+  content: '';
+  position: fixed;
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(200,170,120,0.025) 0%, transparent 60%);
+  top: -300px; right: -200px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page { display: none; padding: 44px 48px 60px; max-width: 920px; position: relative; z-index: 1; }
+.page.active { display: block; animation: fadeIn 0.35s var(--ease-out); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ SHARED COMPONENTS ═══ */
+.overline {
+  font-family: var(--font-condensed);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.overline::before { content: ''; width: 16px; height: 1px; background: var(--cream); }
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 52px);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  margin: 8px 0 4px;
+}
+.page-sub { font-size: 14px; color: var(--text-muted); font-weight: 400; margin-bottom: 36px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-condensed);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+}
+.btn-primary {
+  background: var(--cream);
+  color: var(--bg);
+  padding: 13px 28px;
+  border-radius: 4px;
+}
+.btn-primary:hover {
+  background: var(--cream-light);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(200,170,120,0.2);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 11px 22px;
+  border: 1px solid var(--border-hover);
+  border-radius: 4px;
+}
+.btn-outline:hover { color: var(--text); border-color: var(--cream); background: var(--cream-glow); }
+.btn-ghost {
+  background: var(--white-5);
+  color: var(--text-muted);
+  padding: 9px 16px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.btn-ghost:hover { color: var(--text); background: var(--white-8); }
+.btn-sm { padding: 8px 16px; font-size: 11px; }
+.btn-danger { background: var(--red-dim); color: var(--red); padding: 9px 16px; border-radius: 4px; font-size: 11px; }
+.btn-danger:hover { background: rgba(248,113,113,0.2); }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-hover); }
+
+/* Status */
+.status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.status.g { background: var(--green); box-shadow: 0 0 6px rgba(74,222,128,0.3); }
+.status.y { background: var(--yellow); box-shadow: 0 0 6px rgba(250,204,21,0.3); }
+.status.r { background: var(--red); box-shadow: 0 0 6px rgba(248,113,113,0.3); }
+
+/* Section header */
+.sh { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.sh-title {
+  font-family: var(--font-condensed);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.sh-link { font-size: 11px; color: var(--cream); cursor: pointer; font-weight: 600; }
+
+/* Tags */
+.tag {
+  font-family: var(--font-condensed);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.tag-pro { color: var(--cream); background: var(--cream-glow); }
+.tag-per { color: var(--green); background: var(--green-dim); }
+.tag-spi { color: var(--purple); background: var(--purple-dim); }
+.tag-builder { color: var(--cream); background: var(--cream-glow); }
+.tag-rewirer { color: var(--green); background: var(--green-dim); }
+.tag-pivot { color: var(--yellow); background: var(--yellow-dim); }
+
+/* Progress bar */
+.pbar { height: 3px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.pbar-fill { height: 100%; border-radius: 2px; transition: width 1s var(--ease-out); }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+
+/* ═══ SPRINT HOME ═══ */
+.sprint-stripe {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.sprint-stripe::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--cream);
+}
+.sprint-info { flex: 1; }
+.sprint-label {
+  font-family: var(--font-condensed);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+.sprint-name-row { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.06em; }
+.sprint-dates { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.sprint-progress-wrap { width: 180px; text-align: right; }
+.sprint-pct {
+  font-family: var(--font-display);
+  font-size: 36px;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  line-height: 1;
+}
+.sprint-pct-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Today CTA */
+.today-cta {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--border-accent);
+  border-radius: 6px;
+  padding: 28px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+.today-cta::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 200px; height: 100%;
+  background: radial-gradient(circle at 100% 0%, var(--cream-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+.today-indicator { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px; }
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+.today-label {
+  font-family: var(--font-condensed);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+.today-title { font-family: var(--font-display); font-size: 28px; letter-spacing: 0.04em; margin-bottom: 8px; }
+.today-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; max-width: 540px; margin-bottom: 20px; }
+
+/* Goal rows */
+.goal-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+.goal-row:hover { border-color: var(--border-hover); transform: translateX(3px); }
+.goal-text { flex: 1; font-size: 13px; font-weight: 500; }
+.goal-bar-mini { width: 48px; height: 3px; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.goal-bar-mini div { height: 100%; border-radius: 2px; }
+
+/* Feed */
+.feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-body { flex: 1; }
+.feed-name { font-size: 12px; font-weight: 600; }
+.feed-text { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.5; }
+.feed-time { font-size: 10px; color: var(--text-dim); white-space: nowrap; margin-top: 2px; }
+
+/* ═══ SQUAD ROOM ═══ */
+.squad-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.squad-avatar-stack { display: flex; }
+.squad-avatar-stack .avatar { margin-left: -6px; border: 2px solid var(--bg); }
+.squad-avatar-stack .avatar:first-child { margin-left: 0; }
+
+.day-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0 16px; }
+.day-divider span {
+  font-family: var(--font-condensed);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.day-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* AI message */
+.ai-msg {
+  background: var(--cream-glow);
+  border: 1px solid var(--border-accent);
+  border-radius: 6px;
+  padding: 22px;
+  margin-bottom: 14px;
+}
+.ai-tag {
+  font-family: var(--font-condensed);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.ai-tag::before { content: '\u25C6'; font-size: 8px; }
+.ai-msg p { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+.ai-msg strong { color: var(--text); font-weight: 600; }
+
+/* Declaration cards */
+.decl {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.decl:hover { border-color: var(--border-hover); }
+.decl-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.decl-time { margin-left: auto; font-size: 10px; color: var(--text-dim); }
+.decl-goals { padding-left: 38px; }
+.decl-goal { display: flex; align-items: flex-start; gap: 10px; padding: 4px 0; font-size: 13px; line-height: 1.5; }
+.check-box {
+  width: 16px; height: 16px;
+  border-radius: 3px;
+  border: 1.5px solid var(--text-dim);
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.check-box:hover { border-color: var(--cream); }
+.check-box.done { background: var(--green); border-color: var(--green); color: #fff; }
+.check-box.done::after { content: '\u2713'; }
+.blocker {
+  margin-left: 38px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--yellow);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ═══ CHECK-IN FLOW ═══ */
+.checkin-card {
+  background: var(--surface);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.checkin-goal { margin-bottom: 20px; }
+.checkin-goal-text { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+.status-buttons { display: flex; gap: 8px; }
+.status-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font-condensed);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: all 0.2s var(--ease-out);
+}
+.status-btn:hover { border-color: var(--border-hover); color: var(--text); }
+.status-btn.selected-g { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.status-btn.selected-y { border-color: var(--yellow); background: var(--yellow-dim); color: var(--yellow); }
+.status-btn.selected-r { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+
+.checkin-note {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 14px;
+  resize: vertical;
+  min-height: 80px;
+  margin-top: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.checkin-note:focus { border-color: var(--cream); }
+.checkin-note::placeholder { color: var(--text-dim); }
+
+/* ═══ COACH ═══ */
+.coach-wrap { max-width: 660px; }
+.coach-header {
+  text-align: center;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.coach-icon {
+  width: 52px; height: 52px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--cream), #7a6a4e);
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.coach-label {
+  font-family: var(--font-condensed);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+.coach-desc { font-size: 12px; color: var(--text-dim); }
+
+.msg-bubble {
+  max-width: 85%;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.65;
+  margin-bottom: 12px;
+  animation: msgIn 0.3s var(--ease-snap);
+}
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.msg-ai {
+  background: var(--cream-glow);
+  border: 1px solid var(--border-accent);
+  color: var(--text-muted);
+  align-self: flex-start;
+}
+.msg-user {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  margin-left: auto;
+}
+.msg-ai strong { color: var(--text); }
+.chat-area { display: flex; flex-direction: column; gap: 4px; margin-bottom: 24px; }
+
+.chat-input-wrap {
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  padding-top: 16px;
+}
+.chat-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 14px 18px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--cream); }
+.chat-input::placeholder { color: var(--text-dim); }
+
+/* ═══ ANALYTICS ═══ */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 22px;
+  text-align: center;
+}
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 42px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-family: var(--font-condensed);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.stat-change {
+  font-size: 11px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+.stat-change.up { color: var(--green); }
+.stat-change.down { color: var(--red); }
+
+/* Chart placeholder */
+.chart-placeholder {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  min-height: 220px;
+  position: relative;
+  overflow: hidden;
+}
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+  padding: 0 20px;
+}
+.chart-bar {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  transition: height 1s var(--ease-out);
+  position: relative;
+}
+.chart-bar::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-family: var(--font-condensed);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* ═══ SPRINT REPORT CARD ═══ */
+.report-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.report-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.report-row:last-child { border-bottom: none; }
+.report-label { font-size: 13px; color: var(--text-muted); }
+.report-value { font-size: 13px; font-weight: 600; }
+
+/* ═══ VOTE PANEL ═══ */
+.vote-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+}
+.vote-option:hover { border-color: var(--border-hover); transform: translateX(4px); }
+.vote-option.selected { border-color: var(--cream); background: var(--cream-glow); }
+.vote-radio {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--text-dim);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.vote-option.selected .vote-radio {
+  border-color: var(--cream);
+  background: var(--cream);
+}
+.vote-option.selected .vote-radio::after {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+.vote-title { font-size: 14px; font-weight: 600; }
+.vote-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ═══ MEMBER PROFILE MODAL ═══ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 36px;
+  max-width: 480px;
+  width: 90%;
+  animation: modalIn 0.3s var(--ease-snap);
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.modal-close {
+  float: right;
+  font-size: 18px;
+  color: var(--text-dim);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+.modal-close:hover { color: var(--text); }
+
+/* ═══ NOTIFICATION DOT ═══ */
+.notify-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cream);
+  position: absolute;
+  top: 8px; right: 8px;
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* ═══ MESSAGE INPUT ═══ */
+.squad-input-wrap {
+  margin-top: 20px;
+  display: flex;
+  gap: 8px;
+}
+.squad-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 14px 18px;
+  outline: none;
+}
+.squad-input:focus { border-color: var(--cream); }
+.squad-input::placeholder { color: var(--text-dim); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 860px) {
+  .sidebar { width: 60px; min-width: 60px; }
+  .brand-name, .brand-tag, .nav-label, .member-name-sm, .member-rank, .user-meta, .nav-item span { display: none; }
+  .nav-item { justify-content: center; padding: 12px; }
+  .squad-member-row { display: none; }
+  .sidebar-footer .user-meta { display: none; }
+  .page { padding: 24px 20px 40px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name">DIVISION ALPHA</div>
+      <div class="brand-tag">Peer Accountability Engine</div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-item active" data-page="home">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span>Sprint Home</span>
+      </div>
+      <div class="nav-item" data-page="squad">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Squad Room</span>
+        <div class="nav-badge">3</div>
+      </div>
+      <div class="nav-item" data-page="checkin">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Check-In</span>
+      </div>
+      <div class="nav-item" data-page="coach">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>AI Coach</span>
+      </div>
+      <div class="nav-item" data-page="analytics">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Analytics</span>
+      </div>
+      <div class="nav-item" data-page="report">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Sprint Report</span>
+      </div>
+
+      <div class="nav-sep"></div>
+      <div class="nav-label">Echo Unit</div>
+
+      <div class="squad-member-row" data-member="sarah">
+        <div class="member-dot online"></div>
+        <span class="member-name-sm">Sarah M.</span>
+        <span class="member-rank">Builder</span>
+      </div>
+      <div class="squad-member-row" data-member="james">
+        <div class="member-dot online"></div>
+        <span class="member-name-sm">James K.</span>
+        <span class="member-rank">Builder</span>
+      </div>
+      <div class="squad-member-row" data-member="amina">
+        <div class="member-dot offline"></div>
+        <span class="member-name-sm">Amina R.</span>
+        <span class="member-rank">Rewirer</span>
+      </div>
+      <div class="squad-member-row" data-member="david">
+        <div class="member-dot online"></div>
+        <span class="member-name-sm">David L.</span>
+        <span class="member-rank">Pivot</span>
+      </div>
+      <div class="squad-member-row" data-member="priya">
+        <div class="member-dot offline"></div>
+        <span class="member-name-sm">Priya T.</span>
+        <span class="member-rank">Builder</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar" style="background: linear-gradient(135deg, var(--cream), #7a6a4e);">SK</div>
+      <div class="user-meta">
+        <div class="user-display">Sayed K.</div>
+        <div class="user-rank-tag">Alpha Circle</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main">
+
+    <!-- ═══ PAGE: SPRINT HOME ═══ -->
+    <div class="page active" id="page-home">
+      <div class="overline">Sprint 4 \u2014 Week 3</div>
+      <div class="page-title">COMMAND CENTER</div>
+      <div class="page-sub">Week 3 of 6 \u2014 The Dip. This is where discipline beats motivation.</div>
+
+      <!-- Sprint bar -->
+      <div class="sprint-stripe">
+        <div class="sprint-info">
+          <div class="sprint-label">Active Sprint</div>
+          <div class="sprint-name-row">SPRINT 4 \u2014 ECHO UNIT</div>
+          <div class="sprint-dates">March 3 \u2014 April 13, 2026</div>
+        </div>
+        <div class="sprint-progress-wrap">
+          <div class="sprint-pct">50%</div>
+          <div class="sprint-pct-label">Sprint Progress</div>
+          <div class="pbar" style="margin-top:8px"><div class="pbar-fill" style="width:50%;background:linear-gradient(90deg,var(--cream),var(--cream-light))"></div></div>
+        </div>
+      </div>
+
+      <!-- Today -->
+      <div class="today-cta">
+        <div class="today-indicator">
+          <div class="live-dot"></div>
+          <div class="today-label">Wednesday \u2014 Mid-Week Check-In</div>
+        </div>
+        <div class="today-title">STATUS CHECK TIME</div>
+        <div class="today-desc">For each of your Monday goals, give us one of three signals: Green (on track), Yellow (at risk), or Red (stuck). Your squad is waiting.</div>
+        <button class="btn btn-primary" onclick="navigate('checkin')">SUBMIT CHECK-IN</button>
+      </div>
+
+      <!-- Goals -->
+      <div class="sh">
+        <span class="sh-title">Your Sprint Goals</span>
+        <span class="sh-link">Edit Goals</span>
+      </div>
+
+      <div class="goal-row">
+        <span class="status g"></span>
+        <span class="goal-text">Ship pricing page and get 5 paying users</span>
+        <span class="tag tag-pro">Professional</span>
+        <div class="goal-bar-mini"><div style="width:60%;background:var(--cream)"></div></div>
+      </div>
+      <div class="goal-row">
+        <span class="status y"></span>
+        <span class="goal-text">Exercise 4x/week consistently for 6 weeks</span>
+        <span class="tag tag-per">Personal</span>
+        <div class="goal-bar-mini"><div style="width:45%;background:var(--green)"></div></div>
+      </div>
+      <div class="goal-row">
+        <span class="status g"></span>
+        <span class="goal-text">Complete morning Quran recitation daily</span>
+        <span class="tag tag-spi">Spiritual</span>
+        <div class="goal-bar-mini"><div style="width:80%;background:var(--purple)"></div></div>
+      </div>
+
+      <div style="height:28px"></div>
+
+      <!-- Activity -->
+      <div class="sh">
+        <span class="sh-title">Squad Activity</span>
+        <span class="sh-link">View All</span>
+      </div>
+      <div class="card" style="padding:0 20px">
+        <div class="feed-item">
+          <div class="avatar sm" style="background:#4ade80">SM</div>
+          <div class="feed-body">
+            <span class="feed-name">Sarah M.</span>
+            <div class="feed-text">Shipped the onboarding flow! 3 beta users signed up this morning.</div>
+          </div>
+          <span class="feed-time">2h ago</span>
+        </div>
+        <div class="feed-item">
+          <div class="avatar sm" style="background:var(--cream)">JK</div>
+          <div class="feed-body">
+            <span class="feed-name">James K.</span>
+            <div class="feed-text">Yellow on video editing \u2014 lost 2 days to a corrupted project file. Starting over.</div>
+          </div>
+          <span class="feed-time">4h ago</span>
+        </div>
+        <div class="feed-item">
+          <div class="avatar sm" style="background:var(--purple)">AR</div>
+          <div class="feed-body">
+            <span class="feed-name">Amina R.</span>
+            <div class="feed-text">Had my first sales call today! Was terrifying but she didn't hang up so I'm counting it as a win.</div>
+          </div>
+          <span class="feed-time">6h ago</span>
+        </div>
+      </div>
+
+      <div style="height:28px"></div>
+
+      <!-- Squad stats -->
+      <div class="sh"><span class="sh-title">Squad Pulse</span></div>
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--green)">73%</div>
+          <div class="stat-label">Avg Completion</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--cream)">92%</div>
+          <div class="stat-label">Attendance</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--text)">18</div>
+          <div class="stat-label">Goals This Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--yellow)">2</div>
+          <div class="stat-label">At Risk</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: SQUAD ROOM ═══ -->
+    <div class="page" id="page-squad" style="max-width:800px">
+      <div class="squad-top">
+        <div>
+          <div class="overline">Echo Unit</div>
+          <div class="page-title" style="font-size:36px">SQUAD ROOM</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="squad-avatar-stack">
+            <div class="avatar sm" style="background:#4ade80">SM</div>
+            <div class="avatar sm" style="background:var(--cream)">JK</div>
+            <div class="avatar sm" style="background:var(--purple)">AR</div>
+            <div class="avatar sm" style="background:#facc15;color:var(--bg)">DL</div>
+            <div class="avatar sm" style="background:#f87171">PT</div>
+          </div>
+          <span style="font-size:11px;color:var(--text-dim)">4 online</span>
+        </div>
+      </div>
+
+      <!-- Monday declaration day -->
+      <div class="day-divider"><span>Monday, March 23</span></div>
+
+      <div class="ai-msg">
+        <div class="ai-tag">Sprint Facilitator</div>
+        <p><strong>Monday. Declaration time.</strong> Each of you: declare your specific goals for this week. Not your sprint goals \u2014 your THIS WEEK goals. What actions will you take between now and Friday? Be specific. Be measurable. Also flag any anticipated blockers \u2014 your squad might have the answer.</p>
+      </div>
+
+      <div class="decl">
+        <div class="decl-head">
+          <div class="avatar sm" style="background:#4ade80">SM</div>
+          <div>
+            <div class="user-display">Sarah M.</div>
+            <span class="tag tag-builder" style="margin-top:2px">Builder</span>
+          </div>
+          <span class="decl-time">9:14 AM</span>
+        </div>
+        <div class="decl-goals">
+          <div class="decl-goal"><div class="check-box done"></div><span>Complete user onboarding flow and deploy to staging</span></div>
+          <div class="decl-goal"><div class="check-box done"></div><span>Run 3 customer interviews using the new script</span></div>
+          <div class="decl-goal"><div class="check-box"></div><span>Write and send first cold outreach batch (25 emails)</span></div>
+        </div>
+      </div>
+
+      <div class="decl">
+        <div class="decl-head">
+          <div class="avatar sm" style="background:var(--cream)">JK</div>
+          <div>
+            <div class="user-display">James K.</div>
+            <span class="tag tag-builder" style="margin-top:2px">Builder</span>
+          </div>
+          <span class="decl-time">9:32 AM</span>
+        </div>
+        <div class="decl-goals">
+          <div class="decl-goal"><div class="check-box done"></div><span>Edit and publish 2 YouTube videos (backlog from last week)</span></div>
+          <div class="decl-goal"><div class="check-box"></div><span>Record 3 new videos for next week's pipeline</span></div>
+          <div class="decl-goal"><div class="check-box"></div><span>Reach out to 5 potential collaboration partners</span></div>
+        </div>
+        <div class="blocker">Blocker: Lost project file from Tuesday. May need to re-edit one video from scratch.</div>
+      </div>
+
+      <div class="decl">
+        <div class="decl-head">
+          <div class="avatar sm" style="background:var(--purple)">AR</div>
+          <div>
+            <div class="user-display">Amina R.</div>
+            <span class="tag tag-rewirer" style="margin-top:2px">Rewirer</span>
+          </div>
+          <span class="decl-time">10:05 AM</span>
+        </div>
+        <div class="decl-goals">
+          <div class="decl-goal"><div class="check-box"></div><span>Make 5 discovery calls to potential consulting clients</span></div>
+          <div class="decl-goal"><div class="check-box done"></div><span>Draft consulting service page and pricing structure</span></div>
+          <div class="decl-goal"><div class="check-box"></div><span>30 min daily Quran recitation (maintain streak)</span></div>
+        </div>
+        <div class="blocker">Blocker: Terrified of sales calls. I keep finding reasons to put them off.</div>
+      </div>
+
+      <div style="height:12px"></div>
+      <div class="ai-msg" style="margin-top:8px">
+        <div class="ai-tag">Sprint Facilitator</div>
+        <p>This week, <strong>Echo Unit committed to 17 goals across 5 members</strong>. James flagged a project file issue \u2014 <strong>@Sarah</strong>, you dealt with data recovery last sprint, any tips? And Amina, your blocker on sales calls \u2014 <strong>@David</strong>, you've been doing cold outreach for 3 weeks, can you share what's been working? <strong>Let's execute.</strong></p>
+      </div>
+
+      <!-- Wednesday check-in day -->
+      <div class="day-divider"><span>Wednesday, March 25 \u2014 Today</span></div>
+
+      <div class="ai-msg">
+        <div class="ai-tag">Sprint Facilitator</div>
+        <p><strong>Midweek. Status check.</strong> For each of your Monday goals, give us one of three signals:</p>
+        <p style="margin-top:8px"><span class="status g" style="display:inline-block;margin-right:6px"></span> <strong>Green</strong> \u2014 On track &nbsp;&nbsp; <span class="status y" style="display:inline-block;margin-right:6px"></span> <strong>Yellow</strong> \u2014 At risk &nbsp;&nbsp; <span class="status r" style="display:inline-block;margin-right:6px"></span> <strong>Red</strong> \u2014 Stuck</p>
+        <p style="margin-top:8px">One sentence per goal. If Yellow or Red, tell us what's in the way.</p>
+      </div>
+
+      <div class="squad-input-wrap">
+        <input class="squad-input" type="text" placeholder="Message Echo Unit...">
+        <button class="btn btn-primary btn-sm">Send</button>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: CHECK-IN ═══ -->
+    <div class="page" id="page-checkin">
+      <div class="overline">Wednesday Check-In</div>
+      <div class="page-title">STATUS CHECK</div>
+      <div class="page-sub">Rate each goal. Your squad sees this \u2014 be honest.</div>
+
+      <div class="checkin-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span class="tag tag-pro">Professional</span>
+          <span style="font-size:11px;color:var(--text-dim)">Sprint Goal #1</span>
+        </div>
+        <div class="checkin-goal-text">Ship pricing page and get 5 paying users</div>
+        <div class="status-buttons">
+          <div class="status-btn" onclick="selectStatus(this,'g')" data-goal="1" data-status="g">\u{1F7E2} Green \u2014 On Track</div>
+          <div class="status-btn" onclick="selectStatus(this,'y')" data-goal="1" data-status="y">\u{1F7E1} Yellow \u2014 At Risk</div>
+          <div class="status-btn" onclick="selectStatus(this,'r')" data-goal="1" data-status="r">\u{1F534} Red \u2014 Stuck</div>
+        </div>
+        <textarea class="checkin-note" placeholder="What's the situation? (required for Yellow/Red)"></textarea>
+      </div>
+
+      <div class="checkin-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span class="tag tag-per">Personal</span>
+          <span style="font-size:11px;color:var(--text-dim)">Sprint Goal #2</span>
+        </div>
+        <div class="checkin-goal-text">Exercise 4x/week consistently for 6 weeks</div>
+        <div class="status-buttons">
+          <div class="status-btn" onclick="selectStatus(this,'g')" data-goal="2" data-status="g">\u{1F7E2} Green \u2014 On Track</div>
+          <div class="status-btn" onclick="selectStatus(this,'y')" data-goal="2" data-status="y">\u{1F7E1} Yellow \u2014 At Risk</div>
+          <div class="status-btn" onclick="selectStatus(this,'r')" data-goal="2" data-status="r">\u{1F534} Red \u2014 Stuck</div>
+        </div>
+        <textarea class="checkin-note" placeholder="What's the situation? (required for Yellow/Red)"></textarea>
+      </div>
+
+      <div class="checkin-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span class="tag tag-spi">Spiritual</span>
+          <span style="font-size:11px;color:var(--text-dim)">Sprint Goal #3</span>
+        </div>
+        <div class="checkin-goal-text">Complete morning Quran recitation daily</div>
+        <div class="status-buttons">
+          <div class="status-btn" onclick="selectStatus(this,'g')" data-goal="3" data-status="g">\u{1F7E2} Green \u2014 On Track</div>
+          <div class="status-btn" onclick="selectStatus(this,'y')" data-goal="3" data-status="y">\u{1F7E1} Yellow \u2014 At Risk</div>
+          <div class="status-btn" onclick="selectStatus(this,'r')" data-goal="3" data-status="r">\u{1F534} Red \u2014 Stuck</div>
+        </div>
+        <textarea class="checkin-note" placeholder="What's the situation? (required for Yellow/Red)"></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:24px">
+        <button class="btn btn-primary" onclick="submitCheckin()">SUBMIT CHECK-IN</button>
+        <button class="btn btn-outline">SAVE DRAFT</button>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: AI COACH ═══ -->
+    <div class="page" id="page-coach">
+      <div class="coach-wrap">
+        <div class="coach-header">
+          <div class="coach-icon">\u25C6</div>
+          <div class="coach-label">Personal AI Coach</div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:4px">Your Sprint Intelligence</div>
+          <div class="coach-desc">Private. Persistent. Pattern-aware across all your sprints.</div>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+          <div class="msg-bubble msg-ai">
+            <strong>Welcome back, Sayed.</strong> We're at the midpoint of Sprint 4. Your completion rate is at 73% \u2014 solid, but I'm seeing a pattern. Want to look at it?
+          </div>
+          <div class="msg-bubble msg-user">
+            Yeah, what pattern?
+          </div>
+          <div class="msg-bubble msg-ai">
+            Across 3 sprints, your <strong>spiritual goals</strong> have a 92% completion rate. Your <strong>professional goals</strong> are at 71%. But your <strong>personal goals</strong> \u2014 specifically fitness \u2014 are at 45%. Every sprint, exercise is the first thing you drop when work gets busy. Week 3 is when it happens.
+          </div>
+          <div class="msg-bubble msg-user">
+            That's... accurate. I keep telling myself I'll get to it.
+          </div>
+          <div class="msg-bubble msg-ai">
+            Here's what I'd suggest: <strong>shrink the goal, don't drop it.</strong> Instead of 4x/week, commit to 2x this week. Two is better than zero, and it keeps the habit alive through the dip. You can scale back up in Week 4. Your squad doesn't need to see you crush it \u2014 they need to see you show up even when it's hard. That's what inspires people.
+          </div>
+        </div>
+
+        <div class="chat-input-wrap">
+          <input class="chat-input" id="coachInput" type="text" placeholder="Talk to your coach..." onkeydown="if(event.key==='Enter')sendCoachMsg()">
+          <button class="btn btn-primary btn-sm" onclick="sendCoachMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: ANALYTICS ═══ -->
+    <div class="page" id="page-analytics">
+      <div class="overline">Performance Data</div>
+      <div class="page-title">ANALYTICS</div>
+      <div class="page-sub">Your numbers across Sprint 4. Private \u2014 only you see this.</div>
+
+      <div class="grid-4" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--cream)">73%</div>
+          <div class="stat-label">Completion Rate</div>
+          <div class="stat-change up">\u2191 +8% vs Sprint 3</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--green)">94%</div>
+          <div class="stat-label">Attendance</div>
+          <div class="stat-change up">\u2191 +2% vs Sprint 3</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--text)">14</div>
+          <div class="stat-label">Check-In Streak</div>
+          <div class="stat-change" style="color:var(--cream)">\u{1F525} Personal best</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" style="color:var(--purple)">Top 15%</div>
+          <div class="stat-label">Operator Score</div>
+          <div class="stat-change up">\u2191 from Top 22%</div>
+        </div>
+      </div>
+
+      <!-- Weekly completion chart -->
+      <div class="sh"><span class="sh-title">Weekly Completion Rate</span></div>
+      <div class="chart-placeholder" style="margin-bottom:24px">
+        <div class="chart-bars" id="weeklyChart">
+          <div class="chart-bar" data-label="Wk 1" style="height:85%;background:var(--cream)"></div>
+          <div class="chart-bar" data-label="Wk 2" style="height:78%;background:var(--cream)"></div>
+          <div class="chart-bar" data-label="Wk 3" style="height:67%;background:var(--yellow)"></div>
+          <div class="chart-bar" data-label="Wk 4" style="height:0%;background:var(--surface-3)"></div>
+          <div class="chart-bar" data-label="Wk 5" style="height:0%;background:var(--surface-3)"></div>
+          <div class="chart-bar" data-label="Wk 6" style="height:0%;background:var(--surface-3)"></div>
+        </div>
+      </div>
+
+      <!-- Goal breakdown -->
+      <div class="sh"><span class="sh-title">Goal Category Breakdown</span></div>
+      <div class="grid-3" style="margin-bottom:24px">
+        <div class="card" style="text-align:center">
+          <div style="font-size:11px;color:var(--cream);font-family:var(--font-condensed);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Professional</div>
+          <div style="font-family:var(--font-display);font-size:48px;color:var(--cream)">71%</div>
+          <div class="pbar" style="margin-top:12px"><div class="pbar-fill" style="width:71%;background:var(--cream)"></div></div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:11px;color:var(--green);font-family:var(--font-condensed);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Personal</div>
+          <div style="font-family:var(--font-display);font-size:48px;color:var(--green)">45%</div>
+          <div class="pbar" style="margin-top:12px"><div class="pbar-fill" style="width:45%;background:var(--green)"></div></div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:11px;color:var(--purple);font-family:var(--font-condensed);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Spiritual</div>
+          <div style="font-family:var(--font-display);font-size:48px;color:var(--purple)">92%</div>
+          <div class="pbar" style="margin-top:12px"><div class="pbar-fill" style="width:92%;background:var(--purple)"></div></div>
+        </div>
+      </div>
+
+      <!-- Sprint history -->
+      <div class="sh"><span class="sh-title">Sprint History</span></div>
+      <div class="card" style="padding:0">
+        <div class="report-row" style="padding:14px 20px">
+          <span class="report-label">Sprint 1 \u2014 Sigma Unit</span>
+          <span class="report-value" style="color:var(--yellow)">58%</span>
+        </div>
+        <div class="report-row" style="padding:14px 20px">
+          <span class="report-label">Sprint 2 \u2014 Vanguard Unit</span>
+          <span class="report-value" style="color:var(--cream)">65%</span>
+        </div>
+        <div class="report-row" style="padding:14px 20px">
+          <span class="report-label">Sprint 3 \u2014 Echo Unit</span>
+          <span class="report-value" style="color:var(--green)">71%</span>
+        </div>
+        <div class="report-row" style="padding:14px 20px">
+          <span class="report-label">Sprint 4 \u2014 Echo Unit (current)</span>
+          <span class="report-value" style="color:var(--cream)">73% (in progress)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: SPRINT REPORT ═══ -->
+    <div class="page" id="page-report">
+      <div class="overline">Sprint 4 \u2014 Midpoint Review</div>
+      <div class="page-title">SPRINT REPORT CARD</div>
+      <div class="page-sub">Your performance data through Week 3. Full report generates at Week 6.</div>
+
+      <div class="report-section">
+        <div class="sh"><span class="sh-title">Individual Performance</span></div>
+        <div class="report-row"><span class="report-label">Goals Declared</span><span class="report-value">9</span></div>
+        <div class="report-row"><span class="report-label">Goals Completed</span><span class="report-value" style="color:var(--green)">7</span></div>
+        <div class="report-row"><span class="report-label">Completion Rate</span><span class="report-value" style="color:var(--cream)">73%</span></div>
+        <div class="report-row"><span class="report-label">Check-In Streak</span><span class="report-value">14 consecutive</span></div>
+        <div class="report-row"><span class="report-label">Attendance</span><span class="report-value" style="color:var(--green)">94%</span></div>
+        <div class="report-row"><span class="report-label">Keystone Goal Progress</span><span class="report-value" style="color:var(--cream)">60% (3 of 5 users)</span></div>
+      </div>
+
+      <div class="report-section">
+        <div class="sh"><span class="sh-title">Echo Unit \u2014 Squad Performance</span></div>
+        <div class="report-row"><span class="report-label">Squad Completion Rate</span><span class="report-value" style="color:var(--green)">71%</span></div>
+        <div class="report-row"><span class="report-label">Squad Attendance</span><span class="report-value">89%</span></div>
+        <div class="report-row"><span class="report-label">Combined Goals Hit</span><span class="report-value">31 of 44</span></div>
+        <div class="report-row"><span class="report-label">Squad Health Score</span><span class="report-value" style="color:var(--green)">8.2 / 10</span></div>
+        <div class="report-row"><span class="report-label">Ranking</span><span class="report-value" style="color:var(--cream)">Top 18% of all squads</span></div>
+      </div>
+
+      <div class="report-section">
+        <div class="sh"><span class="sh-title">AI Coach Insights</span></div>
+        <div class="ai-msg" style="margin:0;border:none;background:transparent;padding:0">
+          <p>Your <strong>professional execution</strong> is improving sprint-over-sprint (58% \u2192 65% \u2192 71% \u2192 73%). That's a clear upward trajectory. Your <strong>spiritual consistency</strong> at 92% is exceptional \u2014 this discipline is your foundation.</p>
+          <p style="margin-top:12px">The pattern to watch: <strong>personal goals drop in Week 3 every sprint.</strong> This is your dip signature. Consider pre-committing to a smaller personal goal in Weeks 3-4 of future sprints.</p>
+          <p style="margin-top:12px"><strong>Biggest strength:</strong> Transparency. You've flagged Yellow/Red honestly every time, which lets your squad help. 68% of your Yellow goals recovered to Green by Friday \u2014 that's the power of asking for help early.</p>
+        </div>
+      </div>
+
+      <!-- Continuation vote (Week 6) -->
+      <div style="height:28px"></div>
+      <div class="sh"><span class="sh-title">Week 6 \u2014 Continuation Vote (Preview)</span></div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6">This vote opens at the end of Week 6. Your choice is anonymous.</div>
+
+      <div class="vote-option" onclick="selectVote(this)">
+        <div class="vote-radio"></div>
+        <div>
+          <div class="vote-title">Continue Together</div>
+          <div class="vote-desc">Echo Unit stays intact for Sprint 5. Same people, new goals, deeper bonds.</div>
+        </div>
+      </div>
+      <div class="vote-option" onclick="selectVote(this)">
+        <div class="vote-radio"></div>
+        <div>
+          <div class="vote-title">Reshuffle</div>
+          <div class="vote-desc">Stay in Division Alpha but get matched into a new squad for Sprint 5.</div>
+        </div>
+      </div>
+      <div class="vote-option" onclick="selectVote(this)">
+        <div class="vote-radio"></div>
+        <div>
+          <div class="vote-title">Pause</div>
+          <div class="vote-desc">Take a break. Your spot is held. No charge while paused. Come back when ready.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ MEMBER PROFILE MODAL ═══ -->
+<div class="modal-overlay" id="memberModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">\u2715</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ═══ NAVIGATION ═══
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+  document.querySelector('.main').scrollTop = 0;
+}
+
+document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+  item.addEventListener('click', () => navigate(item.dataset.page));
+});
+
+// ═══ CHECK-IN STATUS SELECTION ═══
+function selectStatus(btn, status) {
+  const parent = btn.closest('.checkin-card');
+  parent.querySelectorAll('.status-btn').forEach(b => {
+    b.className = 'status-btn';
+  });
+  btn.classList.add('selected-' + status);
+}
+
+function submitCheckin() {
+  const cards = document.querySelectorAll('.checkin-card');
+  let allSelected = true;
+  cards.forEach(card => {
+    if (!card.querySelector('.status-btn[class*="selected"]')) allSelected = false;
+  });
+  if (!allSelected) {
+    alert('Please select a status for all goals before submitting.');
+    return;
+  }
+  // Simulate submission
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  overlay.innerHTML = `
+    <div style="text-align:center;animation:fadeIn 0.3s var(--ease-snap)">
+      <div style="font-size:48px;margin-bottom:16px">\u2713</div>
+      <div style="font-family:var(--font-display);font-size:32px;letter-spacing:0.06em;margin-bottom:8px">CHECK-IN SUBMITTED</div>
+      <div style="font-size:14px;color:var(--text-muted)">Your squad can see your status. Keep pushing.</div>
+      <button class="btn btn-primary" style="margin-top:24px" onclick="this.closest('div[style]').parentElement.remove();navigate('squad')">BACK TO SQUAD</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+// ═══ VOTE SELECTION ═══
+function selectVote(option) {
+  document.querySelectorAll('.vote-option').forEach(v => v.classList.remove('selected'));
+  option.classList.add('selected');
+}
+
+// ═══ COACH CHAT ═══
+function sendCoachMsg() {
+  const input = document.getElementById('coachInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  const area = document.getElementById('chatArea');
+  const userBubble = document.createElement('div');
+  userBubble.className = 'msg-bubble msg-user';
+  userBubble.textContent = msg;
+  area.appendChild(userBubble);
+  input.value = '';
+
+  // Simulate AI response
+  setTimeout(() => {
+    const responses = [
+      "That's a good instinct. Let me look at your data \u2014 across your sprint history, the weeks where you hit 3+ goals all had one thing in common: you started your highest-priority task before noon on Monday. The weeks you struggled, you started late. <strong>Discipline isn't motivation \u2014 it's sequence.</strong> What if we set your Monday morning alarm 30 minutes earlier?",
+      "I hear you. Here's what I want you to consider: your squad's combined Yellow rate dropped from 40% to 22% between Sprint 3 and Sprint 4. That's partly because <strong>you</strong> started flagging blockers earlier. When you went Yellow on the pricing page in Week 1, James offered the Stripe fix within 2 hours. Your vulnerability is making the squad stronger.",
+      "Let's reframe this. You're not behind \u2014 you're at the midpoint, which is statistically the hardest part. Your completion rate at the Week 3 midpoint is <strong>73%</strong>. In Sprint 1 at this same point, you were at <strong>48%</strong>. You've grown more than you realize. The question isn't whether you can finish strong \u2014 it's whether you'll let the dip tell you otherwise.",
+      "Good question. Your Operator Score is currently in the <strong>top 15%</strong> of all Division Alpha members. That's up from top 22% last sprint. The biggest contributor: your <strong>squad contribution score</strong> \u2014 you've been actively helping others with blockers, not just posting your own updates. That matters more than raw goal completion for long-term success in this system."
+    ];
+    const aiBubble = document.createElement('div');
+    aiBubble.className = 'msg-bubble msg-ai';
+    aiBubble.innerHTML = responses[Math.floor(Math.random() * responses.length)];
+    area.appendChild(aiBubble);
+    area.scrollTop = area.scrollHeight;
+  }, 800);
+}
+
+// ═══ MEMBER PROFILES ═══
+const members = {
+  sarah: { name: 'Sarah M.', city: 'London', type: 'Builder', color: '#4ade80', sprints: 3, completion: 78, attendance: 96, goals: ['Launch SaaS for interior designers', 'Run 5K without stopping', 'Daily gratitude journal'] },
+  james: { name: 'James K.', city: 'Toronto', type: 'Builder', color: 'var(--cream)', sprints: 2, completion: 69, attendance: 88, goals: ['Scale YouTube to 100K subs', 'Read 2 books/month', 'Weekly volunteering'] },
+  amina: { name: 'Amina R.', city: 'Dubai', type: 'Rewirer', color: 'var(--purple)', sprints: 1, completion: 72, attendance: 91, goals: ['Launch consulting practice', 'Exercise 3x/week', 'Complete Quran review'] },
+  david: { name: 'David L.', city: 'New York', type: 'Pivot', color: '#facc15', sprints: 1, completion: 61, attendance: 85, goals: ['Land 3 freelance clients', 'Build personal website', 'Daily meditation 10 min'] },
+  priya: { name: 'Priya T.', city: 'San Francisco', type: 'Builder', color: '#f87171', sprints: 4, completion: 82, attendance: 97, goals: ['Get 20 coaching clients', 'Prep for half marathon', 'Morning prayer routine'] },
+};
+
+document.querySelectorAll('.squad-member-row').forEach(row => {
+  row.addEventListener('click', () => {
+    const m = members[row.dataset.member];
+    if (!m) return;
+    const typeClass = m.type === 'Builder' ? 'tag-builder' : m.type === 'Rewirer' ? 'tag-rewirer' : 'tag-pivot';
+    document.getElementById('modalContent').innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+        <div class="avatar lg" style="background:${m.color}">${m.name.split(' ').map(n=>n[0]).join('')}</div>
+        <div>
+          <div style="font-size:18px;font-weight:600">${m.name}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${m.city} &bull; <span class="tag ${typeClass}">${m.type}</span></div>
+        </div>
+      </div>
+      <div class="sh"><span class="sh-title">Sprint Record</span></div>
+      <div class="grid-3" style="margin-bottom:20px">
+        <div class="stat-card" style="padding:14px">
+          <div class="stat-value" style="font-size:28px;color:var(--cream)">${m.sprints}</div>
+          <div class="stat-label" style="font-size:8px">Sprints</div>
+        </div>
+        <div class="stat-card" style="padding:14px">
+          <div class="stat-value" style="font-size:28px;color:var(--green)">${m.completion}%</div>
+          <div class="stat-label" style="font-size:8px">Completion</div>
+        </div>
+        <div class="stat-card" style="padding:14px">
+          <div class="stat-value" style="font-size:28px;color:var(--text)">${m.attendance}%</div>
+          <div class="stat-label" style="font-size:8px">Attendance</div>
+        </div>
+      </div>
+      <div class="sh"><span class="sh-title">Current Sprint Goals</span></div>
+      ${m.goals.map(g => `<div class="goal-row" style="margin-bottom:4px"><span class="goal-text" style="font-size:12px">${g}</span></div>`).join('')}
+    `;
+    document.getElementById('memberModal').classList.add('show');
+  });
+});
+
+function closeModal() {
+  document.getElementById('memberModal').classList.remove('show');
+}
+document.getElementById('memberModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ═══ ANIMATE CHART ON VIEW ═══
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.chart-bar').forEach((bar, i) => {
+        const h = bar.style.height;
+        bar.style.height = '0%';
+        setTimeout(() => { bar.style.height = h; }, i * 100);
+      });
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.chart-placeholder').forEach(el => observer.observe(el));
+
+// ═══ CHECKBOX TOGGLE ═══
+document.querySelectorAll('.check-box').forEach(box => {
+  box.addEventListener('click', () => box.classList.toggle('done'));
+});
+</script>
+
+</body>
+</html>

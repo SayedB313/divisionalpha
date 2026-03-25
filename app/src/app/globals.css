@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* ══════ DESIGN SYSTEM — Division Alpha ══════ */
+/* Source of truth: /DESIGN.md */
+
+@theme inline {
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-dm-mono);
+  --font-display: var(--font-instrument-serif);
+}
+
+/* ══════ LIGHT THEME (Primary — morning journal energy) ══════ */
+:root,
+[data-theme="light"] {
+  --bg: #f5f0e6;
+  --bg-page: #faf7f0;
+  --surface: #ede8dc;
+  --surface-hover: #e6e0d3;
+  --border: #d8d0c0;
+  --border-subtle: #e3ddd0;
+  --text: #1c1a15;
+  --text-secondary: #5c5647;
+  --text-muted: #948d7e;
+  --accent: #3d6b4a;
+  --accent-hover: #2e5238;
+  --accent-surface: #e8f0ea;
+  --accent-text: #ffffff;
+  --green: #3d6b4a;
+  --green-soft: rgba(61, 107, 74, 0.08);
+  --yellow: #b8923e;
+  --yellow-soft: rgba(184, 146, 62, 0.08);
+  --red: #a04040;
+  --red-soft: rgba(160, 64, 64, 0.08);
+  --shadow-sm: 0 1px 2px rgba(28, 26, 21, 0.04);
+  --shadow-md: 0 2px 8px rgba(28, 26, 21, 0.05), 0 1px 2px rgba(28, 26, 21, 0.03);
+  --shadow-lg: 0 4px 16px rgba(28, 26, 21, 0.06), 0 2px 4px rgba(28, 26, 21, 0.03);
+  --overlay: rgba(28, 26, 21, 0.5);
+}
+
+/* ══════ DARK THEME (Secondary — evening review energy) ══════ */
+[data-theme="dark"] {
+  --bg: #111110;
+  --bg-page: #151514;
+  --surface: #1c1b19;
+  --surface-hover: #242320;
+  --border: #2a2825;
+  --border-subtle: #222120;
+  --text: #f0ebe0;
+  --text-secondary: #c0b9ab;
+  --text-muted: #847e74;
+  --accent: #6db882;
+  --accent-hover: #82c994;
+  --accent-surface: #1a2a1f;
+  --accent-text: #111110;
+  --green: #5a9a6e;
+  --green-soft: rgba(90, 154, 110, 0.1);
+  --yellow: #c9a54e;
+  --yellow-soft: rgba(201, 165, 78, 0.1);
+  --red: #c45c5c;
+  --red-soft: rgba(196, 92, 92, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+  --overlay: rgba(0, 0, 0, 0.6);
+}
+
+/* ══════ BASE ══════ */
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text);
+  font-family: var(--font-dm-sans), sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+  zoom: 1.3;
+  transition: background 300ms, color 300ms;
+}
+
+/* ══════ MOTION ══════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ══════ FOCUS ══════ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ══════ SCROLLBAR ══════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

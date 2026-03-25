@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Division Alpha v7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --font-display: 'Instrument Serif', serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --dur-micro: 80ms;
+      --dur-short: 150ms;
+      --dur-med: 300ms;
+      --dur-long: 500ms;
+      --radius-sm: 2px;
+      --radius-md: 4px;
+      --content-width: 660px;
+    }
+
+    /* ══════ LIGHT THEME (Primary) ══════ */
+    [data-theme="light"] {
+      --bg: #f5f0e6;
+      --bg-page: #faf7f0;
+      --surface: #ede8dc;
+      --surface-hover: #e6e0d3;
+      --border: #d8d0c0;
+      --border-subtle: #e3ddd0;
+      --text: #1c1a15;
+      --text-secondary: #5c5647;
+      --text-muted: #948d7e;
+      --accent: #3d6b4a;
+      --accent-hover: #2e5238;
+      --accent-surface: #e8f0ea;
+      --accent-text: #ffffff;
+      --green: #3d6b4a;
+      --green-soft: rgba(61, 107, 74, 0.08);
+      --yellow: #b8923e;
+      --yellow-soft: rgba(184, 146, 62, 0.08);
+      --red: #a04040;
+      --red-soft: rgba(160, 64, 64, 0.08);
+      --shadow-sm: 0 1px 2px rgba(28, 26, 21, 0.04);
+      --shadow-md: 0 2px 8px rgba(28, 26, 21, 0.05), 0 1px 2px rgba(28, 26, 21, 0.03);
+      --shadow-lg: 0 4px 16px rgba(28, 26, 21, 0.06), 0 2px 4px rgba(28, 26, 21, 0.03);
+      --overlay: rgba(28, 26, 21, 0.5);
+    }
+
+    /* ══════ DARK THEME (Secondary) ══════ */
+    [data-theme="dark"] {
+      --bg: #111110;
+      --bg-page: #151514;
+      --surface: #1c1b19;
+      --surface-hover: #242320;
+      --border: #2a2825;
+      --border-subtle: #222120;
+      --text: #f0ebe0;
+      --text-secondary: #c0b9ab;
+      --text-muted: #847e74;
+      --accent: #6db882;
+      --accent-hover: #82c994;
+      --accent-surface: #1a2a1f;
+      --accent-text: #111110;
+      --green: #5a9a6e;
+      --green-soft: rgba(90, 154, 110, 0.1);
+      --yellow: #c9a54e;
+      --yellow-soft: rgba(201, 165, 78, 0.1);
+      --red: #c45c5c;
+      --red-soft: rgba(196, 92, 92, 0.1);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+      --overlay: rgba(0, 0, 0, 0.6);
+    }
+
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    body {
+      background: var(--bg-page);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      zoom: 1.3;
+      transition: background var(--dur-med), color var(--dur-med);
+    }
+
+    /* ══════ TOP BAR ══════ */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(16px, 4vw, 40px);
+      z-index: 100;
+      background: var(--bg-page);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--dur-med);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-brand {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .topbar-sprint {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .topbar-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: color var(--dur-short);
+      position: relative;
+    }
+
+    .topbar-btn:hover { color: var(--text-secondary); }
+
+    .topbar-btn.active { color: var(--text); }
+
+    .topbar-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 12px; right: 12px;
+      height: 1.5px;
+      background: var(--accent);
+    }
+
+    .crest-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      margin-left: 4px;
+      border-radius: var(--radius-sm);
+      transition: all var(--dur-short);
+    }
+
+    .crest-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .theme-toggle {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      margin-left: 4px;
+      border-radius: var(--radius-sm);
+      transition: all var(--dur-short);
+    }
+
+    .theme-toggle:hover { border-color: var(--border); color: var(--text-secondary); }
+
+    /* ══════ MAIN CONTENT ══════ */
+    .main { padding-top: 52px; min-height: 100vh; }
+
+    .page {
+      display: none;
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: clamp(28px, 5vw, 56px) clamp(16px, 4vw, 40px);
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeUp 0.4s var(--ease) forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════ HOME PAGE ══════ */
+    .home-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .home-date {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .home-greeting {
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 32px;
+    }
+
+    .home-greeting em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    /* Context Card — changes based on day */
+    .context-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      padding: 28px;
+      margin-bottom: 24px;
+      border-radius: var(--radius-md);
+      transition: box-shadow var(--dur-med);
+    }
+
+    .context-card:hover { box-shadow: var(--shadow-md); }
+
+    .context-overline {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .context-headline {
+      font-family: var(--font-body);
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+
+    .context-body {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .context-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background var(--dur-short), transform var(--dur-micro);
+    }
+
+    .context-action:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    /* Goals section */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .goals-section { margin-top: 36px; }
+
+    .goal-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: opacity var(--dur-short);
+    }
+
+    .goal-row:last-child { border-bottom: none; }
+
+    .goal-check {
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--dur-short);
+      cursor: pointer;
+      font-size: 12px;
+      color: transparent;
+      border-radius: var(--radius-sm);
+    }
+
+    .goal-row.done .goal-check {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .goal-text { font-size: 15px; flex: 1; }
+
+    .goal-row.done .goal-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+      text-decoration-color: var(--border);
+    }
+
+    .goal-status {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Coach whisper */
+    .coach-whisper {
+      margin-top: 36px;
+      padding: 20px 24px;
+      background: var(--accent-surface);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .coach-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .coach-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    /* Sprint progress bar */
+    .sprint-bar {
+      margin-top: 36px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .sprint-bar-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .sprint-bar-track {
+      flex: 1;
+      height: 3px;
+      background: var(--surface);
+      overflow: hidden;
+      border-radius: 2px;
+    }
+
+    .sprint-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 1s var(--ease);
+      width: 0;
+    }
+
+    .sprint-bar-pct {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Squad summary on home */
+    .squad-summary {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: box-shadow var(--dur-short);
+    }
+
+    .squad-summary:hover { box-shadow: var(--shadow-sm); }
+
+    .squad-summary-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .squad-avatars {
+      display: flex;
+      margin-left: 4px;
+    }
+
+    .squad-avatars .av {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 600;
+      background: var(--surface-hover);
+      color: var(--text-secondary);
+      border: 2px solid var(--bg-page);
+      margin-left: -6px;
+    }
+
+    .squad-avatars .av:first-child { margin-left: 0; }
+
+    .squad-summary-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .squad-summary-arrow {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ══════ DECLARE PAGE ══════ */
+    .ritual-header {
+      font-family: var(--font-body);
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .ritual-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .declare-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .declare-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .declare-num {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+      width: 20px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .declare-field {
+      flex: 1;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      border-radius: var(--radius-md);
+      transition: border-color var(--dur-short);
+    }
+
+    .declare-field::placeholder { color: var(--text-muted); }
+    .declare-field:focus { border-color: var(--accent); }
+
+    .add-goal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      margin-left: 32px;
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      transition: all var(--dur-short);
+    }
+
+    .add-goal-btn:hover { border-color: var(--text-muted); color: var(--text-secondary); }
+
+    .blocker-section { margin-top: 24px; margin-bottom: 28px; }
+
+    .field-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .textarea-field {
+      width: 100%;
+      min-height: 80px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      border-radius: var(--radius-md);
+      transition: border-color var(--dur-short);
+    }
+
+    .textarea-field::placeholder { color: var(--text-muted); }
+    .textarea-field:focus { border-color: var(--accent); }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      color: var(--accent-text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background var(--dur-short), transform var(--dur-micro);
+    }
+
+    .submit-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    .submit-btn.submitted { background: var(--green); pointer-events: none; }
+
+    .closing-verse {
+      text-align: center;
+      padding: 36px 0 0;
+      margin-top: 36px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .closing-verse p {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .closing-verse span {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ══════ CHECK-IN PAGE ══════ */
+    .checkin-goal {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .checkin-goal:last-child { border-bottom: none; }
+
+    .checkin-goal-text {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .checkin-signals { display: flex; gap: 6px; }
+
+    .signal-btn {
+      flex: 1;
+      padding: 9px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all var(--dur-short);
+      text-align: center;
+      border-radius: var(--radius-sm);
+    }
+
+    .signal-btn:hover { border-color: var(--text-muted); color: var(--text-secondary); }
+
+    .signal-btn.green.selected { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+    .signal-btn.yellow.selected { background: var(--yellow-soft); border-color: var(--yellow); color: var(--yellow); }
+    .signal-btn.red.selected { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+
+    /* Per-goal note (appears on yellow/red) */
+    .signal-note {
+      margin-top: 8px;
+      display: none;
+    }
+
+    .signal-note.visible { display: block; }
+
+    .signal-note input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 13px;
+      outline: none;
+      border-radius: var(--radius-md);
+    }
+
+    .signal-note input::placeholder { color: var(--text-muted); }
+    .signal-note input:focus { border-color: var(--accent); }
+
+    /* ══════ REFLECT PAGE ══════ */
+    .reflect-section { margin-bottom: 28px; }
+
+    .reflect-prompt {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .week-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .week-stat {
+      text-align: center;
+      padding: 16px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .week-stat-val {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 500;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .week-stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .peer-shoutout {
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-top: 12px;
+    }
+
+    .peer-shoutout-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .peer-select {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .peer-chip {
+      padding: 6px 12px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all var(--dur-short);
+    }
+
+    .peer-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .peer-chip.selected { background: var(--accent-surface); border-color: var(--accent); color: var(--accent); }
+
+    /* ══════ SQUAD PAGE ══════ */
+    .squad-header {
+      margin-bottom: 24px;
+    }
+
+    .squad-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .squad-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .squad-health {
+      display: flex;
+      gap: 16px;
+      padding: 14px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin-bottom: 28px;
+    }
+
+    .health-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .health-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .health-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .activity-item {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .activity-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--surface-hover);
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .activity-name {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .activity-type {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-left: 4px;
+    }
+
+    .activity-time {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .activity-content {
+      margin-left: 38px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .activity-signals {
+      display: flex;
+      gap: 4px;
+      margin-left: 38px;
+      margin-top: 6px;
+    }
+
+    .activity-signal {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    .activity-signal.green { background: var(--green-soft); color: var(--green); }
+    .activity-signal.yellow { background: var(--yellow-soft); color: var(--yellow); }
+    .activity-signal.red { background: var(--red-soft); color: var(--red); }
+
+    .activity-ghost {
+      opacity: 0.5;
+    }
+
+    .squad-facilitator {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: var(--accent-surface);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .facilitator-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .facilitator-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ══════ SCORE PAGE (Hidden behind crest) ══════ */
+    .score-reveal {
+      text-align: center;
+      padding: 48px 0 24px;
+    }
+
+    .score-crest {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all var(--dur-med) var(--ease);
+      color: var(--text-muted);
+    }
+
+    .score-crest:hover { border-color: var(--accent); color: var(--accent); }
+
+    .score-crest.revealed {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: scale(1.05);
+    }
+
+    .score-instruction {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    .score-content {
+      display: none;
+      animation: fadeUp 0.6s var(--ease) forwards;
+    }
+
+    .score-content.visible { display: block; }
+
+    .score-big {
+      font-family: var(--font-display);
+      font-size: 4.5rem;
+      line-height: 1;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .score-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .factor-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .factor-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+      width: 120px;
+      flex-shrink: 0;
+    }
+
+    .factor-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--surface);
+      overflow: hidden;
+      border-radius: 2px;
+    }
+
+    .factor-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.8s var(--ease);
+      width: 0;
+    }
+
+    .factor-val {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      width: 24px;
+      text-align: right;
+    }
+
+    .score-summary {
+      margin-top: 32px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .score-summary-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .score-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .score-stat { text-align: center; }
+
+    .score-stat-val {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 500;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    .score-stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tier-3-whisper {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: var(--accent-surface);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .tier-3-whisper p {
+      font-size: 13px;
+      color: var(--accent);
+      line-height: 1.5;
+    }
+
+    .tier-3-whisper strong {
+      font-weight: 600;
+    }
+
+    /* ══════ COACH DM PAGE ══════ */
+    .coach-thread { margin-top: 8px; }
+
+    .coach-message {
+      margin-bottom: 20px;
+      max-width: 88%;
+    }
+
+    .coach-message.from-coach {
+      margin-right: auto;
+    }
+
+    .coach-message.from-user {
+      margin-left: auto;
+    }
+
+    .coach-msg-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+
+    .coach-msg-bubble {
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      border-radius: var(--radius-md);
+    }
+
+    .from-coach .coach-msg-bubble {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .from-user .coach-msg-bubble {
+      background: var(--accent-surface);
+      border: 1px solid var(--accent);
+      color: var(--text);
+    }
+
+    .coach-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .coach-input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      outline: none;
+      border-radius: var(--radius-md);
+    }
+
+    .coach-input::placeholder { color: var(--text-muted); }
+    .coach-input:focus { border-color: var(--accent); }
+
+    .coach-send {
+      padding: 12px 20px;
+      background: var(--accent);
+      border: none;
+      color: var(--accent-text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background var(--dur-short);
+    }
+
+    .coach-send:hover { background: var(--accent-hover); }
+
+    /* ══════ SPRINT TIMELINE ══════ */
+    .sprint-timeline {
+      margin-top: 32px;
+    }
+
+    .timeline-weeks {
+      display: flex;
+      gap: 4px;
+    }
+
+    .timeline-week {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      position: relative;
+    }
+
+    .timeline-week-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .timeline-week-bar {
+      height: 4px;
+      background: var(--surface);
+      border-radius: 2px;
+    }
+
+    .timeline-week.complete .timeline-week-bar { background: var(--accent); }
+    .timeline-week.current .timeline-week-bar { background: linear-gradient(90deg, var(--accent) 60%, var(--surface) 60%); }
+    .timeline-week.current .timeline-week-num { color: var(--accent); font-weight: 500; }
+
+    /* ══════ MOBILE NAV ══════ */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 52px;
+      background: var(--bg-page);
+      border-top: 1px solid var(--border-subtle);
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      transition: background var(--dur-med);
+    }
+
+    .mobile-nav button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-family: var(--font-body);
+      cursor: pointer;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: color var(--dur-short);
+    }
+
+    .mobile-nav button.active { color: var(--accent); }
+    .mobile-nav button span:first-child { font-size: 16px; }
+
+    @media (max-width: 768px) {
+      .topbar-btn.hide-mobile { display: none; }
+      .mobile-nav { display: flex !important; }
+      .main { padding-bottom: 60px; }
+      .week-stats { grid-template-columns: 1fr; }
+      .score-stats { grid-template-columns: 1fr; gap: 12px; }
+    }
+
+    /* ══════ SCORE OVERLAY ══════ */
+    .score-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--overlay);
+      opacity: 0;
+      transition: opacity var(--dur-med);
+    }
+
+    .score-overlay.visible {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+    }
+
+    .score-panel {
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      width: 90%;
+      max-width: 520px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 32px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      animation: fadeUp 0.4s var(--ease) forwards;
+    }
+
+    .score-close {
+      float: right;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      transition: color var(--dur-short);
+    }
+
+    .score-close:hover { color: var(--text); }
+
+    /* ══════ CEREMONY PAGES ══════ */
+    .ceremony-badge {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--accent);
+    }
+
+    .ceremony-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .ceremony-sub {
+      text-align: center;
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .ceremony-member {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .ceremony-member:last-child { border-bottom: none; }
+
+    .ceremony-member-info { flex: 1; }
+
+    .ceremony-member-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .ceremony-member-goal {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .ceremony-member-type {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 3px 8px;
+      background: var(--surface);
+      border-radius: var(--radius-sm);
+    }
+
+    .ceremony-norms {
+      margin: 28px 0;
+      padding: 20px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    .ceremony-norms ol {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ceremony-norms li {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .ceremony-norms li strong {
+      color: var(--text);
+    }
+
+    .commitment-box {
+      text-align: center;
+      padding: 32px 24px;
+      margin: 28px 0;
+      background: var(--accent-surface);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-md);
+    }
+
+    .commitment-box p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .commitment-btn {
+      padding: 14px 36px;
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background var(--dur-short), transform var(--dur-micro);
+    }
+
+    .commitment-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    .commitment-btn.committed {
+      background: var(--green);
+      pointer-events: none;
+    }
+
+    /* Vote cards */
+    .vote-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 24px 0;
+    }
+
+    .vote-card {
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--dur-short);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .vote-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+
+    .vote-card.selected { border-color: var(--accent); background: var(--accent-surface); }
+
+    .vote-radio {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--dur-short);
+    }
+
+    .vote-card.selected .vote-radio {
+      border-color: var(--accent);
+    }
+
+    .vote-card.selected .vote-radio::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .vote-card-content { flex: 1; }
+
+    .vote-card-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .vote-card-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Completion stats */
+    .completion-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .completion-stat {
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .completion-stat-val {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 500;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .completion-stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ══════ ONBOARDING ══════ */
+    .onboard-progress {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 32px;
+    }
+
+    .onboard-step {
+      flex: 1;
+      height: 3px;
+      background: var(--surface);
+      border-radius: 2px;
+      transition: background var(--dur-med);
+    }
+
+    .onboard-step.done { background: var(--accent); }
+    .onboard-step.current { background: var(--accent); opacity: 0.5; }
+
+    .onboard-step-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .onboard-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .onboard-field-group { display: flex; flex-direction: column; gap: 4px; }
+
+    .onboard-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .onboard-input {
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      border-radius: var(--radius-md);
+      transition: border-color var(--dur-short);
+    }
+
+    .onboard-input::placeholder { color: var(--text-muted); }
+    .onboard-input:focus { border-color: var(--accent); }
+
+    .onboard-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .onboard-option {
+      padding: 14px 18px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: all var(--dur-short);
+      text-align: left;
+    }
+
+    .onboard-option:hover { border-color: var(--text-muted); }
+    .onboard-option.selected { border-color: var(--accent); background: var(--accent-surface); color: var(--text); }
+
+    .onboard-nav {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .onboard-back {
+      padding: 14px 24px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all var(--dur-short);
+    }
+
+    .onboard-back:hover { border-color: var(--text-muted); color: var(--text); }
+
+    .onboard-next {
+      flex: 1;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      color: var(--accent-text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background var(--dur-short);
+    }
+
+    .onboard-next:hover { background: var(--accent-hover); }
+
+    /* ══════ UTILITIES ══════ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .mt-sm { margin-top: 8px; }
+    .mt-md { margin-top: 16px; }
+    .mt-lg { margin-top: 24px; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-brand">Division Alpha</div>
+      <div class="topbar-sprint">S3 W4</div>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn active" data-page="home">Home</button>
+      <button class="topbar-btn" data-page="declare">Declare</button>
+      <button class="topbar-btn" data-page="checkin">Check-in</button>
+      <button class="topbar-btn" data-page="reflect">Reflect</button>
+      <button class="topbar-btn hide-mobile" data-page="squad">Squad</button>
+      <button class="topbar-btn hide-mobile" data-page="coach">Coach</button>
+      <button class="topbar-btn hide-mobile" data-page="kickoff" style="color: var(--accent);">Kickoff</button>
+      <button class="topbar-btn hide-mobile" data-page="completion" style="color: var(--accent);">W6</button>
+      <button class="topbar-btn hide-mobile" data-page="onboard" style="color: var(--accent);">Apply</button>
+      <button class="crest-btn" id="crest-btn" title="Operator Score" aria-label="View Operator Score">&#9670;</button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">&#9788;</button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ══════════ HOME ══════════ -->
+    <section class="page active" id="page-home">
+      <div class="home-meta" id="home-meta">Sprint 3 &middot; Week 4</div>
+      <div class="home-date" id="home-date"></div>
+
+      <h1 class="home-greeting" id="home-greeting"></h1>
+
+      <div class="context-card" id="context-card">
+        <!-- Populated by JS based on day -->
+      </div>
+
+      <div class="goals-section">
+        <div class="section-label">This week's declarations</div>
+        <div id="goals-list">
+          <div class="goal-row done" onclick="this.classList.toggle('done')">
+            <div class="goal-check">&#10003;</div>
+            <div class="goal-text">Ship pricing page with Stripe integration</div>
+            <div class="goal-status" style="background: var(--green);"></div>
+          </div>
+          <div class="goal-row done" onclick="this.classList.toggle('done')">
+            <div class="goal-check">&#10003;</div>
+            <div class="goal-text">Complete 4 deep work sessions (2hr+ each)</div>
+            <div class="goal-status" style="background: var(--green);"></div>
+          </div>
+          <div class="goal-row" onclick="this.classList.toggle('done')">
+            <div class="goal-check">&#10003;</div>
+            <div class="goal-text">Run 3 customer discovery interviews</div>
+            <div class="goal-status" style="background: var(--yellow);"></div>
+          </div>
+          <div class="goal-row" onclick="this.classList.toggle('done')">
+            <div class="goal-check">&#10003;</div>
+            <div class="goal-text">Morning routine 5 of 7 days</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach-whisper">
+        <div class="coach-label">Coach</div>
+        <div class="coach-text">You're 12% ahead of your Week 4 average. Your professional goals land consistently, but this is the third week you've dropped the personal goal. Pattern worth examining.</div>
+      </div>
+
+      <div class="squad-summary" onclick="navigateTo('squad')">
+        <div class="squad-summary-left">
+          <div class="squad-avatars">
+            <div class="av">SR</div>
+            <div class="av">FN</div>
+            <div class="av">MH</div>
+            <div class="av">OT</div>
+            <div class="av">JL</div>
+            <div class="av">PK</div>
+          </div>
+          <div class="squad-summary-text" id="squad-summary-text">5 of 7 checked in</div>
+        </div>
+        <div class="squad-summary-arrow">&rarr;</div>
+      </div>
+
+      <div class="sprint-bar">
+        <span class="sprint-bar-label">Sprint 3</span>
+        <div class="sprint-bar-track">
+          <div class="sprint-bar-fill" id="sprint-fill"></div>
+        </div>
+        <span class="sprint-bar-pct">66%</span>
+      </div>
+
+      <div class="sprint-timeline">
+        <div class="timeline-weeks">
+          <div class="timeline-week complete">
+            <div class="timeline-week-num">W1</div>
+            <div class="timeline-week-bar"></div>
+          </div>
+          <div class="timeline-week complete">
+            <div class="timeline-week-num">W2</div>
+            <div class="timeline-week-bar"></div>
+          </div>
+          <div class="timeline-week complete">
+            <div class="timeline-week-num">W3</div>
+            <div class="timeline-week-bar"></div>
+          </div>
+          <div class="timeline-week current">
+            <div class="timeline-week-num">W4</div>
+            <div class="timeline-week-bar"></div>
+          </div>
+          <div class="timeline-week">
+            <div class="timeline-week-num">W5</div>
+            <div class="timeline-week-bar"></div>
+          </div>
+          <div class="timeline-week">
+            <div class="timeline-week-num">W6</div>
+            <div class="timeline-week-bar"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ DECLARE ══════════ -->
+    <section class="page" id="page-declare">
+      <h1 class="ritual-header">What will you deliver this week?</h1>
+      <p class="ritual-sub">Declare your commitments to your squad. Be specific. Be measurable.</p>
+
+      <div class="declare-inputs" id="declare-inputs">
+        <div class="declare-row">
+          <span class="declare-num">01</span>
+          <input class="declare-field" type="text" placeholder="Your most important commitment..." aria-label="Goal 1">
+        </div>
+        <div class="declare-row">
+          <span class="declare-num">02</span>
+          <input class="declare-field" type="text" placeholder="Second commitment..." aria-label="Goal 2">
+        </div>
+        <div class="declare-row">
+          <span class="declare-num">03</span>
+          <input class="declare-field" type="text" placeholder="Third commitment..." aria-label="Goal 3">
+        </div>
+      </div>
+
+      <button class="add-goal-btn" id="add-goal-btn">+ Add another</button>
+
+      <div class="blocker-section">
+        <div class="field-label">Anticipated blockers</div>
+        <textarea class="textarea-field" placeholder="What might get in the way this week? How can your squad help?" aria-label="Blockers"></textarea>
+      </div>
+
+      <button class="submit-btn" id="declare-submit">Declare to your squad</button>
+
+      <div class="closing-verse">
+        <p>"Tie your camel, then place your trust in Allah."</p>
+        <span>Tawakkul &middot; Effort meets trust</span>
+      </div>
+    </section>
+
+    <!-- ══════════ CHECK-IN ══════════ -->
+    <section class="page" id="page-checkin">
+      <h1 class="ritual-header">Mid-week signal</h1>
+      <p class="ritual-sub">For each goal, give your squad an honest signal.</p>
+
+      <div id="checkin-goals">
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">1. Ship pricing page with Stripe integration</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+          <div class="signal-note"><input type="text" placeholder="What's blocking you?"></div>
+        </div>
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">2. Complete 4 deep work sessions (2hr+ each)</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+          <div class="signal-note"><input type="text" placeholder="What's blocking you?"></div>
+        </div>
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">3. Run 3 customer discovery interviews</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+          <div class="signal-note"><input type="text" placeholder="What's blocking you?"></div>
+        </div>
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">4. Morning routine 5 of 7 days</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+          <div class="signal-note"><input type="text" placeholder="What's blocking you?"></div>
+        </div>
+      </div>
+
+      <button class="submit-btn mt-lg" id="checkin-submit">Submit check-in</button>
+    </section>
+
+    <!-- ══════════ REFLECT ══════════ -->
+    <section class="page" id="page-reflect">
+      <h1 class="ritual-header">Week 4 Reflection</h1>
+      <p class="ritual-sub">Friday. Look back at your week. What landed, what didn't, and what you're carrying forward.</p>
+
+      <div class="week-stats">
+        <div class="week-stat">
+          <div class="week-stat-val" style="color: var(--green);">3/4</div>
+          <div class="week-stat-label">Goals hit</div>
+        </div>
+        <div class="week-stat">
+          <div class="week-stat-val">100%</div>
+          <div class="week-stat-label">Check-ins</div>
+        </div>
+        <div class="week-stat">
+          <div class="week-stat-val" style="color: var(--accent);">+12%</div>
+          <div class="week-stat-label">vs. average</div>
+        </div>
+      </div>
+
+      <div class="reflect-section">
+        <div class="section-label">Wins</div>
+        <div class="reflect-prompt">What did you accomplish this week? Don't minimize it.</div>
+        <textarea class="textarea-field" placeholder="Shipped the pricing page ahead of schedule. Got my first real feedback from a paying user..." aria-label="Wins"></textarea>
+      </div>
+
+      <div class="reflect-section">
+        <div class="section-label">Misses</div>
+        <div class="reflect-prompt">What didn't land? No shame. Just data.</div>
+        <textarea class="textarea-field" placeholder="Only did 1 customer interview instead of 3. Kept putting off the calls..." aria-label="Misses"></textarea>
+      </div>
+
+      <div class="reflect-section">
+        <div class="section-label">Learning</div>
+        <div class="reflect-prompt">What did this week teach you?</div>
+        <textarea class="textarea-field" placeholder="I avoid phone calls when I'm anxious about the product. Need to separate the two..." aria-label="Learning"></textarea>
+      </div>
+
+      <div class="reflect-section">
+        <div class="section-label">Carrying forward</div>
+        <div class="reflect-prompt">One thing you're taking into next week.</div>
+        <input class="declare-field" type="text" placeholder="Schedule the interviews first thing Monday before I can overthink it" aria-label="Carry forward" style="width: 100%;">
+      </div>
+
+      <div class="peer-shoutout">
+        <div class="peer-shoutout-label">Peer appreciation</div>
+        <div class="peer-select">
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Sara R.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Fatima N.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Marcus H.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Omar T.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">James L.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Priya K.</button>
+        </div>
+        <input class="declare-field" type="text" placeholder="What did they do that helped you?" style="width: 100%; font-size: 13px;" aria-label="Peer appreciation note">
+      </div>
+
+      <button class="submit-btn mt-lg" id="reflect-submit">Submit reflection</button>
+
+      <div class="closing-verse">
+        <p>"Indeed, with hardship comes ease."</p>
+        <span>Quran 94:6 &middot; Patience in the process</span>
+      </div>
+    </section>
+
+    <!-- ══════════ SQUAD ══════════ -->
+    <section class="page" id="page-squad">
+      <div class="squad-header">
+        <h1 class="squad-name">Alpha Vanguard</h1>
+        <div class="squad-meta">7 operators &middot; Sprint 3 &middot; Week 4 of 6</div>
+      </div>
+
+      <div class="squad-health">
+        <div class="health-item">
+          <div class="health-dot" style="background: var(--green);"></div>
+          <span class="health-text">5 checked in</span>
+        </div>
+        <div class="health-item">
+          <div class="health-dot" style="background: var(--yellow);"></div>
+          <span class="health-text">1 pending</span>
+        </div>
+        <div class="health-item">
+          <div class="health-dot" style="background: var(--red);"></div>
+          <span class="health-text">1 quiet</span>
+        </div>
+      </div>
+
+      <div class="section-label">Recent activity</div>
+
+      <div class="activity-item">
+        <div class="activity-header">
+          <div class="activity-avatar">SR</div>
+          <span class="activity-name">Sara R.</span>
+          <span class="activity-type">check-in</span>
+          <span class="activity-time">2h ago</span>
+        </div>
+        <div class="activity-content">"Onboarding flow is live. Got 3 beta signups in the first hour. Feeling good about this one."</div>
+        <div class="activity-signals">
+          <span class="activity-signal green">G</span>
+          <span class="activity-signal green">G</span>
+          <span class="activity-signal green">G</span>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-header">
+          <div class="activity-avatar">FN</div>
+          <span class="activity-name">Fatima N.</span>
+          <span class="activity-type">check-in</span>
+          <span class="activity-time">3h ago</span>
+        </div>
+        <div class="activity-content">Solid on product work, behind on outreach. Shifting schedule to front-load calls tomorrow.</div>
+        <div class="activity-signals">
+          <span class="activity-signal green">G</span>
+          <span class="activity-signal green">G</span>
+          <span class="activity-signal yellow">Y</span>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-header">
+          <div class="activity-avatar">MH</div>
+          <span class="activity-name">Marcus H.</span>
+          <span class="activity-type">check-in</span>
+          <span class="activity-time">5h ago</span>
+        </div>
+        <div class="activity-content">"Stuck on the Stripe webhook integration. Has anyone here dealt with recurring subscription events? Could use a 15-min call."</div>
+        <div class="activity-signals">
+          <span class="activity-signal green">G</span>
+          <span class="activity-signal yellow">Y</span>
+          <span class="activity-signal yellow">Y</span>
+        </div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-header">
+          <div class="activity-avatar">OT</div>
+          <span class="activity-name">Omar T.</span>
+          <span class="activity-type">declaration</span>
+          <span class="activity-time">1d ago</span>
+        </div>
+        <div class="activity-content">This week: finalize pitch deck, book 5 investor meetings, close partnership agreement with co-working space.</div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-header">
+          <div class="activity-avatar">PK</div>
+          <span class="activity-name">Priya K.</span>
+          <span class="activity-type">check-in</span>
+          <span class="activity-time">1d ago</span>
+        </div>
+        <div class="activity-content">All on track. Quiet week, heads down executing.</div>
+        <div class="activity-signals">
+          <span class="activity-signal green">G</span>
+          <span class="activity-signal green">G</span>
+        </div>
+      </div>
+
+      <div class="activity-item activity-ghost">
+        <div class="activity-header">
+          <div class="activity-avatar">JL</div>
+          <span class="activity-name">James L.</span>
+          <span class="activity-time">No check-in</span>
+        </div>
+        <div class="activity-content">Last active 4 days ago.</div>
+      </div>
+
+      <div class="squad-facilitator">
+        <div class="facilitator-label">Facilitator</div>
+        <div class="facilitator-text">This week, Alpha Vanguard committed to 22 goals across 7 members. Marcus flagged a Stripe blocker &mdash; Sara, you integrated Stripe last month. Can you connect? James, we're waiting on your check-in.</div>
+      </div>
+    </section>
+
+    <!-- ══════════ COACH ══════════ -->
+    <section class="page" id="page-coach">
+      <div class="squad-header">
+        <h1 class="squad-name">Your Coach</h1>
+        <div class="squad-meta">Private &middot; Only you can see this</div>
+      </div>
+
+      <div class="coach-thread">
+        <div class="coach-message from-coach">
+          <div class="coach-msg-meta">Coach &middot; Monday</div>
+          <div class="coach-msg-bubble">Welcome to Week 4. You're past the midpoint dip &mdash; this is where operators separate from wishful thinkers. Your sprint goals: ship pricing page, run 12 customer interviews, and maintain morning routine. You're on pace for the first, behind on the second. Let's talk about that.</div>
+        </div>
+
+        <div class="coach-message from-user">
+          <div class="coach-msg-meta">You &middot; Monday</div>
+          <div class="coach-msg-bubble">I keep putting off the interviews. I think I'm scared the feedback will be bad.</div>
+        </div>
+
+        <div class="coach-message from-coach">
+          <div class="coach-msg-meta">Coach &middot; Monday</div>
+          <div class="coach-msg-bubble">That's honest. Here's the pattern I'm seeing across 4 weeks: your build goals land at 90%. Your talk-to-humans goals land at 40%. You're building in a vacuum because building feels safe. The interviews aren't about getting good feedback &mdash; they're about getting accurate feedback. Accurate is more useful than good. Can you schedule 2 interviews before Wednesday's check-in? Not 3. Just 2.</div>
+        </div>
+
+        <div class="coach-message from-user">
+          <div class="coach-msg-meta">You &middot; Tuesday</div>
+          <div class="coach-msg-bubble">Done. Booked 2 for tomorrow afternoon. One is a warm lead, one is completely cold. We'll see.</div>
+        </div>
+
+        <div class="coach-message from-coach">
+          <div class="coach-msg-meta">Coach &middot; Tuesday</div>
+          <div class="coach-msg-bubble">Good. The cold one will teach you more. After each call, write one sentence: what surprised you. That's it. Don't analyze, don't react &mdash; just notice what surprised you. We'll debrief Friday.</div>
+        </div>
+      </div>
+
+      <div class="coach-input-row">
+        <input class="coach-input" type="text" placeholder="Message your coach..." aria-label="Coach message">
+        <button class="coach-send" id="coach-send-btn">Send</button>
+      </div>
+    </section>
+
+    <!-- ══════════ KICKOFF (Week 1 Ceremony) ══════════ -->
+    <section class="page" id="page-kickoff">
+      <div class="ceremony-badge">&#9670;</div>
+      <h1 class="ceremony-title">Sprint 3 Kickoff</h1>
+      <p class="ceremony-sub">This is Alpha Vanguard. Seven operators. Six weeks. Here's who you're building with.</p>
+
+      <div class="section-label">Your squad</div>
+
+      <div class="ceremony-member">
+        <div class="activity-avatar">SR</div>
+        <div class="ceremony-member-info">
+          <div class="ceremony-member-name">Sara R. &middot; London</div>
+          <div class="ceremony-member-goal">Building a SaaS product for interior designers. Ship onboarding + get 10 beta users.</div>
+        </div>
+        <span class="ceremony-member-type">Builder</span>
+      </div>
+
+      <div class="ceremony-member">
+        <div class="activity-avatar">FN</div>
+        <div class="ceremony-member-info">
+          <div class="ceremony-member-name">Fatima N. &middot; Dubai</div>
+          <div class="ceremony-member-goal">Launching a consulting practice. Land 3 paying clients and build a referral system.</div>
+        </div>
+        <span class="ceremony-member-type">Rewirer</span>
+      </div>
+
+      <div class="ceremony-member">
+        <div class="activity-avatar">MH</div>
+        <div class="ceremony-member-info">
+          <div class="ceremony-member-name">Marcus H. &middot; Toronto</div>
+          <div class="ceremony-member-goal">Scaling a YouTube channel to 100K subs. Publish 12 videos in 6 weeks.</div>
+        </div>
+        <span class="ceremony-member-type">Builder</span>
+      </div>
+
+      <div class="ceremony-member">
+        <div class="activity-avatar">OT</div>
+        <div class="ceremony-member-info">
+          <div class="ceremony-member-name">Omar T. &middot; New York</div>
+          <div class="ceremony-member-goal">Raising a pre-seed round. Finalize pitch deck, book 15 investor meetings.</div>
+        </div>
+        <span class="ceremony-member-type">Builder</span>
+      </div>
+
+      <div class="ceremony-member">
+        <div class="activity-avatar">JL</div>
+        <div class="ceremony-member-info">
+          <div class="ceremony-member-name">James L. &middot; San Francisco</div>
+          <div class="ceremony-member-goal">Pivoting from corporate to freelance. Land first 2 clients and build a portfolio site.</div>
+        </div>
+        <span class="ceremony-member-type">Pivot</span>
+      </div>
+
+      <div class="ceremony-member">
+        <div class="activity-avatar">PK</div>
+        <div class="ceremony-member-info">
+          <div class="ceremony-member-name">Priya K. &middot; Austin</div>
+          <div class="ceremony-member-goal">Building a fitness coaching business. Launch group program and enroll 20 members.</div>
+        </div>
+        <span class="ceremony-member-type">Builder</span>
+      </div>
+
+      <div class="ceremony-member">
+        <div class="activity-avatar">AM</div>
+        <div class="ceremony-member-info">
+          <div class="ceremony-member-name">Amir M. &middot; Chicago <span style="color: var(--accent);">(You)</span></div>
+          <div class="ceremony-member-goal">Ship pricing page, run 12 customer interviews, maintain morning routine.</div>
+        </div>
+        <span class="ceremony-member-type">Builder</span>
+      </div>
+
+      <div class="ceremony-norms">
+        <div class="section-label">How we operate</div>
+        <ol>
+          <li><strong>Honesty over performance</strong> &mdash; don't tell us what we want to hear. Tell us what's real.</li>
+          <li><strong>Struggling is data, hiding is the problem.</strong> We can't help what we can't see.</li>
+          <li><strong>What's shared here stays here.</strong></li>
+          <li><strong>If you need to pause, say so</strong> &mdash; we'd rather adjust than lose you.</li>
+          <li><strong>Progress, not perfection.</strong> The goal is movement.</li>
+        </ol>
+      </div>
+
+      <div class="commitment-box">
+        <p>You're about to declare your goals in front of six people who will ask you every single week what happened. This isn't a private journal entry. This is a commitment to this unit.</p>
+        <button class="commitment-btn" id="commit-btn">I'm in</button>
+      </div>
+
+      <div class="closing-verse">
+        <p>"And hold firmly to the rope of Allah, all together, and do not become divided."</p>
+        <span>Quran 3:103 &middot; Unity in purpose</span>
+      </div>
+    </section>
+
+    <!-- ══════════ COMPLETION (Week 6 Ceremony) ══════════ -->
+    <section class="page" id="page-completion">
+      <div class="ceremony-badge">&#9733;</div>
+      <h1 class="ceremony-title">Sprint 3 Complete</h1>
+      <p class="ceremony-sub">Six weeks. You showed up when it was hard. You were honest when it would have been easier to hide.</p>
+
+      <div class="completion-stats">
+        <div class="completion-stat">
+          <div class="completion-stat-val" style="color: var(--accent);">78%</div>
+          <div class="completion-stat-label">Goals completed</div>
+        </div>
+        <div class="completion-stat">
+          <div class="completion-stat-val">95%</div>
+          <div class="completion-stat-label">Attendance</div>
+        </div>
+        <div class="completion-stat">
+          <div class="completion-stat-val">14/18</div>
+          <div class="completion-stat-label">Weekly goals hit</div>
+        </div>
+        <div class="completion-stat">
+          <div class="completion-stat-val" style="color: var(--accent);">Top 15%</div>
+          <div class="completion-stat-label">All squads</div>
+        </div>
+      </div>
+
+      <div class="section-label">Your transformation</div>
+      <div class="reflect-section">
+        <div class="reflect-prompt">Six weeks ago you were [starting point]. Now you are [where you are]. What changed isn't just the goals &mdash; it's who you became while pursuing them.</div>
+        <textarea class="textarea-field" placeholder="In your own words, what's different about you now vs. Week 1?" aria-label="Transformation reflection" style="min-height: 100px;"></textarea>
+      </div>
+
+      <div class="section-label">Gratitude round</div>
+      <div class="reflect-section">
+        <div class="reflect-prompt">Who in this squad helped you most? What did they do?</div>
+        <div class="peer-select" style="margin-bottom: 10px;">
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Sara R.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Fatima N.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Marcus H.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Omar T.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">James L.</button>
+          <button class="peer-chip" onclick="this.classList.toggle('selected')">Priya K.</button>
+        </div>
+        <textarea class="textarea-field" placeholder="What they did that mattered..." aria-label="Gratitude note"></textarea>
+      </div>
+
+      <div class="section-label">What's next?</div>
+      <div class="vote-options" id="vote-options">
+        <div class="vote-card" onclick="selectVote(this)">
+          <div class="vote-radio"></div>
+          <div class="vote-card-content">
+            <div class="vote-card-title">Continue Together</div>
+            <div class="vote-card-desc">Alpha Vanguard stays intact for Sprint 4. Same people, new goals, deeper bonds.</div>
+          </div>
+        </div>
+        <div class="vote-card" onclick="selectVote(this)">
+          <div class="vote-radio"></div>
+          <div class="vote-card-content">
+            <div class="vote-card-title">Reshuffle</div>
+            <div class="vote-card-desc">Stay in Division Alpha but meet new operators. You'll be matched into a fresh squad.</div>
+          </div>
+        </div>
+        <div class="vote-card" onclick="selectVote(this)">
+          <div class="vote-radio"></div>
+          <div class="vote-card-content">
+            <div class="vote-card-title">Pause</div>
+            <div class="vote-card-desc">Life needs you elsewhere. Your spot is held. Come back when you're ready.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="vote-submit">Submit vote</button>
+
+      <div class="squad-facilitator" style="margin-top: 28px;">
+        <div class="facilitator-label">Facilitator</div>
+        <div class="facilitator-text">Alpha Vanguard. Your combined completion rate of 78% puts you in the top 15% of all Division Alpha squads this cycle. That's not luck. That's discipline. Whether you're continuing, reshuffling, or pausing &mdash; you're an operator. That doesn't stop.</div>
+      </div>
+
+      <div class="closing-verse">
+        <p>"The best of people are those most beneficial to others."</p>
+        <span>Hadith &middot; Service as purpose</span>
+      </div>
+    </section>
+
+    <!-- ══════════ ONBOARDING ══════════ -->
+    <section class="page" id="page-onboard">
+      <h1 class="ritual-header" style="margin-bottom: 4px;">Apply to Division Alpha</h1>
+      <p class="ritual-sub">This isn't a signup form. It's an application. We use your answers to build squads that actually work.</p>
+
+      <div class="onboard-progress" id="onboard-progress">
+        <div class="onboard-step current"></div>
+        <div class="onboard-step"></div>
+        <div class="onboard-step"></div>
+        <div class="onboard-step"></div>
+      </div>
+
+      <!-- Step 1: Identity -->
+      <div class="onboard-screen active-screen" id="onboard-1">
+        <div class="onboard-step-label">Step 1 &middot; Identity</div>
+        <div class="onboard-fields">
+          <div class="onboard-field-group">
+            <label class="onboard-label">Full name</label>
+            <input class="onboard-input" type="text" placeholder="Your name" aria-label="Full name">
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Email</label>
+            <input class="onboard-input" type="email" placeholder="you@email.com" aria-label="Email">
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Timezone</label>
+            <input class="onboard-input" type="text" placeholder="e.g. EST, GMT+1, PST" aria-label="Timezone">
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">In one sentence, what do you do?</label>
+            <input class="onboard-input" type="text" placeholder="e.g. Building a SaaS for restaurants" aria-label="What you do">
+          </div>
+        </div>
+        <div class="onboard-nav">
+          <button class="onboard-next" onclick="nextOnboardStep(2)">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Goals -->
+      <div class="onboard-screen" id="onboard-2" style="display:none;">
+        <div class="onboard-step-label">Step 2 &middot; Goals</div>
+        <div class="onboard-fields">
+          <div class="onboard-field-group">
+            <label class="onboard-label">What are the 1-3 goals you want to accomplish in the next 6 weeks?</label>
+            <textarea class="textarea-field" placeholder="Be specific. Not 'work on my business' — what does done look like?" style="min-height: 100px;" aria-label="Goals"></textarea>
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Primary focus</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Professional</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Personal</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Spiritual</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">All three</button>
+            </div>
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Current stage</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Just Starting Out</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Building &amp; Growing</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Scaling</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Pivoting</button>
+            </div>
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Why are you applying?</label>
+            <textarea class="textarea-field" placeholder="What's driving you to seek accountability right now?" aria-label="Why applying"></textarea>
+          </div>
+        </div>
+        <div class="onboard-nav">
+          <button class="onboard-back" onclick="prevOnboardStep(1)">&larr; Back</button>
+          <button class="onboard-next" onclick="nextOnboardStep(3)">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Accountability Style -->
+      <div class="onboard-screen" id="onboard-3" style="display:none;">
+        <div class="onboard-step-label">Step 3 &middot; Accountability Style</div>
+        <div class="onboard-fields">
+          <div class="onboard-field-group">
+            <label class="onboard-label">How do you respond best to accountability?</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Direct and Challenging</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Supportive and Encouraging</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Data-Driven and Analytical</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Mix of All</button>
+            </div>
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">When someone in your squad is struggling, what's your instinct?</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Ask how I can help</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Give them space</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Push them harder</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Help them problem-solve</button>
+            </div>
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Are you more of a...</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Builder &mdash; launching projects, needs deadlines</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Rewirer &mdash; changing habits, needs consistency</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Pivot &mdash; changing direction, needs clarity</button>
+            </div>
+          </div>
+        </div>
+        <div class="onboard-nav">
+          <button class="onboard-back" onclick="prevOnboardStep(2)">&larr; Back</button>
+          <button class="onboard-next" onclick="nextOnboardStep(4)">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Commitment -->
+      <div class="onboard-screen" id="onboard-4" style="display:none;">
+        <div class="onboard-step-label">Step 4 &middot; Commitment</div>
+        <div class="onboard-fields">
+          <div class="onboard-field-group">
+            <label class="onboard-label">Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Yes &mdash; I'm ready</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Not right now</button>
+            </div>
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Are you willing to share your progress &mdash; and your struggles &mdash; openly with 5-7 strangers?</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Yes</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">I need to think about it</button>
+            </div>
+          </div>
+          <div class="onboard-field-group">
+            <label class="onboard-label">Do you understand that ghosting your squad isn't an option?</label>
+            <div class="onboard-options">
+              <button class="onboard-option" onclick="selectOnboardOption(this)">Yes &mdash; if life happens, I communicate</button>
+              <button class="onboard-option" onclick="selectOnboardOption(this)">I understand</button>
+            </div>
+          </div>
+        </div>
+        <div class="onboard-nav">
+          <button class="onboard-back" onclick="prevOnboardStep(3)">&larr; Back</button>
+          <button class="onboard-next" onclick="submitApplication()">Submit Application</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══════════ SCORE OVERLAY ══════════ -->
+  <div class="score-overlay" id="score-overlay">
+    <div class="score-panel">
+      <button class="score-close" id="score-close" aria-label="Close">&times;</button>
+
+      <div class="score-reveal">
+        <div class="score-crest revealed" id="score-crest-inner">&#9670;</div>
+      </div>
+
+      <div class="score-content visible" id="score-content">
+        <div class="score-big" id="score-animated">0</div>
+        <div class="score-label">Operator Score</div>
+
+        <div id="score-factors">
+          <div class="factor-row">
+            <span class="factor-name">Goal Completion</span>
+            <div class="factor-bar"><div class="factor-fill" data-w="82"></div></div>
+            <span class="factor-val">82</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-name">Attendance</span>
+            <div class="factor-bar"><div class="factor-fill" data-w="95"></div></div>
+            <span class="factor-val">95</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-name">Contribution</span>
+            <div class="factor-bar"><div class="factor-fill" data-w="78"></div></div>
+            <span class="factor-val">78</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-name">Leadership</span>
+            <div class="factor-bar"><div class="factor-fill" data-w="70"></div></div>
+            <span class="factor-val">70</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-name">Growth</span>
+            <div class="factor-bar"><div class="factor-fill" data-w="88"></div></div>
+            <span class="factor-val">88</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-name">Communication</span>
+            <div class="factor-bar"><div class="factor-fill" data-w="90"></div></div>
+            <span class="factor-val">90</span>
+          </div>
+        </div>
+
+        <div class="score-summary">
+          <div class="score-summary-title">Sprint 3 at a glance</div>
+          <div class="score-stats">
+            <div class="score-stat">
+              <div class="score-stat-val">14/18</div>
+              <div class="score-stat-label">Goals hit</div>
+            </div>
+            <div class="score-stat">
+              <div class="score-stat-val">100%</div>
+              <div class="score-stat-label">Attendance</div>
+            </div>
+            <div class="score-stat">
+              <div class="score-stat-val">3</div>
+              <div class="score-stat-label">Sprints done</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tier-3-whisper">
+          <p>Your score qualifies you for <strong>The Operator Fund</strong>. You'll receive an invitation at sprint completion.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  <nav class="mobile-nav">
+    <button class="active" data-page="home"><span>&#9632;</span><span>Home</span></button>
+    <button data-page="declare"><span>&#9998;</span><span>Declare</span></button>
+    <button data-page="checkin"><span>&#9679;</span><span>Signal</span></button>
+    <button data-page="reflect"><span>&#9883;</span><span>Reflect</span></button>
+    <button data-page="squad"><span>&#9673;</span><span>Squad</span></button>
+  </nav>
+
+  <script>
+    // ══════ NAVIGATION ══════
+    function navigateTo(pageName) {
+      document.querySelectorAll('.topbar-btn, .mobile-nav button').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.page === pageName);
+      });
+      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+      var target = document.getElementById('page-' + pageName);
+      if (target) target.classList.add('active');
+      if (pageName === 'home') {
+        setTimeout(function() {
+          var fill = document.getElementById('sprint-fill');
+          if (fill) fill.style.width = '66%';
+        }, 200);
+      }
+      window.scrollTo(0, 0);
+    }
+
+    document.querySelectorAll('[data-page]').forEach(function(btn) {
+      btn.addEventListener('click', function() { navigateTo(btn.dataset.page); });
+    });
+
+    // ══════ THEME TOGGLE ══════
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme');
+      var next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      this.textContent = next === 'dark' ? '\u263E' : '\u2604';
+    });
+
+    // ══════ SCORE OVERLAY ══════
+    document.getElementById('crest-btn').addEventListener('click', function() {
+      var overlay = document.getElementById('score-overlay');
+      overlay.classList.add('visible');
+      setTimeout(animateScore, 200);
+    });
+
+    document.getElementById('score-close').addEventListener('click', function() {
+      document.getElementById('score-overlay').classList.remove('visible');
+    });
+
+    document.getElementById('score-overlay').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('visible');
+    });
+
+    // ══════ DATE & GREETING ══════
+    (function() {
+      var now = new Date();
+      var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var dayOfWeek = now.getDay();
+
+      var dateEl = document.getElementById('home-date');
+      if (dateEl) {
+        dateEl.textContent = days[dayOfWeek] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
+      }
+
+      var hour = now.getHours();
+      var greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+      var greetEl = document.getElementById('home-greeting');
+      if (greetEl) {
+        greetEl.textContent = '';
+        greetEl.appendChild(document.createTextNode(greeting + ', '));
+        var em = document.createElement('em');
+        em.textContent = 'Amir';
+        greetEl.appendChild(em);
+      }
+
+      // Day-contextual card
+      var card = document.getElementById('context-card');
+      if (card) {
+        var overline = document.createElement('div');
+        overline.className = 'context-overline';
+
+        var headline = document.createElement('h2');
+        headline.className = 'context-headline';
+
+        var body = document.createElement('p');
+        body.className = 'context-body';
+
+        var action = document.createElement('button');
+        action.className = 'context-action';
+
+        if (dayOfWeek === 1) {
+          // Monday — Declaration
+          overline.textContent = 'Monday \u00B7 Declaration Day';
+          headline.textContent = 'What are you committing to this week?';
+          body.textContent = 'Your squad is waiting for your declaration. Last week you hit 3 of 4 goals \u2014 let\u2019s build on that momentum.';
+          action.textContent = 'Declare your goals \u2192';
+          action.addEventListener('click', function() { navigateTo('declare'); });
+        } else if (dayOfWeek === 3) {
+          // Wednesday — Check-in
+          overline.textContent = 'Wednesday \u00B7 Check-in Day';
+          headline.textContent = 'Your squad is waiting on your signal.';
+          body.textContent = '5 of 7 members have checked in. You declared 4 goals on Monday \u2014 how are they tracking?';
+          action.textContent = 'Submit check-in \u2192';
+          action.addEventListener('click', function() { navigateTo('checkin'); });
+        } else if (dayOfWeek === 5) {
+          // Friday — Reflection
+          overline.textContent = 'Friday \u00B7 Reflection Day';
+          headline.textContent = 'Look back before you move forward.';
+          body.textContent = 'Week 4 is closing. Take 5 minutes to reflect on what landed, what didn\u2019t, and what you\u2019re carrying into next week.';
+          action.textContent = 'Write your reflection \u2192';
+          action.addEventListener('click', function() { navigateTo('reflect'); });
+        } else if (dayOfWeek === 0 || dayOfWeek === 6) {
+          // Weekend — Rest
+          overline.textContent = 'Weekend \u00B7 Recharge';
+          headline.textContent = 'Rest is part of the rhythm.';
+          body.textContent = 'No check-ins today. Monday\u2019s declaration round starts fresh. Use this time to think about what you want next week to look like.';
+          action.textContent = 'Review your sprint \u2192';
+          action.addEventListener('click', function() { navigateTo('reflect'); });
+        } else {
+          // Tuesday, Thursday — Between days
+          overline.textContent = days[dayOfWeek] + ' \u00B7 Execution Day';
+          headline.textContent = 'Heads down. You know what to do.';
+          body.textContent = 'Your goals are declared, your squad knows the plan. This is the work between the check-ins \u2014 the part that actually moves the needle.';
+          action.textContent = 'View your goals \u2192';
+          action.addEventListener('click', function() { window.scrollTo({top: document.querySelector('.goals-section').offsetTop - 80, behavior: 'smooth'}); });
+        }
+
+        card.textContent = '';
+        card.appendChild(overline);
+        card.appendChild(headline);
+        card.appendChild(body);
+        card.appendChild(action);
+      }
+
+      // Sprint progress
+      setTimeout(function() {
+        var fill = document.getElementById('sprint-fill');
+        if (fill) fill.style.width = '66%';
+      }, 300);
+    })();
+
+    // ══════ SCORE ANIMATION ══════
+    function animateScore() {
+      var target = 84;
+      var el = document.getElementById('score-animated');
+      if (!el) return;
+      var current = 0;
+      var step = function() {
+        current += 2;
+        if (current >= target) { current = target; }
+        el.textContent = current;
+        if (current < target) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+
+      document.querySelectorAll('.factor-fill').forEach(function(bar) {
+        bar.style.width = bar.dataset.w + '%';
+      });
+    }
+
+    // ══════ DECLARE FORM ══════
+    var goalN = 3;
+    document.getElementById('add-goal-btn').addEventListener('click', function() {
+      goalN++;
+      var container = document.getElementById('declare-inputs');
+      var row = document.createElement('div');
+      row.className = 'declare-row';
+
+      var num = document.createElement('span');
+      num.className = 'declare-num';
+      num.textContent = goalN < 10 ? '0' + goalN : goalN;
+
+      var input = document.createElement('input');
+      input.className = 'declare-field';
+      input.type = 'text';
+      input.placeholder = 'Another commitment...';
+      input.setAttribute('aria-label', 'Goal ' + goalN);
+
+      row.appendChild(num);
+      row.appendChild(input);
+      container.appendChild(row);
+      input.focus();
+    });
+
+    // Submit buttons
+    document.querySelectorAll('.submit-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var originalText = btn.textContent;
+        btn.textContent = 'Submitted \u2713';
+        btn.classList.add('submitted');
+        setTimeout(function() {
+          btn.textContent = originalText;
+          btn.classList.remove('submitted');
+        }, 3000);
+      });
+    });
+
+    // ══════ CHECK-IN SIGNALS ══════
+    function selectSignal(btn) {
+      var siblings = btn.parentElement.querySelectorAll('.signal-btn');
+      siblings.forEach(function(s) { s.classList.remove('selected'); });
+      btn.classList.add('selected');
+
+      // Show note field for yellow/red
+      var noteEl = btn.closest('.checkin-goal').querySelector('.signal-note');
+      if (noteEl) {
+        var isYellowOrRed = btn.classList.contains('yellow') || btn.classList.contains('red');
+        noteEl.classList.toggle('visible', isYellowOrRed);
+      }
+    }
+
+    // ══════ COACH SEND ══════
+    document.getElementById('coach-send-btn').addEventListener('click', function() {
+      var input = document.querySelector('.coach-input');
+      var text = input.value.trim();
+      if (!text) return;
+
+      var thread = document.querySelector('.coach-thread');
+
+      var msg = document.createElement('div');
+      msg.className = 'coach-message from-user';
+
+      var meta = document.createElement('div');
+      meta.className = 'coach-msg-meta';
+      meta.textContent = 'You \u00B7 Just now';
+
+      var bubble = document.createElement('div');
+      bubble.className = 'coach-msg-bubble';
+      bubble.textContent = text;
+
+      msg.appendChild(meta);
+      msg.appendChild(bubble);
+      thread.appendChild(msg);
+
+      input.value = '';
+
+      // Simulate coach response
+      setTimeout(function() {
+        var reply = document.createElement('div');
+        reply.className = 'coach-message from-coach';
+        reply.style.animation = 'fadeUp 0.4s var(--ease) forwards';
+
+        var rMeta = document.createElement('div');
+        rMeta.className = 'coach-msg-meta';
+        rMeta.textContent = 'Coach \u00B7 Just now';
+
+        var rBubble = document.createElement('div');
+        rBubble.className = 'coach-msg-bubble';
+        rBubble.textContent = 'I hear you. Let\u2019s sit with that for a moment. What\u2019s the one thing you could do tomorrow that would make Friday\u2019s reflection feel different from last week\u2019s?';
+
+        reply.appendChild(rMeta);
+        reply.appendChild(rBubble);
+        thread.appendChild(reply);
+
+        reply.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 1500);
+    });
+
+    // Enter key for coach input
+    document.querySelector('.coach-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('coach-send-btn').click();
+      }
+    });
+
+    // ══════ COMMITMENT BUTTON ══════
+    document.getElementById('commit-btn').addEventListener('click', function() {
+      this.textContent = 'You\'re in \u2713';
+      this.classList.add('committed');
+    });
+
+    // ══════ VOTE SELECTION ══════
+    function selectVote(card) {
+      document.querySelectorAll('#vote-options .vote-card').forEach(function(c) {
+        c.classList.remove('selected');
+      });
+      card.classList.add('selected');
+    }
+
+    // ══════ ONBOARDING ══════
+    function nextOnboardStep(step) {
+      document.querySelectorAll('.onboard-screen').forEach(function(s) { s.style.display = 'none'; });
+      var target = document.getElementById('onboard-' + step);
+      if (target) { target.style.display = 'block'; target.style.animation = 'fadeUp 0.4s var(--ease) forwards'; }
+
+      var steps = document.querySelectorAll('.onboard-step');
+      steps.forEach(function(s, i) {
+        s.classList.remove('done', 'current');
+        if (i < step - 1) s.classList.add('done');
+        if (i === step - 1) s.classList.add('current');
+      });
+
+      window.scrollTo(0, 0);
+    }
+
+    function prevOnboardStep(step) {
+      nextOnboardStep(step);
+    }
+
+    function selectOnboardOption(btn) {
+      var siblings = btn.parentElement.querySelectorAll('.onboard-option');
+      siblings.forEach(function(s) { s.classList.remove('selected'); });
+      btn.classList.add('selected');
+    }
+
+    function submitApplication() {
+      var screen = document.getElementById('onboard-4');
+      if (screen) {
+        screen.style.display = 'none';
+      }
+
+      var steps = document.querySelectorAll('.onboard-step');
+      steps.forEach(function(s) { s.classList.add('done'); s.classList.remove('current'); });
+
+      var confirmation = document.createElement('div');
+      confirmation.style.textAlign = 'center';
+      confirmation.style.padding = '48px 0';
+      confirmation.style.animation = 'fadeUp 0.5s var(--ease) forwards';
+
+      var badge = document.createElement('div');
+      badge.className = 'ceremony-badge';
+      badge.textContent = '\u2713';
+      badge.style.marginBottom = '20px';
+
+      var title = document.createElement('h2');
+      title.style.fontSize = '1.5rem';
+      title.style.fontWeight = '700';
+      title.style.marginBottom = '8px';
+      title.textContent = 'Application Received';
+
+      var sub = document.createElement('p');
+      sub.style.color = 'var(--text-secondary)';
+      sub.style.fontSize = '15px';
+      sub.style.lineHeight = '1.6';
+      sub.style.maxWidth = '400px';
+      sub.style.margin = '0 auto';
+      sub.textContent = 'Sprint 4 begins April 6. Your squad will be announced 5 days before launch. Check your email for next steps.';
+
+      confirmation.appendChild(badge);
+      confirmation.appendChild(title);
+      confirmation.appendChild(sub);
+
+      var page = document.getElementById('page-onboard');
+      page.appendChild(confirmation);
+    }
+  </script>
+
+</body>
+</html>

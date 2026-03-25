@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Division Alpha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --font-display: 'DM Serif Display', serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --green: #3d8b5e;
+      --yellow: #b5912b;
+      --red: #b34a3a;
+    }
+
+    /* ══════ LIGHT THEME ══════ */
+    [data-theme="light"] {
+      --bg: #f8f6f1;
+      --bg-elevated: #ffffff;
+      --surface: #efece6;
+      --border: rgba(0, 0, 0, 0.07);
+      --border-hover: rgba(0, 0, 0, 0.14);
+      --text: #1a1917;
+      --text-secondary: #5c5850;
+      --text-muted: #9a9488;
+      --accent: #b35c2f;
+      --accent-soft: rgba(179, 92, 47, 0.08);
+      --accent-hover: #c96a38;
+      --green-soft: rgba(61, 139, 94, 0.1);
+      --yellow-soft: rgba(181, 145, 43, 0.1);
+      --red-soft: rgba(179, 74, 58, 0.1);
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+      --card-shadow-hover: 0 2px 8px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.06);
+      --invert: 0;
+    }
+
+    /* ══════ DARK THEME ══════ */
+    [data-theme="dark"] {
+      --bg: #111110;
+      --bg-elevated: #1a1a18;
+      --surface: #222220;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-hover: rgba(255, 255, 255, 0.12);
+      --text: #e8e5df;
+      --text-secondary: #9a968e;
+      --text-muted: #5c5955;
+      --accent: #d07040;
+      --accent-soft: rgba(208, 112, 64, 0.1);
+      --accent-hover: #e0804e;
+      --green-soft: rgba(61, 139, 94, 0.12);
+      --yellow-soft: rgba(181, 145, 43, 0.12);
+      --red-soft: rgba(179, 74, 58, 0.12);
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.15);
+      --card-shadow-hover: 0 2px 8px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.25);
+      --invert: 1;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background 0.4s, color 0.3s;
+    }
+
+    /* ══════ TOP BAR ══════ */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(20px, 5vw, 48px);
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.4s;
+    }
+
+    .topbar-brand {
+      font-family: var(--font-display);
+      font-size: 16px;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topbar-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .topbar-btn:hover { color: var(--text); }
+
+    .topbar-btn.active {
+      color: var(--text);
+    }
+
+    .topbar-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 14px; right: 14px;
+      height: 1.5px;
+      background: var(--accent);
+    }
+
+    .theme-toggle {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      margin-left: 8px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+
+    /* ══════ MAIN CONTENT ══════ */
+    .main {
+      padding-top: 56px;
+      min-height: 100vh;
+    }
+
+    .page {
+      display: none;
+      max-width: 660px;
+      margin: 0 auto;
+      padding: clamp(32px, 6vw, 64px) clamp(20px, 5vw, 48px);
+    }
+
+    .page.wide {
+      max-width: 960px;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeUp 0.45s var(--ease) forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════ CONTEXTUAL HOME ══════ */
+    .home-date {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .home-greeting {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 32px;
+    }
+
+    .home-greeting em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    /* Context Card — the main action */
+    .context-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--card-shadow);
+      transition: box-shadow 0.3s;
+    }
+
+    .context-card:hover {
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .context-overline {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .context-headline {
+      font-family: var(--font-display);
+      font-size: 24px;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    .context-body {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.65;
+    }
+
+    .context-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .context-action:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    /* Goals progress on home */
+    .goals-section {
+      margin-top: 40px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .goal-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .goal-row:last-child { border-bottom: none; }
+
+    .goal-check {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      cursor: pointer;
+      font-size: 13px;
+      color: transparent;
+    }
+
+    .goal-row.done .goal-check {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .goal-text {
+      font-size: 15px;
+      flex: 1;
+    }
+
+    .goal-row.done .goal-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+      text-decoration-color: var(--border-hover);
+    }
+
+    .goal-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Coach whisper */
+    .coach-whisper {
+      margin-top: 40px;
+      padding: 24px;
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+    }
+
+    .coach-whisper-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .coach-whisper-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      font-style: italic;
+    }
+
+    /* Sprint progress small */
+    .sprint-small {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .sprint-small-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .sprint-small-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .sprint-small-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 1s var(--ease);
+      width: 0;
+    }
+
+    .sprint-small-pct {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ══════ DECLARE PAGE ══════ */
+    .declare-prompt {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 5vw, 40px);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .declare-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .declare-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .declare-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .declare-num {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--text-muted);
+      width: 24px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .declare-field {
+      flex: 1;
+      padding: 16px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .declare-field::placeholder { color: var(--text-muted); }
+    .declare-field:focus { border-color: var(--accent); }
+
+    .add-goal-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      margin-left: 36px;
+      background: none;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .add-goal-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text-secondary);
+    }
+
+    .blocker-section {
+      margin-top: 24px;
+      margin-bottom: 32px;
+    }
+
+    .blocker-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .blocker-field {
+      width: 100%;
+      min-height: 80px;
+      padding: 16px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .blocker-field::placeholder { color: var(--text-muted); }
+    .blocker-field:focus { border-color: var(--accent); }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .submit-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .submit-btn.submitted {
+      background: var(--green);
+      pointer-events: none;
+    }
+
+    /* Quote */
+    .closing-quote {
+      text-align: center;
+      padding: 40px 0 0;
+      margin-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+
+    .closing-quote p {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .closing-quote span {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+    }
+
+    /* ══════ CHECK-IN PAGE ══════ */
+    .checkin-goals {
+      margin-bottom: 32px;
+    }
+
+    .checkin-goal {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .checkin-goal:last-child { border-bottom: none; }
+
+    .checkin-goal-text {
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .checkin-signals {
+      display: flex;
+      gap: 8px;
+    }
+
+    .signal-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .signal-btn:hover { border-color: var(--border-hover); color: var(--text-secondary); }
+
+    .signal-btn.green.selected { background: var(--green-soft); border-color: var(--green); color: var(--green); }
+    .signal-btn.yellow.selected { background: var(--yellow-soft); border-color: var(--yellow); color: var(--yellow); }
+    .signal-btn.red.selected { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+
+    .checkin-notes {
+      margin-top: 24px;
+    }
+
+    .checkin-notes-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* ══════ SQUAD PAGE ══════ */
+    .squad-page-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .squad-page-title {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 5vw, 40px);
+      line-height: 1.2;
+    }
+
+    .squad-page-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .squad-activity {
+      margin-bottom: 40px;
+    }
+
+    .activity-item {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .activity-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--surface);
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .activity-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .activity-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .activity-content {
+      margin-left: 44px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .activity-signals {
+      display: flex;
+      gap: 6px;
+      margin-left: 44px;
+      margin-top: 8px;
+    }
+
+    .activity-signal {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 2px;
+      font-weight: 500;
+    }
+
+    .activity-signal.green { background: var(--green-soft); color: var(--green); }
+    .activity-signal.yellow { background: var(--yellow-soft); color: var(--yellow); }
+    .activity-signal.red { background: var(--red-soft); color: var(--red); }
+
+    /* ══════ SCORE PAGE ══════ */
+    .score-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .score-big {
+      font-family: var(--font-display);
+      font-size: 72px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .score-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .score-factors {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .factor-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .factor-name {
+      font-size: 14px;
+      color: var(--text-secondary);
+      width: 140px;
+      flex-shrink: 0;
+    }
+
+    .factor-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .factor-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.8s var(--ease);
+      width: 0;
+    }
+
+    .factor-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-muted);
+      width: 28px;
+      text-align: right;
+    }
+
+    .score-sprint-summary {
+      padding: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
+    }
+
+    .score-sprint-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .score-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .score-stat {
+      text-align: center;
+    }
+
+    .score-stat-val {
+      font-family: var(--font-display);
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .score-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ══════ RESPONSIVE ══════ */
+    @media (max-width: 768px) {
+      .topbar-btn.hide-mobile { display: none; }
+      .score-stat-grid { grid-template-columns: 1fr; gap: 16px; }
+
+      .mobile-nav {
+        display: flex !important;
+      }
+      .main { padding-bottom: 72px; }
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 56px;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      transition: background 0.4s;
+    }
+
+    .mobile-nav button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-family: var(--font-body);
+      cursor: pointer;
+      padding: 6px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .mobile-nav button.active { color: var(--accent); }
+
+    .mobile-nav button span:first-child { font-size: 18px; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-brand">Division Alpha</div>
+    <div class="topbar-right">
+      <button class="topbar-btn active" data-page="home">Home</button>
+      <button class="topbar-btn" data-page="declare">Declare</button>
+      <button class="topbar-btn" data-page="checkin">Check-in</button>
+      <button class="topbar-btn hide-mobile" data-page="squad">Squad</button>
+      <button class="topbar-btn hide-mobile" data-page="score">Score</button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">&#9790;</button>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ══════════ HOME ══════════ -->
+    <section class="page active" id="page-home">
+      <div class="home-date" id="home-date"></div>
+      <h1 class="home-greeting" id="home-greeting">Good evening, <em>Amir</em></h1>
+
+      <!-- Context card — changes based on the day -->
+      <div class="context-card" id="context-card">
+        <div class="context-overline">Wednesday &middot; Check-in Day</div>
+        <h2 class="context-headline">Your squad is waiting on your signal.</h2>
+        <p class="context-body">4 of 7 members have checked in. You declared 4 goals on Monday — how are they tracking?</p>
+        <button class="context-action" onclick="navigateTo('checkin')">Submit check-in &#8594;</button>
+      </div>
+
+      <!-- Your goals this week -->
+      <div class="goals-section">
+        <div class="section-label">This week's goals</div>
+        <div class="goal-row done" onclick="this.classList.toggle('done')">
+          <div class="goal-check">&#10003;</div>
+          <div class="goal-text">Ship v2 API endpoint for user profiles</div>
+          <div class="goal-status" style="background: var(--green);"></div>
+        </div>
+        <div class="goal-row done" onclick="this.classList.toggle('done')">
+          <div class="goal-check">&#10003;</div>
+          <div class="goal-text">Complete 4 deep work sessions (2hr+ each)</div>
+          <div class="goal-status" style="background: var(--green);"></div>
+        </div>
+        <div class="goal-row" onclick="this.classList.toggle('done')">
+          <div class="goal-check">&#10003;</div>
+          <div class="goal-text">Review and merge 3 squad member PRs</div>
+          <div class="goal-status" style="background: var(--yellow);"></div>
+        </div>
+        <div class="goal-row" onclick="this.classList.toggle('done')">
+          <div class="goal-check">&#10003;</div>
+          <div class="goal-text">Prep Friday demo for client stakeholders</div>
+        </div>
+      </div>
+
+      <!-- Coach insight -->
+      <div class="coach-whisper">
+        <div class="coach-whisper-label">Coach</div>
+        <div class="coach-whisper-text">You're 12% ahead of your Week 4 average. Your professional goals are landing — but you dropped your personal goal again this week. Pattern?</div>
+      </div>
+
+      <!-- Sprint progress -->
+      <div class="sprint-small">
+        <span class="sprint-small-label">Sprint 3 &middot; Week 4 of 6</span>
+        <div class="sprint-small-bar">
+          <div class="sprint-small-fill" id="sprint-fill"></div>
+        </div>
+        <span class="sprint-small-pct">66%</span>
+      </div>
+    </section>
+
+    <!-- ══════════ DECLARE ══════════ -->
+    <section class="page" id="page-declare">
+      <h1 class="declare-prompt">What will you deliver this week?</h1>
+      <p class="declare-sub">Declare your commitments to your squad. Be specific. Be measurable. No "work on my business."</p>
+
+      <div class="declare-inputs" id="declare-inputs">
+        <div class="declare-row">
+          <span class="declare-num">1</span>
+          <input class="declare-field" type="text" placeholder="Your most important commitment..." aria-label="Goal 1">
+        </div>
+        <div class="declare-row">
+          <span class="declare-num">2</span>
+          <input class="declare-field" type="text" placeholder="Second commitment..." aria-label="Goal 2">
+        </div>
+        <div class="declare-row">
+          <span class="declare-num">3</span>
+          <input class="declare-field" type="text" placeholder="Third commitment..." aria-label="Goal 3">
+        </div>
+      </div>
+
+      <button class="add-goal-btn" onclick="addGoal()">+ Add another</button>
+
+      <div class="blocker-section">
+        <div class="blocker-label">Anticipated blockers (optional)</div>
+        <textarea class="blocker-field" placeholder="What might get in the way this week?" aria-label="Blockers"></textarea>
+      </div>
+
+      <button class="submit-btn" id="declare-submit" onclick="submitDeclare(this)">Declare to your squad</button>
+
+      <div class="closing-quote">
+        <p>"Tie your camel, then place your trust in Allah."</p>
+        <span>Tawakkul &middot; Effort meets trust</span>
+      </div>
+    </section>
+
+    <!-- ══════════ CHECK-IN ══════════ -->
+    <section class="page" id="page-checkin">
+      <h1 class="declare-prompt">Mid-week signal</h1>
+      <p class="declare-sub">For each goal, give your squad an honest signal. Green, yellow, or red.</p>
+
+      <div class="checkin-goals">
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">1. Ship v2 API endpoint for user profiles</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+        </div>
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">2. Complete 4 deep work sessions (2hr+ each)</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+        </div>
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">3. Review and merge 3 squad member PRs</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+        </div>
+        <div class="checkin-goal">
+          <div class="checkin-goal-text">4. Prep Friday demo for client stakeholders</div>
+          <div class="checkin-signals">
+            <button class="signal-btn green" onclick="selectSignal(this)">Green</button>
+            <button class="signal-btn yellow" onclick="selectSignal(this)">Yellow</button>
+            <button class="signal-btn red" onclick="selectSignal(this)">Red</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkin-notes">
+        <div class="checkin-notes-label">Context for yellows or reds (optional)</div>
+        <textarea class="blocker-field" placeholder="What's blocking you? How can the squad help?" aria-label="Check-in notes"></textarea>
+      </div>
+
+      <button class="submit-btn" onclick="submitDeclare(this)" style="margin-top: 24px;">Submit check-in</button>
+    </section>
+
+    <!-- ══════════ SQUAD ══════════ -->
+    <section class="page wide" id="page-squad">
+      <div class="squad-page-header">
+        <h1 class="squad-page-title">Alpha Vanguard</h1>
+      </div>
+      <div class="squad-page-meta">7 operators &middot; Sprint 3, Week 4</div>
+
+      <div class="section-label">Recent activity</div>
+      <div class="squad-activity">
+        <div class="activity-item">
+          <div class="activity-header">
+            <div class="activity-avatar">SR</div>
+            <span class="activity-name">Sara R.</span>
+            <span class="activity-time">2h ago</span>
+          </div>
+          <div class="activity-content">Checked in for the week</div>
+          <div class="activity-signals">
+            <span class="activity-signal green">Goal 1: Green</span>
+            <span class="activity-signal green">Goal 2: Green</span>
+            <span class="activity-signal green">Goal 3: Green</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-header">
+            <div class="activity-avatar">FN</div>
+            <span class="activity-name">Fatima N.</span>
+            <span class="activity-time">3h ago</span>
+          </div>
+          <div class="activity-content">Checked in for the week</div>
+          <div class="activity-signals">
+            <span class="activity-signal green">Goal 1: Green</span>
+            <span class="activity-signal green">Goal 2: Green</span>
+            <span class="activity-signal yellow">Goal 3: Yellow</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-header">
+            <div class="activity-avatar">MH</div>
+            <span class="activity-name">Marcus H.</span>
+            <span class="activity-time">5h ago</span>
+          </div>
+          <div class="activity-content">"Stuck on the Stripe integration. Has anyone here dealt with webhooks for recurring subscriptions? Could use a 15-min call."</div>
+          <div class="activity-signals">
+            <span class="activity-signal green">Goal 1: Green</span>
+            <span class="activity-signal yellow">Goal 2: Yellow</span>
+            <span class="activity-signal yellow">Goal 3: Yellow</span>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-header">
+            <div class="activity-avatar">OT</div>
+            <span class="activity-name">Omar T.</span>
+            <span class="activity-time">6h ago</span>
+          </div>
+          <div class="activity-content">Checked in for the week</div>
+          <div class="activity-signals">
+            <span class="activity-signal green">Goal 1: Green</span>
+            <span class="activity-signal green">Goal 2: Green</span>
+            <span class="activity-signal green">Goal 3: Green</span>
+          </div>
+        </div>
+
+        <div class="activity-item" style="opacity: 0.6;">
+          <div class="activity-header">
+            <div class="activity-avatar">JL</div>
+            <span class="activity-name">James L.</span>
+            <span class="activity-time">No check-in yet</span>
+          </div>
+          <div class="activity-content" style="color: var(--text-muted);">Hasn't checked in this week. Last active 4 days ago.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ SCORE ══════════ -->
+    <section class="page" id="page-score">
+      <div class="score-header">
+        <div class="score-big" id="score-animated">0</div>
+        <div class="score-label">Operator Score</div>
+      </div>
+
+      <div class="score-factors">
+        <div class="factor-row">
+          <span class="factor-name">Goal Completion</span>
+          <div class="factor-bar"><div class="factor-fill" data-w="82"></div></div>
+          <span class="factor-val">82</span>
+        </div>
+        <div class="factor-row">
+          <span class="factor-name">Attendance</span>
+          <div class="factor-bar"><div class="factor-fill" data-w="95"></div></div>
+          <span class="factor-val">95</span>
+        </div>
+        <div class="factor-row">
+          <span class="factor-name">Contribution</span>
+          <div class="factor-bar"><div class="factor-fill" data-w="78"></div></div>
+          <span class="factor-val">78</span>
+        </div>
+        <div class="factor-row">
+          <span class="factor-name">Leadership</span>
+          <div class="factor-bar"><div class="factor-fill" data-w="70"></div></div>
+          <span class="factor-val">70</span>
+        </div>
+        <div class="factor-row">
+          <span class="factor-name">Growth</span>
+          <div class="factor-bar"><div class="factor-fill" data-w="88"></div></div>
+          <span class="factor-val">88</span>
+        </div>
+        <div class="factor-row">
+          <span class="factor-name">Communication</span>
+          <div class="factor-bar"><div class="factor-fill" data-w="90"></div></div>
+          <span class="factor-val">90</span>
+        </div>
+      </div>
+
+      <div class="score-sprint-summary">
+        <div class="score-sprint-title">Sprint 3 at a glance</div>
+        <div class="score-stat-grid">
+          <div class="score-stat">
+            <div class="score-stat-val">14/18</div>
+            <div class="score-stat-label">Goals hit</div>
+          </div>
+          <div class="score-stat">
+            <div class="score-stat-val">100%</div>
+            <div class="score-stat-label">Attendance</div>
+          </div>
+          <div class="score-stat">
+            <div class="score-stat-val">3</div>
+            <div class="score-stat-label">Sprints done</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile nav -->
+  <nav class="mobile-nav">
+    <button class="active" data-page="home"><span>&#9632;</span><span>Home</span></button>
+    <button data-page="declare"><span>&#9998;</span><span>Declare</span></button>
+    <button data-page="checkin"><span>&#9679;</span><span>Check-in</span></button>
+    <button data-page="squad"><span>&#9673;</span><span>Squad</span></button>
+    <button data-page="score"><span>&#9733;</span><span>Score</span></button>
+  </nav>
+
+  <script>
+    // ══════ NAVIGATION ══════
+    function navigateTo(pageName) {
+      document.querySelectorAll('.topbar-btn, .mobile-nav button').forEach(function(btn) {
+        var isActive = btn.dataset.page === pageName;
+        btn.classList.toggle('active', isActive);
+      });
+
+      document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+      var target = document.getElementById('page-' + pageName);
+      if (target) target.classList.add('active');
+
+      if (pageName === 'score') setTimeout(animateScore, 150);
+      if (pageName === 'home') setTimeout(function() {
+        var fill = document.getElementById('sprint-fill');
+        if (fill) fill.style.width = '66%';
+      }, 200);
+
+      window.scrollTo(0, 0);
+    }
+
+    document.querySelectorAll('[data-page]').forEach(function(btn) {
+      btn.addEventListener('click', function() { navigateTo(btn.dataset.page); });
+    });
+
+    // ══════ THEME TOGGLE ══════
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      this.textContent = next === 'dark' ? '\u263E' : '\u2600';
+    });
+
+    // ══════ DATE & GREETING ══════
+    (function() {
+      var now = new Date();
+      var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+      var dateEl = document.getElementById('home-date');
+      if (dateEl) {
+        dateEl.textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
+      }
+
+      var hour = now.getHours();
+      var greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+      var greetEl = document.getElementById('home-greeting');
+      if (greetEl) {
+        while (greetEl.firstChild) greetEl.removeChild(greetEl.firstChild);
+        greetEl.appendChild(document.createTextNode(greeting + ', '));
+        var em = document.createElement('em');
+        em.textContent = 'Amir';
+        greetEl.appendChild(em);
+      }
+
+      // Sprint progress
+      setTimeout(function() {
+        var fill = document.getElementById('sprint-fill');
+        if (fill) fill.style.width = '66%';
+      }, 300);
+    })();
+
+    // ══════ SCORE ANIMATION ══════
+    function animateScore() {
+      var target = 84;
+      var el = document.getElementById('score-animated');
+      if (!el) return;
+      var current = 0;
+      var interval = setInterval(function() {
+        current += 2;
+        if (current >= target) { current = target; clearInterval(interval); }
+        el.textContent = current;
+      }, 18);
+
+      document.querySelectorAll('.factor-fill').forEach(function(bar) {
+        bar.style.width = bar.dataset.w + '%';
+      });
+    }
+
+    // ══════ DECLARE FORM ══════
+    var goalN = 3;
+    function addGoal() {
+      goalN++;
+      var container = document.getElementById('declare-inputs');
+      var row = document.createElement('div');
+      row.className = 'declare-row';
+
+      var num = document.createElement('span');
+      num.className = 'declare-num';
+      num.textContent = goalN;
+
+      var input = document.createElement('input');
+      input.className = 'declare-field';
+      input.type = 'text';
+      input.placeholder = 'Another commitment...';
+      input.setAttribute('aria-label', 'Goal ' + goalN);
+
+      row.appendChild(num);
+      row.appendChild(input);
+      container.appendChild(row);
+      input.focus();
+    }
+
+    function submitDeclare(btn) {
+      btn.textContent = 'Submitted \u2713';
+      btn.classList.add('submitted');
+    }
+
+    // ══════ CHECK-IN SIGNALS ══════
+    function selectSignal(btn) {
+      var siblings = btn.parentElement.querySelectorAll('.signal-btn');
+      siblings.forEach(function(s) { s.classList.remove('selected'); });
+      btn.classList.add('selected');
+    }
+  </script>
+
+</body>
+</html>
