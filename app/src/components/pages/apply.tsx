@@ -248,6 +248,27 @@ export function ApplyPage() {
               } catch (err) {
                 console.error("Application submit error:", err);
               }
+
+              // Redirect to Stripe Checkout
+              try {
+                const res = await fetch("/api/checkout", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    email: formRef.current["Email"] || "",
+                    name: formRef.current["Full name"] || "",
+                  }),
+                });
+                const data = await res.json();
+                if (data.url) {
+                  window.location.href = data.url;
+                  return; // Don't show submitted state, user is redirecting
+                }
+              } catch (err) {
+                console.error("Checkout redirect error:", err);
+              }
+
+              // Fallback if Stripe redirect fails
               setSubmitting(false);
               setSubmitted(true);
             }
