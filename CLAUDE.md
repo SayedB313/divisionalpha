@@ -298,7 +298,9 @@ divisionalpha/
 - ~~Theme toggle~~ — **DONE** (light/dark in topbar)
 - ~~Deploy to production server~~ — **DONE** (divisionalpha.net on Coolify, HTTP 200, Cloudflare CDN)
 - ~~Email notifications~~ — **DONE** (Brevo: sprint reminders, squad nudges, life checks, ceremonies)
-- Configure Supabase SMTP for magic link emails (use Resend SMTP or Supabase dashboard)
-- Set up pg_cron for scheduled agent triggers
-- Mobile responsiveness polish
-- Create first real Sprint (Sprint 4) with real dates
+- ~~Configure Supabase SMTP~~ — **DONE** (Brevo SMTP via `supabase config push`, 100 emails/hr limit)
+- ~~Create Sprint 4~~ — **DONE** (April 6 – May 15, 2026, handshake week March 30)
+- ~~Mobile responsiveness polish~~ — **DONE** (tap targets, overflow fixes, settings tabs)
+- Deploy latest changes to Coolify (redeploy to pick up email + cron + fixes)
+- Run `scripts/setup-cron.sh` on Coolify server (every 3h agent dispatch)
+- Rotate CRON_SECRET in production env

@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Cron Orchestrator — single endpoint called by Vercel Cron
+// Cron Orchestrator — single endpoint called every 3 hours
 // Dispatches to the right agents based on day of week and time
 //
-// Vercel Cron config in vercel.json:
-//   "crons": [
-//     { "path": "/api/agents/cron", "schedule": "0 */3 * * *" }  // every 3 hours
-//   ]
+// Trigger via system cron on Coolify server:
+//   0 */3 * * * curl -s -H "Authorization: Bearer $CRON_SECRET" https://divisionalpha.net/api/agents/cron
 //
 // The orchestrator checks the current day/time and fires the appropriate agent actions.
 
-const BASE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+  || 'https://divisionalpha.net'
 
 // Auth: Vercel Cron sends CRON_SECRET header, or we check a shared secret
 const CRON_SECRET = process.env.CRON_SECRET || ''
