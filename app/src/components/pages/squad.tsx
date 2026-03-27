@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useApp } from "@/lib/app-context";
 import { useDeclarations } from "@/lib/hooks/use-declarations";
 import { useCheckins } from "@/lib/hooks/use-checkins";
+import { useSquadChat } from "@/lib/hooks/use-squad-chat";
 import { PageWrapper } from "../page-wrapper";
 
 function timeAgo(dateStr: string): string {
@@ -67,6 +68,7 @@ export function SquadPage() {
   const { squad, sprint } = useApp();
   const { squadDeclarations } = useDeclarations();
   const { squadCheckins } = useCheckins();
+  const { messages: squadMessages } = useSquadChat();
 
   const squadName = squad?.name || "Alpha Vanguard";
   const memberCount = squad?.member_count ?? 7;
@@ -74,7 +76,21 @@ export function SquadPage() {
   const currentWeek = sprint?.current_week ?? 4;
   const sprintWeeks = sprint?.duration_weeks ?? 6;
 
-  // Build real activity feed from declarations + checkins
+  // Facilitator messages from squad chat
+  const facilitatorMessages = squadMessages
+    .filter((m: any) => m.message_type === "facilitator" || m.message_type === "nudge")
+    .slice(-3) // last 3 facilitator messages
+    .map((m: any) => ({
+      avatar: "DA",
+      name: "Facilitator",
+      type: m.message_type === "nudge" ? "nudge" : "facilitator",
+      time: timeAgo(m.created_at),
+      content: m.content,
+      signals: [],
+      isFacilitator: true,
+    }));
+
+  // Build real activity feed from declarations + checkins + facilitator messages
   const realActivity = [
     ...squadCheckins.map((c: any) => ({
       avatar: c.profile?.initials || "??",
@@ -92,7 +108,8 @@ export function SquadPage() {
       content: (d.goals as any[]).map((g: any) => g.text).join(", "),
       signals: [],
     })),
-  ].sort((a, b) => 0); // already sorted by query
+    ...facilitatorMessages,
+  ];
 
   const activityData = (user && realActivity.length > 0) ? realActivity : ACTIVITY;
 
@@ -164,27 +181,33 @@ export function SquadPage() {
       </div>
 
       {/* Activity feed */}
-      {activityData.map((a, i) => (
+      {activityData.map((a, i) => {
+        const isFacil = (a as any).isFacilitator || a.type === "facilitator" || a.type === "nudge";
+        return (
         <div
           key={i}
           className="py-4"
           style={{
             borderBottom: i < activityData.length - 1 ? "1px solid var(--border-subtle)" : "none",
             opacity: (a as any).ghost ? 0.5 : 1,
+            ...(isFacil ? { background: "var(--accent-surface)", borderLeft: "2px solid var(--accent)", borderRadius: "0 4px 4px 0", paddingLeft: "16px", marginBottom: "4px" } : {}),
           }}
         >
           <div className="flex items-center gap-2.5 mb-2">
             <div
               className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0"
-              style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}
+              style={{
+                background: isFacil ? "var(--accent)" : "var(--surface-hover)",
+                color: isFacil ? "var(--accent-text)" : "var(--text-secondary)",
+              }}
             >
               {a.avatar}
             </div>
-            <span className="text-[13px] font-medium">{a.name}</span>
+            <span className="text-[13px] font-medium" style={isFacil ? { color: "var(--accent)" } : undefined}>{a.name}</span>
             {a.type && (
               <span
                 className="text-[10px] uppercase tracking-[0.06em] ml-1"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+                style={{ fontFamily: "var(--font-dm-mono), monospace", color: isFacil ? "var(--accent)" : "var(--text-muted)" }}
               >
                 {a.type}
               </span>
@@ -218,7 +241,8 @@ export function SquadPage() {
             </div>
           )}
         </div>
-      ))}
+      );
+      })}
 
       {/* Facilitator */}
       <div

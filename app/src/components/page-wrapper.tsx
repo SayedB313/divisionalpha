@@ -3,7 +3,7 @@
 import { useNavigation } from "@/lib/navigation-context";
 import type { ReactNode } from "react";
 
-type Page = "landing" | "login" | "home" | "declare" | "checkin" | "reflect" | "squad" | "squad-chat" | "coach" | "leaderboard" | "kickoff" | "completion" | "apply" | "settings";
+type Page = "landing" | "login" | "home" | "declare" | "checkin" | "reflect" | "squad" | "squad-chat" | "coach" | "leaderboard" | "kickoff" | "completion" | "apply" | "settings" | "admin";
 
 export function PageWrapper({ page, children }: { page: Page; children: ReactNode }) {
   const { currentPage } = useNavigation();

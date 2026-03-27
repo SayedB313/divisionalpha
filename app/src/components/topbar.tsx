@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigation } from "@/lib/navigation-context";
 import { useAuth } from "@/lib/auth-context";
+import { useNotifications } from "@/lib/hooks/use-notifications";
 import { useTheme } from "./theme-provider";
 
 const PRIMARY_NAV = [
@@ -19,14 +20,18 @@ const MORE_NAV = [
   { page: "kickoff" as const, label: "Sprint Kickoff" },
   { page: "completion" as const, label: "Sprint Completion" },
   { page: "apply" as const, label: "Apply" },
+  { page: "admin" as const, label: "Admin Dashboard" },
 ];
 
 export function Topbar() {
   const { currentPage, navigateTo, setScoreOpen } = useNavigation();
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { unreadCount, notifications, markAllRead, markRead } = useNotifications();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   // Hide full nav on public pages when not authenticated
   const isPublicPage = ["landing", "login", "apply"].includes(currentPage);
@@ -42,6 +47,17 @@ export function Topbar() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [moreOpen]);
+
+  useEffect(() => {
+    if (!notifOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [notifOpen]);
 
   const isMoreActive = MORE_NAV.some((item) => item.page === currentPage);
 
@@ -169,6 +185,99 @@ export function Topbar() {
         >
           {theme === "light" ? "\u263E" : "\u2600"}
         </button>
+
+        {/* Notification bell — only when authenticated */}
+        {showFullNav && (
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen) markAllRead(); }}
+              className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150 relative"
+              style={{
+                border: "1px solid var(--border)",
+                background: notifOpen ? "var(--surface)" : "none",
+                color: "var(--text-muted)",
+                borderRadius: "2px",
+              }}
+              aria-label="Notifications"
+            >
+              &#9993;
+              {unreadCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 min-w-[14px] h-[14px] flex items-center justify-center text-[8px] font-bold rounded-full"
+                  style={{ background: "var(--red)", color: "#fff", padding: "0 3px" }}
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notification dropdown */}
+            {notifOpen && (
+              <div
+                className="absolute right-0 top-[36px] w-[300px] max-h-[400px] overflow-y-auto z-[150]"
+                style={{
+                  background: "var(--bg-page)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "4px",
+                  boxShadow: "var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.12))",
+                }}
+              >
+                <div className="flex items-center justify-between py-2.5 px-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                  <span className="text-[11px] font-medium uppercase tracking-[0.06em]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
+                    Notifications
+                  </span>
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={markAllRead}
+                      className="text-[10px] bg-transparent border-none cursor-pointer"
+                      style={{ color: "var(--accent)", fontFamily: "inherit" }}
+                    >
+                      Mark all read
+                    </button>
+                  )}
+                </div>
+
+                {notifications.length === 0 ? (
+                  <div className="py-6 text-center text-[13px]" style={{ color: "var(--text-muted)" }}>
+                    No notifications yet
+                  </div>
+                ) : (
+                  notifications.slice(0, 10).map((n: any) => (
+                    <button
+                      key={n.id}
+                      onClick={() => {
+                        markRead(n.id);
+                        if (n.action_page) navigateTo(n.action_page);
+                        setNotifOpen(false);
+                      }}
+                      className="w-full text-left py-3 px-3 cursor-pointer transition-colors duration-150 bg-transparent border-none"
+                      style={{
+                        borderBottom: "1px solid var(--border-subtle)",
+                        background: n.read ? "transparent" : "var(--accent-surface)",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      <div className="text-[13px] font-medium mb-0.5" style={{ color: "var(--text)" }}>
+                        {n.title}
+                      </div>
+                      {n.body && (
+                        <div className="text-[11px] leading-[1.4]" style={{ color: "var(--text-muted)" }}>
+                          {n.body}
+                        </div>
+                      )}
+                      <div
+                        className="text-[9px] mt-1 uppercase tracking-[0.06em]"
+                        style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+                      >
+                        {new Date(n.created_at).toLocaleDateString()}
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Score + Avatar — only when authenticated */}
         {showFullNav && (

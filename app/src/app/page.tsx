@@ -17,12 +17,13 @@ import { KickoffPage } from "@/components/pages/kickoff";
 import { CompletionPage } from "@/components/pages/completion";
 import { ApplyPage } from "@/components/pages/apply";
 import { SettingsPage } from "@/components/pages/settings";
+import { AdminPage } from "@/components/pages/admin";
 
 // Pages that don't require authentication
 const PUBLIC_PAGES = new Set(["landing", "login", "apply"]);
 
 // Pages that require authentication (redirect to landing if not logged in)
-const AUTH_PAGES = new Set(["home", "declare", "checkin", "reflect", "squad", "squad-chat", "coach", "leaderboard", "kickoff", "completion", "settings"]);
+const AUTH_PAGES = new Set(["home", "declare", "checkin", "reflect", "squad", "squad-chat", "coach", "leaderboard", "kickoff", "completion", "settings", "admin"]);
 
 export default function Page() {
   const { user, loading } = useAuth();
@@ -78,6 +79,7 @@ export default function Page() {
           <KickoffPage />
           <CompletionPage />
           <SettingsPage />
+          <AdminPage />
         </>
       )}
     </>

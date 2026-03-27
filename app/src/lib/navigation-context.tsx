@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 
-type Page = "landing" | "login" | "home" | "declare" | "checkin" | "reflect" | "squad" | "squad-chat" | "coach" | "leaderboard" | "kickoff" | "completion" | "apply" | "settings";
+type Page = "landing" | "login" | "home" | "declare" | "checkin" | "reflect" | "squad" | "squad-chat" | "coach" | "leaderboard" | "kickoff" | "completion" | "apply" | "settings" | "admin";
 
 interface NavigationContextType {
   currentPage: Page;
