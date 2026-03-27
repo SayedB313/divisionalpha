@@ -2,107 +2,71 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigation } from "@/lib/navigation-context";
+import { useAuth } from "@/lib/auth-context";
+import { useApp } from "@/lib/app-context";
+import { useSquadChat, type SquadMessage } from "@/lib/hooks/use-squad-chat";
 import { PageWrapper } from "../page-wrapper";
 
-interface Message {
+interface DisplayMessage {
   id: string;
   sender: string;
   avatar: string;
   text: string;
   time: string;
   isMe: boolean;
+  type?: string;
 }
 
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: "1", sender: "Marcus H.", avatar: "MH",
-    text: "Anyone dealt with Stripe recurring subscription webhooks? I\u2019m stuck on the event handling. Could really use a quick 15-min call if someone\u2019s been through it.",
-    time: "2:14 PM", isMe: false,
-  },
-  {
-    id: "2", sender: "Sara R.", avatar: "SR",
-    text: "Hey Marcus \u2014 I integrated Stripe last sprint. The trick is to handle invoice.payment_succeeded, not checkout.session.completed for recurring. Want to jump on a call at 3?",
-    time: "2:22 PM", isMe: false,
-  },
-  {
-    id: "3", sender: "Marcus H.", avatar: "MH",
-    text: "That\u2019s exactly what I was missing. 3 PM works \u2014 sending you a link now. \ud83d\ude4f",
-    time: "2:25 PM", isMe: false,
-  },
-  {
-    id: "4", sender: "Fatima N.", avatar: "FN",
-    text: "Love seeing this. This is what squads are for. Marcus, let us know how it goes in your check-in tomorrow.",
-    time: "2:31 PM", isMe: false,
-  },
-  {
-    id: "5", sender: "Amir M.", avatar: "AM",
-    text: "Good stuff. Marcus, if you\u2019re also handling proration events, Sara\u2019s approach with customer.subscription.updated is the cleanest pattern I\u2019ve seen.",
-    time: "2:45 PM", isMe: true,
-  },
-  {
-    id: "6", sender: "Omar T.", avatar: "OT",
-    text: "Quick one \u2014 who\u2019s doing the Friday sync this week? I have a pitch rehearsal at 4 and need to know if I should block my calendar.",
-    time: "3:12 PM", isMe: false,
-  },
-  {
-    id: "7", sender: "Priya K.", avatar: "PK",
-    text: "I think it\u2019s at 5 PM this week. @Omar you should be fine.",
-    time: "3:18 PM", isMe: false,
-  },
+const MOCK_MESSAGES: DisplayMessage[] = [
+  { id: "1", sender: "Marcus H.", avatar: "MH", text: "Anyone dealt with Stripe recurring subscription webhooks? I\u2019m stuck on the event handling.", time: "2:14 PM", isMe: false },
+  { id: "2", sender: "Sara R.", avatar: "SR", text: "Hey Marcus \u2014 I integrated Stripe last sprint. The trick is to handle invoice.payment_succeeded for recurring. Want to jump on a call at 3?", time: "2:22 PM", isMe: false },
+  { id: "3", sender: "Marcus H.", avatar: "MH", text: "That\u2019s exactly what I was missing. 3 PM works \u2014 sending you a link now. \ud83d\ude4f", time: "2:25 PM", isMe: false },
+  { id: "4", sender: "Fatima N.", avatar: "FN", text: "Love seeing this. This is what squads are for.", time: "2:31 PM", isMe: false },
+  { id: "5", sender: "Amir M.", avatar: "AM", text: "Good stuff. Marcus, if you\u2019re also handling proration events, Sara\u2019s approach with customer.subscription.updated is the cleanest.", time: "2:45 PM", isMe: true },
 ];
 
 export function SquadChatPage() {
   const { navigateTo } = useNavigation();
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const { user } = useAuth();
+  const { profile, squad, squadMembers } = useApp();
+  const { messages: realtimeMessages, sendMessage: sendRealtimeMessage } = useSquadChat();
   const [inputValue, setInputValue] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+
+  const squadName = squad?.name || "Alpha Vanguard";
+  const memberCount = squad?.member_count ?? 7;
+
+  // Convert realtime messages to display format, or use mocks
+  const displayMessages: DisplayMessage[] = (user && realtimeMessages.length > 0)
+    ? realtimeMessages.map((m: SquadMessage) => ({
+        id: m.id,
+        sender: m.profile?.display_name || "Unknown",
+        avatar: m.profile?.initials || "??",
+        text: m.content,
+        time: new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+        isMe: m.sender_id === user.id,
+        type: m.message_type,
+      }))
+    : MOCK_MESSAGES;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [displayMessages.length]);
 
-  const sendMessage = () => {
+  const handleSend = () => {
     const text = inputValue.trim();
     if (!text) return;
-
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      sender: "Amir M.",
-      avatar: "AM",
-      text,
-      time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-      isMe: true,
-    };
-
-    setMessages((prev) => [...prev, newMsg]);
     setInputValue("");
 
-    // Simulate someone responding
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      const responses = [
-        { sender: "Sara R.", avatar: "SR", text: "Good point, Amir. Totally agree." },
-        { sender: "Marcus H.", avatar: "MH", text: "Thanks for the tip! Will try that approach." },
-        { sender: "Fatima N.", avatar: "FN", text: "Noted. Let\u2019s discuss more on Friday." },
-        { sender: "Omar T.", avatar: "OT", text: "Appreciate the support, team. \ud83d\udcaa" },
-      ];
-      const resp = responses[Math.floor(Math.random() * responses.length)];
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          sender: resp.sender,
-          avatar: resp.avatar,
-          text: resp.text,
-          time: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
-          isMe: false,
-        },
-      ]);
-    }, 1500 + Math.random() * 1000);
+    if (user) {
+      sendRealtimeMessage.mutate(text);
+    }
   };
+
+  // Online members for header
+  const onlineAvatars = squadMembers.length > 0
+    ? squadMembers.filter(m => m.user_id !== profile?.id).slice(0, 4).map(m => m.profile.initials)
+    : ["SR", "MH", "FN", "OT"];
 
   return (
     <PageWrapper page="squad-chat">
@@ -116,16 +80,16 @@ export function SquadChatPage() {
           &larr; Back
         </button>
         <div className="flex-1">
-          <h1 className="text-lg font-semibold">Alpha Vanguard Chat</h1>
+          <h1 className="text-lg font-semibold">{squadName} Chat</h1>
           <div
             className="text-[11px] tracking-[0.04em]"
             style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
           >
-            7 operators &middot; 4 online
+            {memberCount} operators
           </div>
         </div>
         <div className="flex -space-x-1.5">
-          {["SR", "MH", "FN", "OT"].map((m) => (
+          {onlineAvatars.map((m) => (
             <div
               key={m}
               className="w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-semibold"
@@ -143,7 +107,7 @@ export function SquadChatPage() {
 
       {/* Messages */}
       <div className="space-y-5 mb-6">
-        {messages.map((msg) => (
+        {displayMessages.map((msg) => (
           <div
             key={msg.id}
             className={`max-w-[88%] ${msg.isMe ? "ml-auto" : "mr-auto"}`}
@@ -164,12 +128,25 @@ export function SquadChatPage() {
               >
                 {msg.isMe ? "You" : msg.sender} &middot; {msg.time}
               </span>
+              {msg.type === "facilitator" && (
+                <span
+                  className="text-[8px] uppercase tracking-[0.06em] py-[1px] px-1.5"
+                  style={{
+                    fontFamily: "var(--font-dm-mono), monospace",
+                    background: "var(--accent-surface)",
+                    color: "var(--accent)",
+                    borderRadius: "2px",
+                  }}
+                >
+                  Facilitator
+                </span>
+              )}
             </div>
             <div
               className="py-3 px-4 text-sm leading-relaxed"
               style={{
-                background: msg.isMe ? "var(--accent-surface)" : "var(--surface)",
-                border: `1px solid ${msg.isMe ? "var(--accent)" : "var(--border-subtle)"}`,
+                background: msg.isMe ? "var(--accent-surface)" : msg.type === "facilitator" ? "var(--accent-surface)" : "var(--surface)",
+                border: `1px solid ${msg.isMe ? "var(--accent)" : msg.type === "facilitator" ? "var(--accent)" : "var(--border-subtle)"}`,
                 color: msg.isMe ? "var(--text)" : "var(--text-secondary)",
                 borderRadius: "4px",
               }}
@@ -178,26 +155,6 @@ export function SquadChatPage() {
             </div>
           </div>
         ))}
-
-        {/* Typing indicator */}
-        {isTyping && (
-          <div className="max-w-[88%] mr-auto">
-            <div
-              className="py-3 px-4 text-sm inline-flex gap-1"
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "4px",
-                color: "var(--text-muted)",
-              }}
-            >
-              <span className="animate-bounce" style={{ animationDelay: "0ms" }}>.</span>
-              <span className="animate-bounce" style={{ animationDelay: "150ms" }}>.</span>
-              <span className="animate-bounce" style={{ animationDelay: "300ms" }}>.</span>
-            </div>
-          </div>
-        )}
-
         <div ref={messagesEndRef} />
       </div>
 
@@ -207,11 +164,10 @@ export function SquadChatPage() {
         style={{ borderTop: "1px solid var(--border-subtle)" }}
       >
         <input
-          ref={inputRef}
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSend(); } }}
           className="flex-1 py-3 px-4 text-sm outline-none transition-colors duration-150"
           style={{
             background: "var(--surface)",
@@ -226,13 +182,15 @@ export function SquadChatPage() {
           aria-label="Chat message"
         />
         <button
-          onClick={sendMessage}
+          onClick={handleSend}
+          disabled={!inputValue.trim()}
           className="py-3 px-5 text-sm font-medium border-none cursor-pointer transition-colors duration-150"
           style={{
             background: "var(--accent)",
             color: "var(--accent-text)",
             borderRadius: "2px",
             fontFamily: "inherit",
+            opacity: !inputValue.trim() ? 0.6 : 1,
           }}
         >
           Send

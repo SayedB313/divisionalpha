@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useNavigation } from "@/lib/navigation-context";
+import { useAuth } from "@/lib/auth-context";
+import { useApp } from "@/lib/app-context";
+import { useLeaderboard } from "@/lib/hooks/use-scores";
 import { PageWrapper } from "../page-wrapper";
 
 type Tab = "squads" | "operators";
@@ -39,7 +42,36 @@ const TOP_OPERATORS = [
 
 export function LeaderboardPage() {
   const { navigateTo } = useNavigation();
+  const { user } = useAuth();
+  const { squad, profile } = useApp();
+  const { squads: realSquads, operators: realOperators } = useLeaderboard();
   const [tab, setTab] = useState<Tab>("squads");
+
+  // Use real data if available (authenticated + data exists), else mocks
+  const squadsData = (user && realSquads.length > 0)
+    ? realSquads.map((s: any, i: number) => ({
+        rank: s.rank || i + 1,
+        name: s.name,
+        sprint: `S${s.sprint_number || 3}`,
+        members: s.member_count || s.members,
+        completion: Math.round(Number(s.completion_rate || s.avg_completion_rate || 0)),
+        streak: s.streak || 1,
+        trend: "+0%",
+        isYou: s.squad_id === squad?.id || s.name === squad?.name,
+      }))
+    : SQUADS;
+
+  const operatorsData = (user && realOperators.length > 0)
+    ? realOperators.map((op: any, i: number) => ({
+        rank: op.rank || i + 1,
+        name: op.display_name,
+        squad: op.squad_name,
+        score: Math.round(Number(op.total_score)),
+        goals: `${op.goals_hit || 0}/${op.goals_total || 0}`,
+        sprints: op.sprints_completed || 1,
+        isYou: op.user_id === user.id,
+      }))
+    : TOP_OPERATORS;
 
   return (
     <PageWrapper page="leaderboard">
@@ -165,7 +197,7 @@ export function LeaderboardPage() {
           </div>
 
           {/* Squad rows */}
-          {SQUADS.map((s) => (
+          {squadsData.map((s) => (
             <div
               key={s.rank}
               className="flex items-center gap-3 py-3 px-3 cursor-pointer transition-all duration-150 hover:shadow-sm"
@@ -273,7 +305,7 @@ export function LeaderboardPage() {
           </div>
 
           {/* Operator rows */}
-          {TOP_OPERATORS.map((op) => (
+          {operatorsData.map((op) => (
             <div
               key={op.rank}
               className="flex items-center gap-3 py-3 px-3 transition-all duration-150"
@@ -296,7 +328,7 @@ export function LeaderboardPage() {
                 className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0"
                 style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}
               >
-                {op.name.split(" ").map((w) => w[0]).join("")}
+                {op.name.split(" ").map((w: string) => w[0]).join("")}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium flex items-center gap-2">

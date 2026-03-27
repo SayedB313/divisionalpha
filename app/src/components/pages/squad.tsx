@@ -1,8 +1,31 @@
 "use client";
 
 import { useNavigation } from "@/lib/navigation-context";
+import { useAuth } from "@/lib/auth-context";
 import { useApp } from "@/lib/app-context";
+import { useDeclarations } from "@/lib/hooks/use-declarations";
+import { useCheckins } from "@/lib/hooks/use-checkins";
 import { PageWrapper } from "../page-wrapper";
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function summarizeCheckin(signals: any[]): string {
+  const sigs = signals as { signal: string; note?: string }[];
+  const greens = sigs.filter(s => s.signal === "green").length;
+  const yellows = sigs.filter(s => s.signal === "yellow").length;
+  const notes = sigs.filter(s => s.note).map(s => s.note).join(". ");
+  if (notes) return notes;
+  if (yellows > 0) return `${greens} on track, ${yellows} at risk.`;
+  return "All on track.";
+}
 
 const ACTIVITY = [
   {
@@ -40,13 +63,38 @@ const ACTIVITY = [
 
 export function SquadPage() {
   const { navigateTo } = useNavigation();
+  const { user } = useAuth();
   const { squad, sprint } = useApp();
+  const { squadDeclarations } = useDeclarations();
+  const { squadCheckins } = useCheckins();
 
   const squadName = squad?.name || "Alpha Vanguard";
   const memberCount = squad?.member_count ?? 7;
   const sprintNumber = sprint?.number ?? 3;
   const currentWeek = sprint?.current_week ?? 4;
   const sprintWeeks = sprint?.duration_weeks ?? 6;
+
+  // Build real activity feed from declarations + checkins
+  const realActivity = [
+    ...squadCheckins.map((c: any) => ({
+      avatar: c.profile?.initials || "??",
+      name: c.profile?.display_name || "Unknown",
+      type: "check-in",
+      time: timeAgo(c.submitted_at),
+      content: summarizeCheckin(c.signals),
+      signals: (c.signals as any[]).map((s: any) => s.signal),
+    })),
+    ...squadDeclarations.map((d: any) => ({
+      avatar: d.profile?.initials || "??",
+      name: d.profile?.display_name || "Unknown",
+      type: "declaration",
+      time: timeAgo(d.submitted_at),
+      content: (d.goals as any[]).map((g: any) => g.text).join(", "),
+      signals: [],
+    })),
+  ].sort((a, b) => 0); // already sorted by query
+
+  const activityData = (user && realActivity.length > 0) ? realActivity : ACTIVITY;
 
   return (
     <PageWrapper page="squad">
@@ -116,13 +164,13 @@ export function SquadPage() {
       </div>
 
       {/* Activity feed */}
-      {ACTIVITY.map((a, i) => (
+      {activityData.map((a, i) => (
         <div
           key={i}
           className="py-4"
           style={{
-            borderBottom: i < ACTIVITY.length - 1 ? "1px solid var(--border-subtle)" : "none",
-            opacity: a.ghost ? 0.5 : 1,
+            borderBottom: i < activityData.length - 1 ? "1px solid var(--border-subtle)" : "none",
+            opacity: (a as any).ghost ? 0.5 : 1,
           }}
         >
           <div className="flex items-center gap-2.5 mb-2">

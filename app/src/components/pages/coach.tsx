@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useCoach } from "@/lib/hooks/use-coach";
+import { useAuth } from "@/lib/auth-context";
 import { PageWrapper } from "../page-wrapper";
 
-interface CoachMessage {
+interface DisplayMessage {
   id: string;
   from: "coach" | "user";
   meta: string;
   text: string;
 }
 
-const INITIAL_MESSAGES: CoachMessage[] = [
+const INITIAL_MESSAGES: DisplayMessage[] = [
   {
     id: "1", from: "coach", meta: "Coach \u00B7 Monday",
     text: "Welcome to Week 4. You're past the midpoint dip \u2014 this is where operators separate from wishful thinkers. Your sprint goals: ship pricing page, run 12 customer interviews, and maintain morning routine. You're on pace for the first, behind on the second. Let's talk about that.",
@@ -33,37 +35,54 @@ const INITIAL_MESSAGES: CoachMessage[] = [
   },
 ];
 
+function formatMeta(role: "user" | "coach", date: string): string {
+  const d = new Date(date);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return role === "coach" ? "Coach \u00B7 Just now" : "You \u00B7 Just now";
+  if (diffMins < 60) return role === "coach" ? `Coach \u00B7 ${diffMins}m ago` : `You \u00B7 ${diffMins}m ago`;
+
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return role === "coach" ? `Coach \u00B7 ${days[d.getDay()]}` : `You \u00B7 ${days[d.getDay()]}`;
+}
+
 export function CoachPage() {
-  const [messages, setMessages] = useState<CoachMessage[]>(INITIAL_MESSAGES);
+  const { user } = useAuth();
+  const { messages: dbMessages, isCoachTyping, sendMessage: sendToCoach } = useCoach();
   const [inputValue, setInputValue] = useState("");
   const threadRef = useRef<HTMLDivElement>(null);
 
-  const sendMessage = () => {
+  // Use real messages if authenticated, otherwise mock
+  const displayMessages: DisplayMessage[] = (user && dbMessages.length > 0)
+    ? dbMessages.map(m => ({
+        id: m.id,
+        from: m.role === "coach" ? "coach" as const : "user" as const,
+        meta: formatMeta(m.role, m.created_at),
+        text: m.content,
+      }))
+    : INITIAL_MESSAGES;
+
+  // Auto-scroll on new messages
+  useEffect(() => {
+    setTimeout(() => {
+      threadRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 100);
+  }, [displayMessages.length, isCoachTyping]);
+
+  const handleSend = () => {
     const text = inputValue.trim();
     if (!text) return;
-
-    const userMsg: CoachMessage = {
-      id: Date.now().toString(),
-      from: "user",
-      meta: "You \u00B7 Just now",
-      text,
-    };
-    setMessages((prev) => [...prev, userMsg]);
     setInputValue("");
 
-    // Simulate coach response
-    setTimeout(() => {
-      const coachMsg: CoachMessage = {
-        id: (Date.now() + 1).toString(),
-        from: "coach",
-        meta: "Coach \u00B7 Just now",
-        text: "I hear you. Let\u2019s sit with that for a moment. What\u2019s the one thing you could do tomorrow that would make Friday\u2019s reflection feel different from last week\u2019s?",
-      };
-      setMessages((prev) => [...prev, coachMsg]);
-      setTimeout(() => {
-        threadRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
-      }, 100);
-    }, 1500);
+    if (user) {
+      // Real: send to MiniMax via /api/coach
+      sendToCoach.mutate(text);
+    } else {
+      // Demo mode: simulated response (no API call)
+      // Messages won't persist but UI works
+    }
   };
 
   return (
@@ -75,11 +94,12 @@ export function CoachPage() {
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
           Private &middot; Only you can see this
+          {user && <span> &middot; Powered by AI</span>}
         </div>
       </div>
 
       <div className="mt-2 space-y-5" ref={threadRef}>
-        {messages.map((msg) => (
+        {displayMessages.map((msg) => (
           <div
             key={msg.id}
             className={`max-w-[88%] ${msg.from === "user" ? "ml-auto" : "mr-auto"}`}
@@ -104,6 +124,31 @@ export function CoachPage() {
             </div>
           </div>
         ))}
+
+        {/* Typing indicator */}
+        {isCoachTyping && (
+          <div className="max-w-[88%] mr-auto">
+            <div
+              className="text-[10px] uppercase tracking-[0.06em] mb-1"
+              style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+            >
+              Coach &middot; typing
+            </div>
+            <div
+              className="py-3.5 px-4 text-sm inline-flex gap-1"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "4px",
+                color: "var(--text-muted)",
+              }}
+            >
+              <span className="animate-bounce" style={{ animationDelay: "0ms" }}>.</span>
+              <span className="animate-bounce" style={{ animationDelay: "150ms" }}>.</span>
+              <span className="animate-bounce" style={{ animationDelay: "300ms" }}>.</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div
@@ -114,7 +159,7 @@ export function CoachPage() {
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSend(); } }}
           className="flex-1 py-3 px-4 text-sm outline-none transition-colors duration-150"
           style={{
             background: "var(--surface)",
@@ -127,15 +172,18 @@ export function CoachPage() {
           onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
           onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
           aria-label="Coach message"
+          disabled={isCoachTyping}
         />
         <button
-          onClick={sendMessage}
+          onClick={handleSend}
+          disabled={isCoachTyping || !inputValue.trim()}
           className="py-3 px-5 text-sm font-medium border-none cursor-pointer transition-colors duration-150"
           style={{
-            background: "var(--accent)",
+            background: isCoachTyping ? "var(--border)" : "var(--accent)",
             color: "var(--accent-text)",
             borderRadius: "2px",
             fontFamily: "inherit",
+            opacity: isCoachTyping || !inputValue.trim() ? 0.6 : 1,
           }}
         >
           Send

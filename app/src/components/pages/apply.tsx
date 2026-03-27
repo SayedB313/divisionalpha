@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { PageWrapper } from "../page-wrapper";
 
 const STEPS = [
@@ -50,7 +51,9 @@ const STEPS = [
 export function ApplyPage() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const formRef = useRef<Record<string, string>>({});
 
   const selectOption = (label: string, choice: string) => {
     setSelectedOptions((prev) => ({ ...prev, [label]: choice }));
@@ -127,6 +130,7 @@ export function ApplyPage() {
                 className="w-full min-h-[100px] py-3.5 px-4 text-[15px] leading-relaxed resize-y outline-none transition-colors duration-150"
                 style={inputStyle}
                 placeholder={f.placeholder}
+                onChange={(e) => { formRef.current[f.label] = e.target.value; }}
                 onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
                 aria-label={f.label}
@@ -137,6 +141,7 @@ export function ApplyPage() {
                 className="py-3.5 px-4 text-[15px] outline-none transition-colors duration-150"
                 style={inputStyle}
                 placeholder={f.placeholder}
+                onChange={(e) => { formRef.current[f.label] = e.target.value; }}
                 onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
                 aria-label={f.label}
@@ -180,6 +185,7 @@ export function ApplyPage() {
               className="w-full min-h-[80px] py-3.5 px-4 text-[15px] leading-relaxed resize-y outline-none transition-colors duration-150"
               style={inputStyle}
               placeholder={f.placeholder}
+              onChange={(e) => { formRef.current[f.label] = e.target.value; }}
               onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
               onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
               aria-label={f.label}
@@ -206,19 +212,56 @@ export function ApplyPage() {
           </button>
         )}
         <button
-          onClick={() => {
-            if (step < STEPS.length - 1) setStep((s) => s + 1);
-            else setSubmitted(true);
+          disabled={submitting}
+          onClick={async () => {
+            if (step < STEPS.length - 1) {
+              setStep((s) => s + 1);
+            } else {
+              // Submit application to Supabase
+              setSubmitting(true);
+              try {
+                const supabase = createClient();
+
+                // Map persona type from the long form
+                let personaType = selectedOptions["Are you more of a..."] || "";
+                if (personaType.startsWith("Builder")) personaType = "Builder";
+                else if (personaType.startsWith("Rewirer")) personaType = "Rewirer";
+                else if (personaType.startsWith("Pivot")) personaType = "Pivot";
+
+                await supabase.from("applications").insert({
+                  full_name: formRef.current["Full name"] || "",
+                  email: formRef.current["Email"] || "",
+                  timezone: formRef.current["Timezone"] || "",
+                  one_liner: formRef.current["In one sentence, what do you do?"] || "",
+                  goals_text: formRef.current["What are the 1-3 goals you want to accomplish in the next 6 weeks?"] || "",
+                  primary_focus: selectedOptions["Primary focus"] || null,
+                  current_stage: selectedOptions["Current stage"] || null,
+                  why_applying: formRef.current["Why are you applying?"] || "",
+                  accountability_style: selectedOptions["How do you respond best to accountability?"] || null,
+                  support_instinct: selectedOptions["When someone in your squad is struggling, what\u2019s your instinct?"] || null,
+                  persona_type: personaType || null,
+                  can_commit_3x_week: selectedOptions["Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?"]?.startsWith("Yes") || false,
+                  willing_to_share: selectedOptions["Are you willing to share your progress \u2014 and your struggles \u2014 openly with 5-7 strangers?"] === "Yes",
+                  no_ghosting_understood: true,
+                  status: "submitted",
+                });
+              } catch (err) {
+                console.error("Application submit error:", err);
+              }
+              setSubmitting(false);
+              setSubmitted(true);
+            }
           }}
           className="flex-1 py-3.5 text-sm font-medium border-none cursor-pointer transition-colors duration-150"
           style={{
-            background: "var(--accent)",
+            background: submitting ? "var(--border)" : "var(--accent)",
             color: "var(--accent-text)",
             borderRadius: "2px",
             fontFamily: "inherit",
+            opacity: submitting ? 0.7 : 1,
           }}
         >
-          {step < STEPS.length - 1 ? "Continue" : "Submit Application"}
+          {submitting ? "Submitting..." : step < STEPS.length - 1 ? "Continue" : "Submit Application"}
         </button>
       </div>
     </PageWrapper>
