@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigation } from "@/lib/navigation-context";
+import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "./theme-provider";
 
 const PRIMARY_NAV = [
@@ -22,9 +23,14 @@ const MORE_NAV = [
 
 export function Topbar() {
   const { currentPage, navigateTo, setScoreOpen } = useNavigation();
+  const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+
+  // Hide full nav on public pages when not authenticated
+  const isPublicPage = ["landing", "login", "apply"].includes(currentPage);
+  const showFullNav = !!user && !isPublicPage;
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -50,7 +56,7 @@ export function Topbar() {
     >
       {/* Brand — clickable home link */}
       <button
-        onClick={() => navigateTo("home")}
+        onClick={() => navigateTo(user ? "home" : "landing")}
         className="flex items-center gap-3 shrink-0 bg-transparent border-none cursor-pointer p-0"
         style={{ fontFamily: "inherit" }}
       >
@@ -73,8 +79,8 @@ export function Topbar() {
         </div>
       </button>
 
-      {/* Desktop nav — hidden on mobile */}
-      <div className="hidden md:flex items-center gap-0">
+      {/* Desktop nav — hidden on mobile, hidden on public pages */}
+      <div className="hidden md:flex items-center gap-0" style={{ display: showFullNav ? undefined : "none" }}>
         {PRIMARY_NAV.map((item) => (
           <button
             key={item.page}
@@ -147,8 +153,8 @@ export function Topbar() {
         />
       </div>
 
-      {/* Action buttons — always visible */}
-      <div className="flex items-center gap-1">
+      {/* Action buttons — hidden on public pages when not authenticated */}
+      <div className="flex items-center gap-1" style={{ display: showFullNav ? undefined : "none" }}>
         <button
           onClick={() => setScoreOpen(true)}
           className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"

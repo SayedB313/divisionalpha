@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigation } from "@/lib/navigation-context";
+import { useAuth } from "@/lib/auth-context";
 
 const MOBILE_ITEMS = [
   { page: "home" as const, icon: "\u25A0", label: "Home" },
@@ -22,8 +23,13 @@ const MORE_ITEMS = [
 
 export function MobileNav() {
   const { currentPage, navigateTo } = useNavigation();
+  const { user } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+
+  // Hide mobile nav on public pages when not authenticated
+  const isPublicPage = ["landing", "login", "apply"].includes(currentPage);
+  if (!user && isPublicPage) return null;
 
   useEffect(() => {
     if (!moreOpen) return;

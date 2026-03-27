@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 
-type Page = "home" | "declare" | "checkin" | "reflect" | "squad" | "squad-chat" | "coach" | "leaderboard" | "kickoff" | "completion" | "apply" | "settings";
+type Page = "landing" | "login" | "home" | "declare" | "checkin" | "reflect" | "squad" | "squad-chat" | "coach" | "leaderboard" | "kickoff" | "completion" | "apply" | "settings";
 
 interface NavigationContextType {
   currentPage: Page;
@@ -14,7 +14,7 @@ interface NavigationContextType {
 const NavigationContext = createContext<NavigationContextType | null>(null);
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
-  const [currentPage, setCurrentPage] = useState<Page>("home");
+  const [currentPage, setCurrentPage] = useState<Page>("landing");
   const [scoreOpen, setScoreOpen] = useState(false);
 
   const navigateTo = useCallback((page: Page) => {
