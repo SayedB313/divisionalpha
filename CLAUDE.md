@@ -98,7 +98,8 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 divisionalpha/
 ├── CLAUDE.md                                 ← You are here
 ├── DESIGN.md                                 ← Locked design system (typography, color, spacing, layout, motion)
-├── Dockerfile                                ← Standalone Docker build for self-hosting
+├── scripts/
+│   └── setup-cron.sh                         ← Cron setup for Coolify server (every 3h agent dispatch)
 ├── docs/
 │   ├── DIVISION_ALPHA_COMPLETE_REFERENCE.md  ← A-Z reference: every aspect of the product (1,023 lines, 30 sections)
 │   ├── Division_Alpha_Complete_UX_Flow.md    ← Every touchpoint from first click to third sprint
@@ -135,6 +136,7 @@ divisionalpha/
 │   │   │   └── api/
 │   │   │       ├── coach/route.ts            ← MiniMax 2.7 AI coach endpoint
 │   │   │       ├── checkout/route.ts         ← Stripe checkout session creation
+│   │   │       ├── email/route.ts            ← Brevo email notifications (reminders, nudges, ceremonies)
 │   │   │       ├── webhooks/stripe/route.ts  ← Stripe webhook: payment → create user + profile
 │   │   │       ├── admin/
 │   │   │       │   ├── dashboard/route.ts    ← Admin metrics API
@@ -154,6 +156,7 @@ divisionalpha/
 │   │   │   ├── app-context.tsx               ← Global app state (wraps auth + query + theme)
 │   │   │   ├── query-provider.tsx            ← React Query provider for data fetching
 │   │   │   ├── minimax.ts                    ← MiniMax 2.7 API client
+│   │   │   ├── email.ts                      ← Brevo email client + 7 templates
 │   │   │   ├── supabase/
 │   │   │   │   ├── client.ts                 ← Browser Supabase client
 │   │   │   │   ├── server.ts                 ← Server-side Supabase client
@@ -250,7 +253,7 @@ divisionalpha/
 - `agent_events` — inter-agent event bus
 - `notification_preferences` — per-user notification settings
 
-## API Routes (13)
+## API Routes (14)
 
 | Route | Method | Purpose |
 |-------|--------|---------|
@@ -267,7 +270,7 @@ divisionalpha/
 | `/api/agents/events` | POST | Inter-agent event bus |
 | `/api/admin/dashboard` | GET | Platform metrics |
 | `/api/admin/trigger` | POST | Manual agent invocation |
-| `/api/email` | POST | Resend email notifications (reminders, nudges, life checks) |
+| `/api/email` | POST | Brevo email notifications (reminders, nudges, life checks) |
 
 ## Key Decisions
 
@@ -301,6 +304,6 @@ divisionalpha/
 - ~~Configure Supabase SMTP~~ — **DONE** (Brevo SMTP via `supabase config push`, 100 emails/hr limit)
 - ~~Create Sprint 4~~ — **DONE** (April 6 – May 15, 2026, handshake week March 30)
 - ~~Mobile responsiveness polish~~ — **DONE** (tap targets, overflow fixes, settings tabs)
-- Deploy latest changes to Coolify (redeploy to pick up email + cron + fixes)
-- Run `scripts/setup-cron.sh` on Coolify server (every 3h agent dispatch)
-- Rotate CRON_SECRET in production env
+- ~~Deploy latest to Coolify~~ — **DONE** (auto-deploy on push, Brevo env vars live)
+- ~~Cron setup on server~~ — **DONE** (every 3h agent dispatch via system cron)
+- Tier 3 (Operator Fund) — deferred until 500+ Tier 2 members
