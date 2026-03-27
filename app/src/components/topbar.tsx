@@ -153,23 +153,9 @@ export function Topbar() {
         />
       </div>
 
-      {/* Action buttons — hidden on public pages when not authenticated */}
-      <div className="flex items-center gap-1" style={{ display: showFullNav ? undefined : "none" }}>
-        <button
-          onClick={() => setScoreOpen(true)}
-          className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
-          style={{
-            border: "1px solid var(--border)",
-            background: "var(--surface)",
-            color: "var(--text-muted)",
-            borderRadius: "2px",
-          }}
-          title="Operator Score"
-          aria-label="View Operator Score"
-        >
-          &#9670;
-        </button>
-
+      {/* Action buttons */}
+      <div className="flex items-center gap-1">
+        {/* Theme toggle — always visible */}
         <button
           onClick={toggleTheme}
           className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
@@ -181,21 +167,41 @@ export function Topbar() {
           }}
           aria-label="Toggle theme"
         >
-          {theme === "light" ? "\u2604" : "\u263E"}
+          {theme === "light" ? "\u263E" : "\u2600"}
         </button>
 
-        <button
-          onClick={() => navigateTo("settings")}
-          className="w-7 h-7 flex items-center justify-center text-[10px] font-semibold cursor-pointer transition-all duration-150 rounded-full ml-1"
-          style={{
-            background: currentPage === "settings" ? "var(--accent)" : "var(--surface-hover)",
-            color: currentPage === "settings" ? "var(--accent-text)" : "var(--text-secondary)",
-            border: "none",
-          }}
-          aria-label="Settings"
-        >
-          AM
-        </button>
+        {/* Score + Avatar — only when authenticated */}
+        {showFullNav && (
+          <button
+            onClick={() => setScoreOpen(true)}
+            className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
+            style={{
+              border: "1px solid var(--border)",
+              background: "var(--surface)",
+              color: "var(--text-muted)",
+              borderRadius: "2px",
+            }}
+            title="Operator Score"
+            aria-label="View Operator Score"
+          >
+            &#9670;
+          </button>
+        )}
+
+        {showFullNav && (
+          <button
+            onClick={() => navigateTo("settings")}
+            className="w-7 h-7 flex items-center justify-center text-[10px] font-semibold cursor-pointer transition-all duration-150 rounded-full ml-1"
+            style={{
+              background: currentPage === "settings" ? "var(--accent)" : "var(--surface-hover)",
+              color: currentPage === "settings" ? "var(--accent-text)" : "var(--text-secondary)",
+              border: "none",
+            }}
+            aria-label="Settings"
+          >
+            AM
+          </button>
+        )}
       </div>
     </header>
   );
