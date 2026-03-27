@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigation } from "@/lib/navigation-context";
 import { LandingPage } from "@/components/pages/landing";
@@ -30,19 +30,30 @@ export default function Page() {
   const { currentPage, navigateTo } = useNavigation();
 
   // Session gating: redirect unauthenticated users to landing page
+  const hasRedirected = useRef(false);
+
   useEffect(() => {
-    if (loading) return; // Wait for auth to resolve
+    if (loading) return;
 
     if (!user && AUTH_PAGES.has(currentPage)) {
-      // Not logged in and trying to view a protected page → landing
       navigateTo("landing");
     }
+  }, [user, loading, currentPage]);
+
+  // On login success, redirect to home (only once)
+  useEffect(() => {
+    if (loading || hasRedirected.current) return;
 
     if (user && (currentPage === "landing" || currentPage === "login")) {
-      // Logged in but on landing/login → go to home
+      hasRedirected.current = true;
       navigateTo("home");
     }
-  }, [user, loading, currentPage, navigateTo]);
+  }, [user, loading, currentPage]);
+
+  // Reset redirect flag on logout
+  useEffect(() => {
+    if (!user) hasRedirected.current = false;
+  }, [user]);
 
   // Show loading state while auth resolves
   if (loading) {
