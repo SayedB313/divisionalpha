@@ -88,14 +88,14 @@ export function SettingsPage() {
 
       {/* Tabs */}
       <div
-        className="flex mb-6"
+        className="flex mb-6 overflow-x-auto"
         style={{ borderBottom: "1px solid var(--border-subtle)" }}
       >
         {SETTINGS_TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className="py-2.5 px-4 text-[13px] font-medium cursor-pointer transition-colors duration-150 relative bg-transparent border-none"
+            className="py-2.5 px-3 sm:px-4 text-[13px] font-medium cursor-pointer transition-colors duration-150 relative bg-transparent border-none whitespace-nowrap shrink-0"
             style={{
               color: tab === t.id ? "var(--text)" : "var(--text-muted)",
               fontFamily: "inherit",
@@ -361,7 +361,7 @@ export function SettingsPage() {
             <div className="text-[13px] mb-3" style={{ color: "var(--text-secondary)" }}>
               $49/mo &middot; 6-week accountability sprints with squads
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 className="text-[12px] font-medium py-2 px-4 cursor-pointer transition-colors duration-150"
                 style={{
@@ -435,7 +435,7 @@ export function SettingsPage() {
             <div className="text-[12px] mb-4" style={{ color: "var(--text-muted)" }}>
               These actions cannot be undone.
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 className="text-[12px] font-medium py-2 px-4 cursor-pointer"
                 style={{

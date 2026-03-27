@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { chatCompletion, type ChatMessage } from '@/lib/minimax'
+import { sendEmail, squadNudge, lifeCheckDm } from '@/lib/email'
 
 // Guardian Agent — monitors engagement, triggers Pause Protocol
 // Triggered by: cron job (every 6 hours) or manual POST
@@ -100,6 +101,14 @@ export async function POST(request: NextRequest) {
           payload: { user_id: userId, user_name: userName, squad_id: member.squad.id, miss_type: missType },
         })
 
+        // Send nudge email
+        if (member.profile.email) {
+          const missAction = missingDeclaration ? 'declare' : missingCheckin ? 'check in' : 'reflect'
+          const email = squadNudge(userName, member.squad.name, missAction)
+          email.to = member.profile.email
+          sendEmail(email).catch(err => console.error('[guardian] nudge email failed:', err))
+        }
+
         results.push({ user: userName, action: 'gentle_nudge', misses: consecutiveMisses })
 
       } else if (consecutiveMisses === 2) {
@@ -130,6 +139,13 @@ export async function POST(request: NextRequest) {
           type: 'coach_message',
           action_page: 'coach',
         })
+
+        // Send life check email
+        if (member.profile.email) {
+          const email = lifeCheckDm(userName)
+          email.to = member.profile.email
+          sendEmail(email).catch(err => console.error('[guardian] life check email failed:', err))
+        }
 
         results.push({ user: userName, action: 'life_check_dm', misses: consecutiveMisses })
 

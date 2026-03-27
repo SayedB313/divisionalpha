@@ -30,19 +30,22 @@ export async function GET(request: NextRequest) {
 
   const actions: { agent: string; action: string; description: string }[] = []
 
-  // ── Monday: Declaration prompts ──
+  // ── Monday: Declaration prompts + email reminders ──
   if (dayOfWeek === 1 && hour >= 7 && hour <= 9) {
     actions.push({ agent: 'facilitator', action: 'monday_declaration', description: 'Monday declaration prompt' })
+    actions.push({ agent: 'email', action: 'monday_reminder', description: 'Monday email reminder' })
   }
 
-  // ── Wednesday: Check-in prompts ──
+  // ── Wednesday: Check-in prompts + email reminders ──
   if (dayOfWeek === 3 && hour >= 11 && hour <= 13) {
     actions.push({ agent: 'facilitator', action: 'wednesday_checkin', description: 'Wednesday check-in prompt' })
+    actions.push({ agent: 'email', action: 'wednesday_reminder', description: 'Wednesday email reminder' })
   }
 
-  // ── Friday: Reflection prompts ──
+  // ── Friday: Reflection prompts + email reminders ──
   if (dayOfWeek === 5 && hour >= 14 && hour <= 16) {
     actions.push({ agent: 'facilitator', action: 'friday_reflection', description: 'Friday reflection prompt' })
+    actions.push({ agent: 'email', action: 'friday_reminder', description: 'Friday email reminder' })
   }
 
   // ── Friday night: Weekly summary + score calculation ──
@@ -72,9 +75,11 @@ export async function GET(request: NextRequest) {
   const results = []
   for (const action of actions) {
     try {
-      const url = action.agent === 'guardian'
-        ? `${BASE_URL}/api/agents/guardian`
-        : `${BASE_URL}/api/agents/${action.agent}`
+      const url = action.agent === 'email'
+        ? `${BASE_URL}/api/email`
+        : action.agent === 'guardian'
+          ? `${BASE_URL}/api/agents/guardian`
+          : `${BASE_URL}/api/agents/${action.agent}`
 
       const body = action.agent === 'guardian'
         ? {}

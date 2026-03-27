@@ -38,7 +38,7 @@ export default function Page() {
     if (!user && AUTH_PAGES.has(currentPage)) {
       navigateTo("landing");
     }
-  }, [user, loading, currentPage]);
+  }, [user, loading, currentPage, navigateTo]);
 
   // On login success, redirect to home (only once)
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function Page() {
       hasRedirected.current = true;
       navigateTo("home");
     }
-  }, [user, loading, currentPage]);
+  }, [user, loading, currentPage, navigateTo]);
 
   // Reset redirect flag on logout
   useEffect(() => {

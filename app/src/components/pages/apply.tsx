@@ -138,7 +138,7 @@ export function ApplyPage() {
             ) : (
               <input
                 type={f.type}
-                className="py-3.5 px-4 text-[15px] outline-none transition-colors duration-150"
+                className="w-full py-3.5 px-4 text-[15px] outline-none transition-colors duration-150"
                 style={inputStyle}
                 placeholder={f.placeholder}
                 onChange={(e) => { formRef.current[f.label] = e.target.value; }}

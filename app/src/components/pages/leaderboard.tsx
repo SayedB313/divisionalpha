@@ -142,7 +142,7 @@ export function LeaderboardPage() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
               {[
                 { label: "Members", val: "7" },
                 { label: "Streak", val: "3 sprints" },

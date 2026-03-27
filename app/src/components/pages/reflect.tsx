@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useApp } from "@/lib/app-context";
 import { useReflections } from "@/lib/hooks/use-reflections";
+import { useCheckins } from "@/lib/hooks/use-checkins";
+import { useDeclarations } from "@/lib/hooks/use-declarations";
 import { PageWrapper } from "../page-wrapper";
 
 const MOCK_PEERS = ["Sara R.", "Fatima N.", "Marcus H.", "Omar T.", "James L.", "Priya K."];
@@ -10,6 +12,8 @@ const MOCK_PEERS = ["Sara R.", "Fatima N.", "Marcus H.", "Omar T.", "James L.", 
 export function ReflectPage() {
   const { profile, sprint, squadMembers } = useApp();
   const { submit } = useReflections();
+  const { checkin } = useCheckins();
+  const { declaration } = useDeclarations();
   const [selectedPeers, setSelectedPeers] = useState<Set<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
   const [wins, setWins] = useState("");
@@ -17,6 +21,17 @@ export function ReflectPage() {
   const [learnings, setLearnings] = useState("");
   const [carryForward, setCarryForward] = useState("");
   const [appreciationNote, setAppreciationNote] = useState("");
+
+  // Calculate goals hit/total from real check-in and declaration data
+  const goalsTotal = useMemo(() => {
+    if (declaration?.goals && Array.isArray(declaration.goals)) return declaration.goals.length;
+    return 0;
+  }, [declaration]);
+
+  const goalsHit = useMemo(() => {
+    if (!checkin?.signals || !Array.isArray(checkin.signals)) return 0;
+    return (checkin.signals as { signal: string }[]).filter(s => s.signal === 'green').length;
+  }, [checkin]);
 
   // Use real squad members or mock
   const peers = squadMembers.length > 0
@@ -43,8 +58,8 @@ export function ReflectPage() {
         carry_forward: carryForward,
         appreciated_user_ids: Array.from(selectedPeers),
         appreciation_note: appreciationNote || undefined,
-        goals_hit: 3, // TODO: calculate from check-in data
-        goals_total: 4,
+        goals_hit: goalsHit,
+        goals_total: goalsTotal,
       });
     } catch { /* fallback */ }
     setSubmitted(true);
@@ -69,9 +84,9 @@ export function ReflectPage() {
       {/* Week Stats */}
       <div className="grid grid-cols-3 gap-3 mb-8 max-md:grid-cols-1">
         {[
-          { val: "3/4", label: "Goals hit", color: "var(--green)" },
-          { val: "100%", label: "Check-ins", color: "var(--text)" },
-          { val: "+12%", label: "vs. average", color: "var(--accent)" },
+          { val: goalsTotal > 0 ? `${goalsHit}/${goalsTotal}` : "—", label: "Goals hit", color: "var(--green)" },
+          { val: checkin ? "100%" : "—", label: "Check-ins", color: "var(--text)" },
+          { val: goalsTotal > 0 ? `${Math.round((goalsHit / goalsTotal) * 100)}%` : "—", label: "Completion", color: "var(--accent)" },
         ].map((s) => (
           <div
             key={s.label}
@@ -96,9 +111,9 @@ export function ReflectPage() {
 
       {/* Reflection sections */}
       {[
-        { label: "Wins", prompt: "What did you accomplish this week? Don\u2019t minimize it.", placeholder: "Shipped the pricing page ahead of schedule. Got my first real feedback from a paying user..." },
-        { label: "Misses", prompt: "What didn\u2019t land? No shame. Just data.", placeholder: "Only did 1 customer interview instead of 3. Kept putting off the calls..." },
-        { label: "Learning", prompt: "What did this week teach you?", placeholder: "I avoid phone calls when I'm anxious about the product. Need to separate the two..." },
+        { label: "Wins", prompt: "What did you accomplish this week? Don\u2019t minimize it.", placeholder: "Shipped the pricing page ahead of schedule. Got my first real feedback from a paying user...", value: wins, onChange: setWins },
+        { label: "Misses", prompt: "What didn\u2019t land? No shame. Just data.", placeholder: "Only did 1 customer interview instead of 3. Kept putting off the calls...", value: misses, onChange: setMisses },
+        { label: "Learning", prompt: "What did this week teach you?", placeholder: "I avoid phone calls when I'm anxious about the product. Need to separate the two...", value: learnings, onChange: setLearnings },
       ].map((sec) => (
         <div key={sec.label} className="mb-7">
           <div
@@ -114,6 +129,8 @@ export function ReflectPage() {
             className="w-full min-h-[80px] py-3.5 px-4 text-[15px] leading-relaxed resize-y outline-none transition-colors duration-150"
             style={inputStyle}
             placeholder={sec.placeholder}
+            value={sec.value}
+            onChange={(e) => sec.onChange(e.target.value)}
             onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
             onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
             aria-label={sec.label}
@@ -137,6 +154,8 @@ export function ReflectPage() {
           className="w-full py-3.5 px-4 text-[15px] outline-none transition-colors duration-150"
           style={inputStyle}
           placeholder="Schedule the interviews first thing Monday before I can overthink it"
+          value={carryForward}
+          onChange={(e) => setCarryForward(e.target.value)}
           onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
           onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
           aria-label="Carry forward"
@@ -177,6 +196,8 @@ export function ReflectPage() {
           className="w-full py-3 px-4 text-[13px] outline-none transition-colors duration-150"
           style={inputStyle}
           placeholder="What did they do that helped you?"
+          value={appreciationNote}
+          onChange={(e) => setAppreciationNote(e.target.value)}
           onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
           onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
           aria-label="Peer appreciation note"

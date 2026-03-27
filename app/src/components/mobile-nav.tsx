@@ -57,7 +57,7 @@ export function MobileNav() {
         <button
           key={item.page}
           onClick={() => navigateTo(item.page)}
-          className="bg-transparent border-none text-[10px] cursor-pointer px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition-colors duration-150"
+          className="bg-transparent border-none text-[10px] cursor-pointer px-2 py-2 flex flex-col items-center gap-0.5 transition-colors duration-150 min-w-[44px] min-h-[44px] justify-center"
           style={{
             color: currentPage === item.page ? "var(--accent)" : "var(--text-muted)",
           }}
@@ -71,7 +71,7 @@ export function MobileNav() {
       <div className="relative" ref={moreRef}>
         <button
           onClick={() => setMoreOpen(!moreOpen)}
-          className="bg-transparent border-none text-[10px] cursor-pointer px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition-colors duration-150"
+          className="bg-transparent border-none text-[10px] cursor-pointer px-2 py-2 flex flex-col items-center gap-0.5 transition-colors duration-150 min-w-[44px] min-h-[44px] justify-center"
           style={{
             color: isMoreActive ? "var(--accent)" : "var(--text-muted)",
           }}

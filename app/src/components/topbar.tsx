@@ -174,7 +174,7 @@ export function Topbar() {
         {/* Theme toggle — always visible */}
         <button
           onClick={toggleTheme}
-          className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
+          className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
           style={{
             border: "1px solid var(--border)",
             background: "none",
@@ -191,7 +191,7 @@ export function Topbar() {
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen) markAllRead(); }}
-              className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150 relative"
+              className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer transition-all duration-150 relative"
               style={{
                 border: "1px solid var(--border)",
                 background: notifOpen ? "var(--surface)" : "none",
@@ -214,7 +214,7 @@ export function Topbar() {
             {/* Notification dropdown */}
             {notifOpen && (
               <div
-                className="absolute right-0 top-[36px] w-[300px] max-h-[400px] overflow-y-auto z-[150]"
+                className="absolute right-0 top-[40px] w-[calc(100vw-24px)] max-w-[300px] max-h-[400px] overflow-y-auto z-[150]"
                 style={{
                   background: "var(--bg-page)",
                   border: "1px solid var(--border)",
@@ -283,7 +283,7 @@ export function Topbar() {
         {showFullNav && (
           <button
             onClick={() => setScoreOpen(true)}
-            className="w-7 h-7 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
+            className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
             style={{
               border: "1px solid var(--border)",
               background: "var(--surface)",
@@ -300,7 +300,7 @@ export function Topbar() {
         {showFullNav && (
           <button
             onClick={() => navigateTo("settings")}
-            className="w-7 h-7 flex items-center justify-center text-[10px] font-semibold cursor-pointer transition-all duration-150 rounded-full ml-1"
+            className="w-9 h-9 flex items-center justify-center text-[10px] font-semibold cursor-pointer transition-all duration-150 rounded-full ml-1"
             style={{
               background: currentPage === "settings" ? "var(--accent)" : "var(--surface-hover)",
               color: currentPage === "settings" ? "var(--accent-text)" : "var(--text-secondary)",

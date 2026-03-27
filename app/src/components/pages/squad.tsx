@@ -127,7 +127,7 @@ export function SquadPage() {
 
       {/* Health bar */}
       <div
-        className="flex gap-4 py-3.5 px-5 mb-7"
+        className="flex flex-wrap gap-x-4 gap-y-1 py-3.5 px-5 mb-7"
         style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
       >
         {[

@@ -65,11 +65,11 @@ Color is rare and meaningful. Sage green accent used sparingly — when it appea
 --bg-page: #151514;     /* page background */
 --surface: #1c1b19;     /* card/panel background */
 --border: #2a2825;      /* subtle warm border */
---text: #ede6d5;        /* warm cream text */
---text-secondary: #9a9488;  /* secondary content */
---text-muted: #5c5955;  /* timestamps, hints */
---accent: #5a9a6e;      /* brighter sage for dark bg */
---accent-hover: #6db882; /* lighter sage on hover */
+--text: #f0ebe0;        /* warm cream text — boosted for contrast */
+--text-secondary: #c0b9ab;  /* secondary content — boosted for readability */
+--text-muted: #847e74;  /* timestamps, hints — boosted from #5c5955 */
+--accent: #6db882;      /* brighter sage for dark bg — boosted for visibility */
+--accent-hover: #82c994; /* lighter sage on hover */
 --accent-surface: #1a2a1f; /* dark sage tint */
 --green: #5a9a6e;
 --yellow: #c9a54e;

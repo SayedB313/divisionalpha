@@ -21,6 +21,7 @@ Division Alpha is an AI-orchestrated peer accountability platform connected to *
 - **AI Brain:** MiniMax 2.7 (all 5 agents) — chosen for cost efficiency
 - **Agent Architecture:** Custom — Next.js API routes + Supabase Edge Functions (OpenClaw deferred)
 - **Payments:** Stripe (live keys configured)
+- **Email:** Brevo (transactional emails — sprint reminders, nudges, life checks. 300/day free)
 - **Hosting:** Self-hosted server (Docker/Coolify + Traefik), domain on Cloudflare
 - **No Discord** — custom app from day one
 
@@ -266,6 +267,7 @@ divisionalpha/
 | `/api/agents/events` | POST | Inter-agent event bus |
 | `/api/admin/dashboard` | GET | Platform metrics |
 | `/api/admin/trigger` | POST | Manual agent invocation |
+| `/api/email` | POST | Resend email notifications (reminders, nudges, life checks) |
 
 ## Key Decisions
 
@@ -294,10 +296,9 @@ divisionalpha/
 - ~~Admin dashboard~~ — **DONE** (API + frontend)
 - ~~Notification system~~ — **DONE** (unread count, badge in topbar)
 - ~~Theme toggle~~ — **DONE** (light/dark in topbar)
-- Deploy to production server — divisionalpha.net on Coolify
-- Configure Supabase SMTP for magic link emails
+- ~~Deploy to production server~~ — **DONE** (divisionalpha.net on Coolify, HTTP 200, Cloudflare CDN)
+- ~~Email notifications~~ — **DONE** (Brevo: sprint reminders, squad nudges, life checks, ceremonies)
+- Configure Supabase SMTP for magic link emails (use Resend SMTP or Supabase dashboard)
 - Set up pg_cron for scheduled agent triggers
-- Email notifications (Resend/SendGrid) for reminders
-- Mobile responsiveness full audit
-- Design review (`/design-review`) for spacing/contrast polish
+- Mobile responsiveness polish
 - Create first real Sprint (Sprint 4) with real dates
