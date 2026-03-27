@@ -29,7 +29,6 @@ export function MobileNav() {
 
   // Hide mobile nav on public pages when not authenticated
   const isPublicPage = ["landing", "login", "apply"].includes(currentPage);
-  if (!user && isPublicPage) return null;
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -41,6 +40,8 @@ export function MobileNav() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [moreOpen]);
+
+  if (!user && isPublicPage) return null;
 
   const isMoreActive = MORE_ITEMS.some((item) => item.page === currentPage);
 
