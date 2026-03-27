@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useDeclarations } from "@/lib/hooks/use-declarations";
+import { useCheckins, type CheckinSignal } from "@/lib/hooks/use-checkins";
 import { PageWrapper } from "../page-wrapper";
 
-const GOALS = [
+const MOCK_GOALS = [
   "Ship pricing page with Stripe integration",
   "Complete 4 deep work sessions (2hr+ each)",
   "Run 3 customer discovery interviews",
@@ -13,16 +15,65 @@ const GOALS = [
 type Signal = "green" | "yellow" | "red" | null;
 
 export function CheckinPage() {
-  const [signals, setSignals] = useState<Signal[]>(GOALS.map(() => null));
+  const { declaration } = useDeclarations();
+  const { checkin, submit } = useCheckins();
+
+  // Load goals from this week's declaration, or fall back to mock
+  const goalTexts = declaration?.goals
+    ? (declaration.goals as { text: string; order: number }[]).map(g => g.text)
+    : MOCK_GOALS;
+
+  const [signals, setSignals] = useState<Signal[]>(goalTexts.map(() => null));
+  const [notes, setNotes] = useState<(string | null)[]>(goalTexts.map(() => null));
   const [submitted, setSubmitted] = useState(false);
+  const initialized = useRef(false);
+
+  // Sync signals count when goals change
+  useEffect(() => {
+    setSignals(goalTexts.map(() => null));
+    setNotes(goalTexts.map(() => null));
+  }, [goalTexts.length]);
+
+  // Load existing check-in if one exists
+  useEffect(() => {
+    if (checkin && !initialized.current) {
+      initialized.current = true;
+      const sigs = checkin.signals as CheckinSignal[];
+      setSignals(goalTexts.map((_, i) => {
+        const sig = sigs.find(s => s.goal_index === i);
+        return sig ? sig.signal : null;
+      }));
+      setNotes(goalTexts.map((_, i) => {
+        const sig = sigs.find(s => s.goal_index === i);
+        return sig?.note ?? null;
+      }));
+      setSubmitted(true);
+    }
+  }, [checkin]);
 
   const selectSignal = (goalIdx: number, signal: Signal) => {
     setSignals((prev) => prev.map((s, i) => (i === goalIdx ? signal : s)));
   };
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+  const updateNote = (goalIdx: number, note: string) => {
+    setNotes((prev) => prev.map((n, i) => (i === goalIdx ? note : n)));
+  };
+
+  const handleSubmit = async () => {
+    const checkinSignals: CheckinSignal[] = signals.map((signal, i) => ({
+      goal_index: i,
+      signal: signal || "green",
+      note: notes[i] || null,
+    }));
+
+    try {
+      await submit.mutateAsync(checkinSignals);
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch {
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+    }
   };
 
   return (
@@ -32,11 +83,11 @@ export function CheckinPage() {
         For each goal, give your squad an honest signal.
       </p>
 
-      {GOALS.map((goal, i) => (
+      {goalTexts.map((goal, i) => (
         <div
           key={i}
           className="py-4"
-          style={{ borderBottom: i < GOALS.length - 1 ? "1px solid var(--border-subtle)" : "none" }}
+          style={{ borderBottom: i < goalTexts.length - 1 ? "1px solid var(--border-subtle)" : "none" }}
         >
           <div className="text-[15px] mb-2.5">
             {i + 1}. {goal}
@@ -63,6 +114,8 @@ export function CheckinPage() {
             <div className="mt-2">
               <input
                 type="text"
+                value={notes[i] || ""}
+                onChange={(e) => updateNote(i, e.target.value)}
                 className="w-full py-2.5 px-3.5 text-[13px] outline-none transition-colors duration-150"
                 style={{
                   background: "var(--surface)",

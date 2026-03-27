@@ -1,13 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { useApp } from "@/lib/app-context";
+import { useReflections } from "@/lib/hooks/use-reflections";
 import { PageWrapper } from "../page-wrapper";
 
-const PEERS = ["Sara R.", "Fatima N.", "Marcus H.", "Omar T.", "James L.", "Priya K."];
+const MOCK_PEERS = ["Sara R.", "Fatima N.", "Marcus H.", "Omar T.", "James L.", "Priya K."];
 
 export function ReflectPage() {
+  const { profile, sprint, squadMembers } = useApp();
+  const { submit } = useReflections();
   const [selectedPeers, setSelectedPeers] = useState<Set<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
+  const [wins, setWins] = useState("");
+  const [misses, setMisses] = useState("");
+  const [learnings, setLearnings] = useState("");
+  const [carryForward, setCarryForward] = useState("");
+  const [appreciationNote, setAppreciationNote] = useState("");
+
+  // Use real squad members or mock
+  const peers = squadMembers.length > 0
+    ? squadMembers.filter(m => m.user_id !== profile?.id).map(m => ({ id: m.user_id, name: m.profile.display_name }))
+    : MOCK_PEERS.map((name, i) => ({ id: `mock-${i}`, name }));
+
+  const currentWeek = sprint?.current_week ?? 4;
 
   const togglePeer = (name: string) => {
     setSelectedPeers((prev) => {
@@ -18,7 +34,19 @@ export function ReflectPage() {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    try {
+      await submit.mutateAsync({
+        wins,
+        misses,
+        learnings,
+        carry_forward: carryForward,
+        appreciated_user_ids: Array.from(selectedPeers),
+        appreciation_note: appreciationNote || undefined,
+        goals_hit: 3, // TODO: calculate from check-in data
+        goals_total: 4,
+      });
+    } catch { /* fallback */ }
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 3000);
   };
@@ -33,7 +61,7 @@ export function ReflectPage() {
 
   return (
     <PageWrapper page="reflect">
-      <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-2">Week 4 Reflection</h1>
+      <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-2">Week {currentWeek} Reflection</h1>
       <p className="text-[15px] leading-relaxed mb-9" style={{ color: "var(--text-secondary)" }}>
         Friday. Look back at your week. What landed, what didn&apos;t, and what you&apos;re carrying forward.
       </p>
@@ -127,20 +155,20 @@ export function ReflectPage() {
           Peer appreciation
         </div>
         <div className="flex gap-1.5 flex-wrap mb-2">
-          {PEERS.map((name) => (
+          {peers.map((peer) => (
             <button
-              key={name}
-              onClick={() => togglePeer(name)}
+              key={peer.id}
+              onClick={() => togglePeer(peer.id)}
               className="py-1.5 px-3 text-xs cursor-pointer transition-all duration-150"
               style={{
-                background: selectedPeers.has(name) ? "var(--accent-surface)" : "none",
-                border: `1px solid ${selectedPeers.has(name) ? "var(--accent)" : "var(--border)"}`,
-                color: selectedPeers.has(name) ? "var(--accent)" : "var(--text-secondary)",
+                background: selectedPeers.has(peer.id) ? "var(--accent-surface)" : "none",
+                border: `1px solid ${selectedPeers.has(peer.id) ? "var(--accent)" : "var(--border)"}`,
+                color: selectedPeers.has(peer.id) ? "var(--accent)" : "var(--text-secondary)",
                 borderRadius: "2px",
                 fontFamily: "inherit",
               }}
             >
-              {name}
+              {peer.name}
             </button>
           ))}
         </div>

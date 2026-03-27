@@ -2,19 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useNavigation } from "@/lib/navigation-context";
+import { useApp } from "@/lib/app-context";
+import { useCoach } from "@/lib/hooks/use-coach";
+import { useDeclarations } from "@/lib/hooks/use-declarations";
 import { PageWrapper } from "../page-wrapper";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const GOALS = [
+// Fallback mock data (used when not authenticated)
+const MOCK_GOALS = [
   { text: "Ship pricing page with Stripe integration", done: true, status: "green" },
   { text: "Complete 4 deep work sessions (2hr+ each)", done: true, status: "green" },
   { text: "Run 3 customer discovery interviews", done: false, status: "yellow" },
   { text: "Morning routine 5 of 7 days", done: false, status: null },
 ];
 
-const SQUAD_MEMBERS = ["SR", "FN", "MH", "OT", "JL", "PK"];
+const MOCK_SQUAD_MEMBERS = ["SR", "FN", "MH", "OT", "JL", "PK"];
 
 function getContextCard(dayOfWeek: number) {
   if (dayOfWeek === 1) {
@@ -64,8 +68,34 @@ function getContextCard(dayOfWeek: number) {
 
 export function HomePage() {
   const { navigateTo } = useNavigation();
-  const [goals, setGoals] = useState(GOALS);
+  const { profile, sprint, squad, squadMembers } = useApp();
+  const { whisper } = useCoach();
+  const { declaration } = useDeclarations();
+  const [goals, setGoals] = useState(MOCK_GOALS);
   const [sprintWidth, setSprintWidth] = useState("0%");
+
+  // Use real data when available, fall back to mock
+  const userName = profile?.display_name?.split(" ")[0] || "Amir";
+  const sprintNumber = sprint?.number ?? 3;
+  const currentWeek = sprint?.current_week ?? 4;
+  const sprintWeeks = sprint?.duration_weeks ?? 6;
+  const sprintPct = sprintWeeks > 0 ? Math.round((currentWeek / sprintWeeks) * 100) : 66;
+  const memberInitials = squadMembers.length > 0
+    ? squadMembers.filter(m => m.user_id !== profile?.id).map(m => m.profile.initials)
+    : MOCK_SQUAD_MEMBERS;
+  const coachWhisper = whisper?.content || "You\u2019re 12% ahead of your Week 4 average. Your professional goals land consistently, but this is the third week you\u2019ve dropped the personal goal. Pattern worth examining.";
+
+  // Map declaration goals to display format
+  useEffect(() => {
+    if (declaration?.goals) {
+      const declGoals = (declaration.goals as { text: string; order: number }[]).map(g => ({
+        text: g.text,
+        done: false,
+        status: null as string | null,
+      }));
+      if (declGoals.length > 0) setGoals(declGoals);
+    }
+  }, [declaration]);
 
   const now = new Date();
   const dayOfWeek = now.getDay();
@@ -75,9 +105,9 @@ export function HomePage() {
   const ctx = getContextCard(dayOfWeek);
 
   useEffect(() => {
-    const t = setTimeout(() => setSprintWidth("66%"), 300);
+    const t = setTimeout(() => setSprintWidth(`${sprintPct}%`), 300);
     return () => clearTimeout(t);
-  }, []);
+  }, [sprintPct]);
 
   const toggleGoal = (i: number) => {
     setGoals((prev) => prev.map((g, idx) => (idx === i ? { ...g, done: !g.done } : g)));
@@ -90,7 +120,7 @@ export function HomePage() {
         className="text-[11px] uppercase tracking-[0.08em] mb-1"
         style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
       >
-        Sprint 3 &middot; Week 4
+        Sprint {sprintNumber} &middot; Week {currentWeek}
       </div>
       <div className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
         {dateStr}
@@ -98,7 +128,7 @@ export function HomePage() {
 
       {/* Greeting */}
       <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-8">
-        {greeting}, <span style={{ color: "var(--accent)" }}>Amir</span>
+        {greeting}, <span style={{ color: "var(--accent)" }}>{userName}</span>
       </h1>
 
       {/* Context Card */}
@@ -195,8 +225,7 @@ export function HomePage() {
           Coach
         </div>
         <div className="text-sm italic leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-          You&apos;re 12% ahead of your Week 4 average. Your professional goals land consistently, but this
-          is the third week you&apos;ve dropped the personal goal. Pattern worth examining.
+          {coachWhisper}
         </div>
       </div>
 
@@ -212,7 +241,7 @@ export function HomePage() {
       >
         <div className="flex items-center gap-3">
           <div className="flex ml-1">
-            {SQUAD_MEMBERS.map((m, i) => (
+            {memberInitials.map((m, i) => (
               <div
                 key={m}
                 className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-semibold"
@@ -243,7 +272,7 @@ export function HomePage() {
           className="text-[11px] whitespace-nowrap"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          Sprint 3
+          Sprint {sprintNumber}
         </span>
         <div
           className="flex-1 h-[3px] overflow-hidden"
@@ -263,20 +292,20 @@ export function HomePage() {
           className="text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          66%
+          {sprintPct}%
         </span>
       </div>
 
       {/* Sprint Timeline */}
       <div className="mt-8 flex gap-1">
-        {[1, 2, 3, 4, 5, 6].map((w) => (
+        {Array.from({ length: sprintWeeks }, (_, i) => i + 1).map((w) => (
           <div key={w} className="flex-1 text-center">
             <div
               className="text-[10px] uppercase tracking-[0.06em] mb-1.5"
               style={{
                 fontFamily: "var(--font-dm-mono), monospace",
-                color: w === 4 ? "var(--accent)" : "var(--text-muted)",
-                fontWeight: w === 4 ? 500 : 400,
+                color: w === currentWeek ? "var(--accent)" : "var(--text-muted)",
+                fontWeight: w === currentWeek ? 500 : 400,
               }}
             >
               W{w}
@@ -286,9 +315,9 @@ export function HomePage() {
               style={{
                 borderRadius: "2px",
                 background:
-                  w < 4
+                  w < currentWeek
                     ? "var(--accent)"
-                    : w === 4
+                    : w === currentWeek
                       ? "linear-gradient(90deg, var(--accent) 60%, var(--surface) 60%)"
                       : "var(--surface)",
               }}

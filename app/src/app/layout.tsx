@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { DM_Sans, DM_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/lib/auth-context";
+import { AppProvider } from "@/lib/app-context";
+import { QueryProvider } from "@/lib/query-provider";
 import { Topbar } from "@/components/topbar";
 import { MobileNav } from "@/components/mobile-nav";
 import { ScoreOverlay } from "@/components/score-overlay";
@@ -45,14 +48,20 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <ThemeProvider>
-          <Topbar />
-          <main className="pt-[52px] min-h-screen">
-            {children}
-          </main>
-          <MobileNav />
-          <ScoreOverlay />
-        </ThemeProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <AppProvider>
+              <ThemeProvider>
+                <Topbar />
+                <main className="pt-[52px] min-h-screen">
+                  {children}
+                </main>
+                <MobileNav />
+                <ScoreOverlay />
+              </ThemeProvider>
+            </AppProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

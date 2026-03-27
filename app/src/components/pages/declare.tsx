@@ -1,15 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useDeclarations } from "@/lib/hooks/use-declarations";
 import { PageWrapper } from "../page-wrapper";
 
 export function DeclarePage() {
+  const { declaration, submit } = useDeclarations();
   const [goalCount, setGoalCount] = useState(3);
   const [submitted, setSubmitted] = useState(false);
+  const [goalValues, setGoalValues] = useState<string[]>(["", "", ""]);
+  const [blockers, setBlockers] = useState("");
+  const initialized = useRef(false);
 
-  const handleSubmit = () => {
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+  // Load existing declaration if one exists for this week
+  useEffect(() => {
+    if (declaration && !initialized.current) {
+      initialized.current = true;
+      const goals = declaration.goals as { text: string; order: number }[];
+      setGoalValues(goals.map(g => g.text));
+      setGoalCount(goals.length);
+      setBlockers(declaration.blockers || "");
+      setSubmitted(true); // Already declared this week
+    }
+  }, [declaration]);
+
+  const updateGoal = (index: number, value: string) => {
+    setGoalValues(prev => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
+  const handleSubmit = async () => {
+    const goals = goalValues
+      .map((text, i) => ({ text: text.trim(), order: i + 1 }))
+      .filter(g => g.text.length > 0);
+
+    if (goals.length === 0) return;
+
+    try {
+      await submit.mutateAsync({ goals, blockers: blockers.trim() || undefined });
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch {
+      // Fallback: just show submitted UI even if Supabase isn't connected
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 3000);
+    }
   };
 
   return (
@@ -32,6 +70,8 @@ export function DeclarePage() {
             </span>
             <input
               type="text"
+              value={goalValues[i] || ""}
+              onChange={(e) => updateGoal(i, e.target.value)}
               className="flex-1 py-3.5 px-4 text-[15px] outline-none transition-colors duration-150"
               style={{
                 background: "var(--surface)",
@@ -56,7 +96,7 @@ export function DeclarePage() {
       </div>
 
       <button
-        onClick={() => setGoalCount((c) => c + 1)}
+        onClick={() => { setGoalCount((c) => c + 1); setGoalValues(prev => [...prev, ""]); }}
         className="inline-flex items-center gap-1.5 py-2.5 px-4 ml-8 text-[13px] cursor-pointer transition-all duration-150"
         style={{
           background: "none",
@@ -82,6 +122,8 @@ export function DeclarePage() {
             borderRadius: "4px",
             fontFamily: "inherit",
           }}
+          value={blockers}
+          onChange={(e) => setBlockers(e.target.value)}
           placeholder="What might get in the way this week? How can your squad help?"
           onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
           onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}

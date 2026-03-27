@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "@/lib/navigation-context";
+import { useApp } from "@/lib/app-context";
+import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "../theme-provider";
+import { createClient } from "@/lib/supabase/client";
 import { PageWrapper } from "../page-wrapper";
 
 type SettingsTab = "profile" | "preferences" | "notifications" | "account";
@@ -16,15 +19,41 @@ const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
 
 export function SettingsPage() {
   const { navigateTo } = useNavigation();
+  const { profile, squad, refreshProfile } = useApp();
+  const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [tab, setTab] = useState<SettingsTab>("profile");
-  const [displayName, setDisplayName] = useState("Amir M.");
-  const [bio, setBio] = useState("Building with purpose. S3 operator.");
-  const [timezone, setTimezone] = useState("America/New_York");
+  const [displayName, setDisplayName] = useState(profile?.display_name || "Amir M.");
+  const [bio, setBio] = useState(profile?.bio || "Building with purpose. S3 operator.");
+  const [timezone, setTimezone] = useState(profile?.timezone || "America/New_York");
   const [sprintReminders, setSprintReminders] = useState(true);
   const [squadActivity, setSquadActivity] = useState(true);
   const [coachMessages, setCoachMessages] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Sync from profile when it loads
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name);
+      setBio(profile.bio || "");
+      setTimezone(profile.timezone);
+    }
+  }, [profile]);
+
+  const saveProfile = async () => {
+    if (!user) return;
+    setSaving(true);
+    const supabase = createClient();
+    await supabase.from("profiles").update({
+      display_name: displayName,
+      bio,
+      timezone,
+      initials: displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2),
+    }).eq("id", user.id);
+    await refreshProfile();
+    setSaving(false);
+  };
 
   return (
     <PageWrapper page="settings">
@@ -38,7 +67,7 @@ export function SettingsPage() {
             border: "2px solid var(--border)",
           }}
         >
-          AM
+          {profile?.initials || "AM"}
           <div
             className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150"
             style={{ background: "rgba(0,0,0,0.4)" }}
@@ -52,7 +81,7 @@ export function SettingsPage() {
             className="text-[13px]"
             style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
           >
-            Alpha Vanguard &middot; S3 Operator &middot; Score 84
+            {squad?.name || "Alpha Vanguard"} &middot; S{profile?.sprints_completed ?? 3} Operator
           </p>
         </div>
       </div>
@@ -165,15 +194,18 @@ export function SettingsPage() {
 
           <div className="pt-2">
             <button
+              onClick={saveProfile}
+              disabled={saving}
               className="text-[13px] font-medium py-2.5 px-6 cursor-pointer transition-all duration-150"
               style={{
-                background: "var(--accent)",
+                background: saving ? "var(--green)" : "var(--accent)",
                 color: "var(--accent-text)",
                 border: "none",
                 borderRadius: "4px",
+                opacity: saving ? 0.8 : 1,
               }}
             >
-              Save Profile
+              {saving ? "Saved \u2713" : "Save Profile"}
             </button>
           </div>
         </div>
@@ -369,10 +401,10 @@ export function SettingsPage() {
           >
             <div className="text-[15px] font-medium mb-4">Account Information</div>
             {[
-              { label: "Email", value: "amir@example.com" },
-              { label: "Member since", value: "January 2026" },
-              { label: "Sprints completed", value: "2" },
-              { label: "Current squad", value: "Alpha Vanguard" },
+              { label: "Email", value: profile?.email || "amir@example.com" },
+              { label: "Member since", value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "January 2026" },
+              { label: "Sprints completed", value: String(profile?.sprints_completed ?? 2) },
+              { label: "Current squad", value: squad?.name || "Alpha Vanguard" },
             ].map((info) => (
               <div
                 key={info.label}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useNavigation } from "@/lib/navigation-context";
+import { useApp } from "@/lib/app-context";
 import { PageWrapper } from "../page-wrapper";
 
 const ACTIVITY = [
@@ -39,16 +40,23 @@ const ACTIVITY = [
 
 export function SquadPage() {
   const { navigateTo } = useNavigation();
+  const { squad, sprint } = useApp();
+
+  const squadName = squad?.name || "Alpha Vanguard";
+  const memberCount = squad?.member_count ?? 7;
+  const sprintNumber = sprint?.number ?? 3;
+  const currentWeek = sprint?.current_week ?? 4;
+  const sprintWeeks = sprint?.duration_weeks ?? 6;
 
   return (
     <PageWrapper page="squad">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold mb-0.5">Alpha Vanguard</h1>
+        <h1 className="text-xl font-semibold mb-0.5">{squadName}</h1>
         <div
           className="text-[11px] tracking-[0.04em]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          7 operators &middot; Sprint 3 &middot; Week 4 of 6
+          {memberCount} operators &middot; Sprint {sprintNumber} &middot; Week {currentWeek} of {sprintWeeks}
         </div>
       </div>
 

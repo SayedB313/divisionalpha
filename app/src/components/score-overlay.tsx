@@ -1,9 +1,11 @@
 "use client";
 
 import { useNavigation } from "@/lib/navigation-context";
+import { useApp } from "@/lib/app-context";
+import { useOperatorScore } from "@/lib/hooks/use-scores";
 import { useEffect, useState, useRef } from "react";
 
-const FACTORS = [
+const MOCK_FACTORS = [
   { name: "Goal Completion", value: 82 },
   { name: "Attendance", value: 95 },
   { name: "Contribution", value: 78 },
@@ -14,9 +16,24 @@ const FACTORS = [
 
 export function ScoreOverlay() {
   const { scoreOpen, setScoreOpen } = useNavigation();
+  const { profile, sprint } = useApp();
+  const { data: scoreData } = useOperatorScore();
   const [animatedScore, setAnimatedScore] = useState(0);
   const [barsVisible, setBarsVisible] = useState(false);
   const animRef = useRef<number | null>(null);
+
+  // Use real score data or mock
+  const totalScore = scoreData?.total_score ? Math.round(Number(scoreData.total_score)) : 84;
+  const factors = scoreData ? [
+    { name: "Goal Completion", value: Math.round(Number(scoreData.goal_completion ?? 82)) },
+    { name: "Attendance", value: Math.round(Number(scoreData.attendance ?? 95)) },
+    { name: "Contribution", value: Math.round(Number(scoreData.squad_contribution ?? 78)) },
+    { name: "Leadership", value: Math.round(Number(scoreData.leadership ?? 70)) },
+    { name: "Growth", value: Math.round(Number(scoreData.growth ?? 88)) },
+    { name: "Communication", value: Math.round(Number(scoreData.communication ?? 90)) },
+  ] : MOCK_FACTORS;
+
+  const sprintNumber = sprint?.number ?? 3;
 
   useEffect(() => {
     if (scoreOpen) {
@@ -28,9 +45,9 @@ export function ScoreOverlay() {
         let current = 0;
         const step = () => {
           current += 2;
-          if (current >= 84) current = 84;
+          if (current >= totalScore) current = totalScore;
           setAnimatedScore(current);
-          if (current < 84) {
+          if (current < totalScore) {
             animRef.current = requestAnimationFrame(step);
           }
         };
@@ -42,7 +59,7 @@ export function ScoreOverlay() {
         if (animRef.current) cancelAnimationFrame(animRef.current);
       };
     }
-  }, [scoreOpen]);
+  }, [scoreOpen, totalScore]);
 
   if (!scoreOpen) return null;
 
@@ -105,7 +122,7 @@ export function ScoreOverlay() {
 
         {/* Factor bars */}
         <div className="space-y-3.5">
-          {FACTORS.map((f) => (
+          {factors.map((f) => (
             <div key={f.name} className="flex items-center gap-3">
               <span
                 className="text-[13px] w-[120px] shrink-0"
@@ -149,7 +166,7 @@ export function ScoreOverlay() {
             borderRadius: "4px",
           }}
         >
-          <div className="text-sm font-semibold mb-4">Sprint 3 at a glance</div>
+          <div className="text-sm font-semibold mb-4">Sprint {sprintNumber} at a glance</div>
           <div className="grid grid-cols-3 gap-4">
             {[
               { val: "14/18", label: "Goals hit" },
