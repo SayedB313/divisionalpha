@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { createLogger } from '@/lib/logger'
+
+const log = createLogger('email')
 import {
   sendEmail,
   mondayDeclarationReminder,
@@ -88,35 +91,36 @@ export async function POST(request: NextRequest) {
 
         switch (action) {
           case 'monday_reminder':
-            email = mondayDeclarationReminder(user.display_name, sprint.current_week, sprint.number)
+            email = mondayDeclarationReminder(user.email, user.display_name, sprint.current_week, sprint.number)
             break
           case 'wednesday_reminder':
-            email = wednesdayCheckinReminder(user.display_name, sprint.current_week, sprint.number)
+            email = wednesdayCheckinReminder(user.email, user.display_name, sprint.current_week, sprint.number)
             break
           case 'friday_reminder':
-            email = fridayReflectionReminder(user.display_name, sprint.current_week, sprint.number)
+            email = fridayReflectionReminder(user.email, user.display_name, sprint.current_week, sprint.number)
             break
           case 'squad_nudge':
-            email = squadNudge(user.display_name, squadName, meta?.missed_action || 'participate')
+            email = squadNudge(user.email, user.display_name, squadName, meta?.missed_action || 'participate')
             break
           case 'life_check':
-            email = lifeCheckDm(user.display_name)
+            email = lifeCheckDm(user.email, user.display_name)
             break
           case 'sprint_kickoff':
-            email = sprintKickoff(user.display_name, sprint.number, squadName)
+            email = sprintKickoff(user.email, user.display_name, sprint.number, squadName)
             break
           case 'sprint_completion':
-            email = sprintCompletion(user.display_name, sprint.number, meta?.score || 0)
+            email = sprintCompletion(user.email, user.display_name, sprint.number, meta?.score || 0)
             break
           default:
             results.push({ user: user.email, status: `unknown action: ${action}` })
             continue
         }
 
-        email.to = user.email
         await sendEmail(email)
+        log.info('Email sent', { action, recipient: user.email })
         results.push({ user: user.email, status: 'sent' })
       } catch (err: any) {
+        log.error('Email send failed', { action, recipient: user.email, error: err.message })
         results.push({ user: user.email, status: `error: ${err.message}` })
       }
     }
@@ -127,8 +131,8 @@ export async function POST(request: NextRequest) {
       total: results.length,
       results,
     })
-  } catch (err) {
-    console.error('[email] Route error:', err)
+  } catch (err: any) {
+    log.error('Route error', { error: err.message })
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }

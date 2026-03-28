@@ -18,6 +18,11 @@ export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
     return null
   }
 
+  if (!to) {
+    console.error('[email] No recipient address provided, skipping email')
+    return null
+  }
+
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
@@ -43,7 +48,16 @@ export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
   return res.json()
 }
 
-// ─── Email Templates ──────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
 
 const FOOTER = `
   <p style="margin-top:32px;padding-top:16px;border-top:1px solid #e3ddd0;font-size:11px;color:#948d7e;font-family:monospace;">
@@ -68,13 +82,18 @@ function wrap(content: string): string {
 </html>`
 }
 
-export function mondayDeclarationReminder(name: string, week: number, sprintNum: number): SendEmailOptions {
+// ─── Email Templates ──────────────────────────────────
+// All templates accept `to` as first param for explicit recipient wiring.
+// User-provided strings are HTML-escaped in template bodies.
+
+export function mondayDeclarationReminder(to: string, name: string, week: number, sprintNum: number): SendEmailOptions {
+  const safe = escapeHtml(name)
   return {
-    to: '',
+    to,
     subject: `Week ${week} — Time to declare`,
     html: wrap(`
       <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Monday. Declaration time.</h2>
-      <p>${name}, Sprint ${sprintNum} Week ${week} is live. Your squad is waiting on your goals.</p>
+      <p>${safe}, Sprint ${sprintNum} Week ${week} is live. Your squad is waiting on your goals.</p>
       <p>Open the app and declare what you're committing to this week. Be specific. Be measurable.</p>
       <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
         Declare now
@@ -84,13 +103,14 @@ export function mondayDeclarationReminder(name: string, week: number, sprintNum:
   }
 }
 
-export function wednesdayCheckinReminder(name: string, week: number, sprintNum: number): SendEmailOptions {
+export function wednesdayCheckinReminder(to: string, name: string, week: number, sprintNum: number): SendEmailOptions {
+  const safe = escapeHtml(name)
   return {
-    to: '',
+    to,
     subject: `Week ${week} — Check-in time`,
     html: wrap(`
       <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Wednesday. Signal check.</h2>
-      <p>${name}, how are your goals tracking? Green, yellow, or red — your squad needs to know.</p>
+      <p>${safe}, how are your goals tracking? Green, yellow, or red — your squad needs to know.</p>
       <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
         Check in now
       </a>
@@ -99,13 +119,14 @@ export function wednesdayCheckinReminder(name: string, week: number, sprintNum: 
   }
 }
 
-export function fridayReflectionReminder(name: string, week: number, sprintNum: number): SendEmailOptions {
+export function fridayReflectionReminder(to: string, name: string, week: number, sprintNum: number): SendEmailOptions {
+  const safe = escapeHtml(name)
   return {
-    to: '',
+    to,
     subject: `Week ${week} — Reflect on your week`,
     html: wrap(`
       <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Friday. Look back.</h2>
-      <p>${name}, what landed this week? What didn't? What are you carrying forward?</p>
+      <p>${safe}, what landed this week? What didn't? What are you carrying forward?</p>
       <p>Your squad reads these. Make it real.</p>
       <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
         Reflect now
@@ -115,13 +136,16 @@ export function fridayReflectionReminder(name: string, week: number, sprintNum: 
   }
 }
 
-export function squadNudge(name: string, squadName: string, action: string): SendEmailOptions {
+export function squadNudge(to: string, name: string, squadName: string, action: string): SendEmailOptions {
+  const safe = escapeHtml(name)
+  const safeSquad = escapeHtml(squadName)
+  const safeAction = escapeHtml(action)
   return {
-    to: '',
+    to,
     subject: `Your squad ${squadName} is waiting`,
     html: wrap(`
       <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Your squad is moving.</h2>
-      <p>${name}, ${squadName} has been active but we haven't seen you ${action} yet this week.</p>
+      <p>${safe}, ${safeSquad} has been active but we haven't seen you ${safeAction} yet this week.</p>
       <p>No judgment. Just showing up matters.</p>
       <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
         Open Division Alpha
@@ -131,12 +155,13 @@ export function squadNudge(name: string, squadName: string, action: string): Sen
   }
 }
 
-export function lifeCheckDm(name: string): SendEmailOptions {
+export function lifeCheckDm(to: string, name: string): SendEmailOptions {
+  const safe = escapeHtml(name)
   return {
-    to: '',
+    to,
     subject: 'Just checking in',
     html: wrap(`
-      <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Hey ${name}.</h2>
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Hey ${safe}.</h2>
       <p>We noticed you've been quiet. No pressure, no guilt — just checking if you're okay.</p>
       <p>If life got heavy, that's what the Pause Protocol is for. Your squad will be here when you're ready.</p>
       <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
@@ -147,13 +172,15 @@ export function lifeCheckDm(name: string): SendEmailOptions {
   }
 }
 
-export function sprintKickoff(name: string, sprintNum: number, squadName: string): SendEmailOptions {
+export function sprintKickoff(to: string, name: string, sprintNum: number, squadName: string): SendEmailOptions {
+  const safe = escapeHtml(name)
+  const safeSquad = escapeHtml(squadName)
   return {
-    to: '',
+    to,
     subject: `Sprint ${sprintNum} starts now`,
     html: wrap(`
       <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Sprint ${sprintNum} is live.</h2>
-      <p>${name}, you've been matched with ${squadName}. Six weeks. Real goals. Real accountability.</p>
+      <p>${safe}, you've been matched with ${safeSquad}. Six weeks. Real goals. Real accountability.</p>
       <p>Your kickoff ceremony is ready. Meet your squad and commit.</p>
       <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
         Join kickoff
@@ -163,13 +190,14 @@ export function sprintKickoff(name: string, sprintNum: number, squadName: string
   }
 }
 
-export function sprintCompletion(name: string, sprintNum: number, score: number): SendEmailOptions {
+export function sprintCompletion(to: string, name: string, sprintNum: number, score: number): SendEmailOptions {
+  const safe = escapeHtml(name)
   return {
-    to: '',
+    to,
     subject: `Sprint ${sprintNum} complete — your results`,
     html: wrap(`
       <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Sprint ${sprintNum} is done.</h2>
-      <p>${name}, you showed up for six weeks. That matters more than any number.</p>
+      <p>${safe}, you showed up for six weeks. That matters more than any number.</p>
       <p style="font-size:28px;font-weight:700;color:#3d6b4a;margin:16px 0;">
         Operator Score: ${score}
       </p>

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageWrapper } from "../page-wrapper";
+
+const STORAGE_KEY = "da_apply_draft";
 
 const STEPS = [
   {
@@ -55,8 +57,33 @@ export function ApplyPage() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const formRef = useRef<Record<string, string>>({});
 
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const { fields, options, step: savedStep } = JSON.parse(saved);
+        if (fields) formRef.current = fields;
+        if (options) setSelectedOptions(options);
+        if (typeof savedStep === "number") setStep(savedStep);
+      }
+    } catch {}
+  }, []);
+
+  const saveDraft = (fields: Record<string, string>, options: Record<string, string>, currentStep: number) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ fields, options, step: currentStep }));
+    } catch {}
+  };
+
+  const clearDraft = () => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  };
+
   const selectOption = (label: string, choice: string) => {
-    setSelectedOptions((prev) => ({ ...prev, [label]: choice }));
+    const next = { ...selectedOptions, [label]: choice };
+    setSelectedOptions(next);
+    saveDraft(formRef.current, next, step);
   };
 
   const currentStep = STEPS[step];
@@ -130,7 +157,8 @@ export function ApplyPage() {
                 className="w-full min-h-[100px] py-3.5 px-4 text-[15px] leading-relaxed resize-y outline-none transition-colors duration-150"
                 style={inputStyle}
                 placeholder={f.placeholder}
-                onChange={(e) => { formRef.current[f.label] = e.target.value; }}
+                defaultValue={formRef.current[f.label] || ""}
+                onChange={(e) => { formRef.current[f.label] = e.target.value; saveDraft(formRef.current, selectedOptions, step); }}
                 onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
                 aria-label={f.label}
@@ -141,7 +169,8 @@ export function ApplyPage() {
                 className="w-full py-3.5 px-4 text-[15px] outline-none transition-colors duration-150"
                 style={inputStyle}
                 placeholder={f.placeholder}
-                onChange={(e) => { formRef.current[f.label] = e.target.value; }}
+                defaultValue={formRef.current[f.label] || ""}
+                onChange={(e) => { formRef.current[f.label] = e.target.value; saveDraft(formRef.current, selectedOptions, step); }}
                 onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
                 aria-label={f.label}
@@ -185,7 +214,8 @@ export function ApplyPage() {
               className="w-full min-h-[80px] py-3.5 px-4 text-[15px] leading-relaxed resize-y outline-none transition-colors duration-150"
               style={inputStyle}
               placeholder={f.placeholder}
-              onChange={(e) => { formRef.current[f.label] = e.target.value; }}
+              defaultValue={formRef.current[f.label] || ""}
+              onChange={(e) => { formRef.current[f.label] = e.target.value; saveDraft(formRef.current, selectedOptions, step); }}
               onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
               onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
               aria-label={f.label}
@@ -215,7 +245,9 @@ export function ApplyPage() {
           disabled={submitting}
           onClick={async () => {
             if (step < STEPS.length - 1) {
-              setStep((s) => s + 1);
+              const next = step + 1;
+              setStep(next);
+              saveDraft(formRef.current, selectedOptions, next);
             } else {
               // Submit application to Supabase
               setSubmitting(true);
@@ -261,6 +293,7 @@ export function ApplyPage() {
                 });
                 const data = await res.json();
                 if (data.url) {
+                  clearDraft();
                   window.location.href = data.url;
                   return; // Don't show submitted state, user is redirecting
                 }
@@ -269,6 +302,7 @@ export function ApplyPage() {
               }
 
               // Fallback if Stripe redirect fails
+              clearDraft();
               setSubmitting(false);
               setSubmitted(true);
             }

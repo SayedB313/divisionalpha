@@ -22,9 +22,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // Use Eastern Time as the canonical schedule timezone (majority of users).
+  // The server may run in UTC, so we convert before checking day/hour windows.
+  const SCHEDULE_TZ = process.env.CRON_TIMEZONE || 'America/Toronto'
   const now = new Date()
-  const hour = now.getHours()
-  const dayOfWeek = now.getDay() // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+  const localNow = new Date(now.toLocaleString('en-US', { timeZone: SCHEDULE_TZ }))
+  const hour = localNow.getHours()
+  const dayOfWeek = localNow.getDay() // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
 
   const actions: { agent: string; action: string; description: string }[] = []
 
@@ -98,6 +102,8 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     timestamp: now.toISOString(),
+    timezone: SCHEDULE_TZ,
+    local_time: localNow.toISOString(),
     day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dayOfWeek],
     hour,
     actions_fired: results.length,

@@ -10,9 +10,9 @@ import { createServiceClient } from '@/lib/supabase/server'
 // - Transition sprint status (upcoming → handshake → active → dip_week → completing → completed)
 // - Handle continuation votes at sprint end
 
-const BASE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+  || 'https://divisionalpha.net'
 
 // Support both GET (from Vercel Cron) and POST (from admin trigger)
 export async function GET(request: NextRequest) {

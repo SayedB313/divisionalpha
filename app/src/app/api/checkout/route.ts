@@ -16,7 +16,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 })
     }
 
-    const origin = request.headers.get('origin') || 'http://localhost:3000'
+    const origin = request.headers.get('origin')
+      || process.env.NEXT_PUBLIC_SITE_URL
+      || 'https://divisionalpha.net'
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',

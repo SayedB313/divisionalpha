@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase/server'
 import { chatCompletion, type ChatMessage } from '@/lib/minimax'
 
+// Simple in-memory rate limiter: 20 messages per user per hour
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const RATE_LIMIT = 20
+const RATE_WINDOW_MS = 60 * 60 * 1000 // 1 hour
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now()
+  const entry = rateLimitMap.get(userId)
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS })
+    return true
+  }
+  if (entry.count >= RATE_LIMIT) return false
+  entry.count++
+  return true
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Verify auth
@@ -10,6 +27,13 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (!checkRateLimit(user.id)) {
+      return NextResponse.json(
+        { error: 'Rate limit reached. You can send 20 messages per hour.' },
+        { status: 429 }
+      )
     }
 
     const { message } = await request.json()
@@ -43,6 +67,16 @@ export async function POST(request: NextRequest) {
     // Build system prompt with full operator context
     const systemPrompt = buildCoachSystemPrompt(profile, sprint, scores, latestDeclaration)
 
+    // Save user message to DB (so conversation history is complete)
+    await serviceClient.from('coach_messages').insert({
+      user_id: user.id,
+      role: 'user',
+      content: message,
+      sprint_id: sprint?.id ?? null,
+      week_number: sprint?.current_week ?? null,
+      trigger_type: 'user_initiated',
+    })
+
     // Build conversation history
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -54,10 +88,17 @@ export async function POST(request: NextRequest) {
     ]
 
     // Call MiniMax 2.7
-    const coachResponse = await chatCompletion(messages, {
-      temperature: 0.8,
-      max_tokens: 512,
-    })
+    let coachResponse: string
+    try {
+      coachResponse = await chatCompletion(messages, {
+        temperature: 0.8,
+        max_tokens: 512,
+      })
+    } catch (aiErr) {
+      console.error('MiniMax error:', aiErr)
+      const firstName = profile?.display_name?.split(' ')[0] || 'Operator'
+      coachResponse = `${firstName}, I'm having a moment of technical difficulty — my thinking circuits are busy. Give me a few minutes and try again. Your message was received.`
+    }
 
     // Save coach response to database
     await serviceClient.from('coach_messages').insert({

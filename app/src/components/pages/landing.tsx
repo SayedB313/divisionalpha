@@ -1,10 +1,65 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useNavigation } from "@/lib/navigation-context";
+import { createClient } from "@/lib/supabase/client";
 import { PageWrapper } from "../page-wrapper";
+
+function useNextSprint() {
+  const [sprintInfo, setSprintInfo] = useState<{
+    name: string | null;
+    number: number;
+    startDate: string;
+    spotsRemaining: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    (async () => {
+      // Get next upcoming or active sprint
+      const { data: sprint } = await supabase
+        .from('sprints')
+        .select('*')
+        .in('status', ['upcoming', 'handshake', 'active'])
+        .order('start_date', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      if (!sprint) return;
+
+      // Count enrolled members to estimate remaining spots
+      const { count } = await supabase
+        .from('squad_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'active');
+
+      // Estimate spots: ~50 target capacity minus enrolled
+      const capacity = sprint.max_members || 50;
+      const enrolled = count || 0;
+      const remaining = Math.max(0, capacity - enrolled);
+
+      const startDate = new Date(sprint.start_date);
+      const formatted = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+
+      setSprintInfo({
+        name: sprint.name,
+        number: sprint.number,
+        startDate: formatted,
+        spotsRemaining: remaining,
+      });
+    })();
+  }, []);
+
+  return sprintInfo;
+}
 
 export function LandingPage() {
   const { navigateTo } = useNavigation();
+  const nextSprint = useNextSprint();
+
+  const sprintNum = nextSprint?.number ?? 4;
+  const sprintDate = nextSprint?.startDate ?? "April 6";
+  const spotsLeft = nextSprint?.spotsRemaining ?? 18;
 
   return (
     <PageWrapper page="landing">
@@ -61,7 +116,7 @@ export function LandingPage() {
           className="mt-6 text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          Sprint 4 begins April 6 &middot; 18 spots remaining &middot; $49/month
+          Sprint {sprintNum} begins {sprintDate} &middot; {spotsLeft} spots remaining &middot; $49/month
         </div>
       </div>
 
@@ -293,14 +348,14 @@ export function LandingPage() {
           className="w-full py-4 text-[15px] font-medium border-none cursor-pointer transition-all duration-150 hover:-translate-y-px"
           style={{ background: "var(--accent)", color: "var(--accent-text)", borderRadius: "2px", fontFamily: "inherit" }}
         >
-          Apply for Sprint 4 &mdash; Begins April 6
+          Apply for Sprint {sprintNum} &mdash; Begins {sprintDate}
         </button>
 
         <div
           className="mt-4 text-center text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          18 spots remaining &middot; Applications reviewed within 48 hours
+          {spotsLeft} spots remaining &middot; Applications reviewed within 48 hours
         </div>
       </div>
 

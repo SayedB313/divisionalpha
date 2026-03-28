@@ -104,8 +104,7 @@ export async function POST(request: NextRequest) {
         // Send nudge email
         if (member.profile.email) {
           const missAction = missingDeclaration ? 'declare' : missingCheckin ? 'check in' : 'reflect'
-          const email = squadNudge(userName, member.squad.name, missAction)
-          email.to = member.profile.email
+          const email = squadNudge(member.profile.email, userName, member.squad.name, missAction)
           sendEmail(email).catch(err => console.error('[guardian] nudge email failed:', err))
         }
 
@@ -142,8 +141,7 @@ export async function POST(request: NextRequest) {
 
         // Send life check email
         if (member.profile.email) {
-          const email = lifeCheckDm(userName)
-          email.to = member.profile.email
+          const email = lifeCheckDm(member.profile.email, userName)
           sendEmail(email).catch(err => console.error('[guardian] life check email failed:', err))
         }
 
@@ -214,5 +212,17 @@ Use their first name (${firstName}). Be warm, not clinical.`
     { role: 'user', content: 'Generate the Life Check message.' },
   ]
 
-  return chatCompletion(messages, { temperature: 0.7, max_tokens: 200 })
+  try {
+    return await chatCompletion(messages, { temperature: 0.7, max_tokens: 200 })
+  } catch (err) {
+    console.error('[guardian] MiniMax error generating life check:', err)
+    return `${firstName}, just checking in — you've been quiet and I want to make sure you're okay.
+
+Pick one:
+(a) Heads down, forgot to post — I'll catch up
+(b) Something's going on — I could use support
+(c) Need to pause — life happened
+
+Reply whenever you're ready. No judgment.`
+  }
 }

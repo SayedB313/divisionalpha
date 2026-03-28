@@ -7,9 +7,9 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 // POST /api/admin/trigger
 // { "agent": "facilitator", "action": "monday_declaration", "squad_id": "..." }
 
-const BASE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+  || 'https://divisionalpha.net'
 
 const VALID_AGENTS = ['facilitator', 'guardian', 'analytics', 'matchmaker', 'ceremonies', 'events', 'cron']
 

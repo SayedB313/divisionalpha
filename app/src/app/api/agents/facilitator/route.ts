@@ -172,7 +172,18 @@ Close with a look-ahead to next week.`
         { role: 'user', content: `Generate the ${action} message now.` },
       ]
 
-      facilMessage = await chatCompletion(messages, { temperature: 0.8, max_tokens: 300 })
+      try {
+        facilMessage = await chatCompletion(messages, { temperature: 0.8, max_tokens: 300 })
+      } catch (aiErr) {
+        console.error('[facilitator] MiniMax error:', aiErr)
+        const fallbacks: Record<string, string> = {
+          monday_declaration: `Squad — it's Monday. Time to declare. What are you committing to this week? Post your goals below.`,
+          wednesday_checkin: `Mid-week check-in. How's everyone tracking? Green, Yellow, or Red — post your signal and a quick note.`,
+          friday_reflection: `It's Friday. Time to reflect. What were your wins this week? What did you miss? What's carrying forward?`,
+          weekly_summary: `Another week in the books. Check the activity feed for this week's stats.`,
+        }
+        facilMessage = fallbacks[action] || `Time for your ${action.replace('_', ' ')}. Post in the channel.`
+      }
 
       // Post to squad channel
       // Use a system user ID for the facilitator (or the first admin)

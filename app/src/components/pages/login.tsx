@@ -16,6 +16,17 @@ export function LoginPage() {
 
   const supabase = createClient();
 
+  function friendlyError(msg: string): string {
+    const m = msg.toLowerCase();
+    if (m.includes("rate limit") || m.includes("too many")) return "Too many attempts. Please wait a few minutes before trying again.";
+    if (m.includes("invalid login") || m.includes("invalid credentials")) return "Incorrect email or password.";
+    if (m.includes("email not confirmed")) return "Your email isn't confirmed yet. Check your inbox for a confirmation link.";
+    if (m.includes("user not found")) return "No account found with this email. Apply for the next sprint below.";
+    if (m.includes("invalid email")) return "Please enter a valid email address.";
+    if (m.includes("network") || m.includes("fetch")) return "Connection error. Check your internet and try again.";
+    return "Something went wrong. Please try again.";
+  }
+
   const handleMagicLink = async () => {
     if (!email) return;
     setLoading(true);
@@ -29,9 +40,9 @@ export function LoginPage() {
 
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(friendlyError(error.message));
     } else {
-      setMessage("Check your email for the login link.");
+      setMessage("Magic link sent. Check your inbox — it expires in 1 hour.");
     }
   };
 
@@ -44,7 +55,7 @@ export function LoginPage() {
 
     setLoading(false);
     if (error) {
-      setError(error.message);
+      setError(friendlyError(error.message));
     } else {
       navigateTo("home");
     }

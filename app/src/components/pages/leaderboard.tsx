@@ -109,62 +109,68 @@ export function LeaderboardPage() {
       {tab === "squads" ? (
         <>
           {/* Your squad highlight */}
-          <div
-            className="p-5 mb-6"
-            style={{
-              background: "var(--accent-surface)",
-              border: "1px solid var(--accent)",
-              borderRadius: "4px",
-            }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <div
-                  className="text-[10px] uppercase tracking-[0.08em] mb-1"
-                  style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
-                >
-                  Your Squad &middot; Rank #2
+          {(() => {
+            const yourSquad = squadsData.find((s: any) => s.isYou);
+            if (!yourSquad) return null;
+            return (
+              <div
+                className="p-5 mb-6"
+                style={{
+                  background: "var(--accent-surface)",
+                  border: "1px solid var(--accent)",
+                  borderRadius: "4px",
+                }}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <div
+                      className="text-[10px] uppercase tracking-[0.08em] mb-1"
+                      style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+                    >
+                      Your Squad &middot; Rank #{yourSquad.rank}
+                    </div>
+                    <div className="text-lg font-semibold">{yourSquad.name}</div>
+                  </div>
+                  <div className="text-right">
+                    <div
+                      className="text-2xl font-medium"
+                      style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+                    >
+                      {yourSquad.completion}%
+                    </div>
+                    <div
+                      className="text-[10px] uppercase tracking-[0.06em]"
+                      style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+                    >
+                      Completion
+                    </div>
+                  </div>
                 </div>
-                <div className="text-lg font-semibold">Alpha Vanguard</div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  {[
+                    { label: "Members", val: String(yourSquad.members) },
+                    { label: "Streak", val: `${yourSquad.streak} sprint${yourSquad.streak > 1 ? "s" : ""}` },
+                    { label: "Trend", val: yourSquad.trend },
+                  ].map((s) => (
+                    <div key={s.label} className="flex items-center gap-1.5">
+                      <span
+                        className="text-[10px] uppercase tracking-[0.06em]"
+                        style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+                      >
+                        {s.label}:
+                      </span>
+                      <span
+                        className="text-[11px] font-medium"
+                        style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-secondary)" }}
+                      >
+                        {s.val}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="text-right">
-                <div
-                  className="text-2xl font-medium"
-                  style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
-                >
-                  78%
-                </div>
-                <div
-                  className="text-[10px] uppercase tracking-[0.06em]"
-                  style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-                >
-                  Completion
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              {[
-                { label: "Members", val: "7" },
-                { label: "Streak", val: "3 sprints" },
-                { label: "Trend", val: "+12%" },
-              ].map((s) => (
-                <div key={s.label} className="flex items-center gap-1.5">
-                  <span
-                    className="text-[10px] uppercase tracking-[0.06em]"
-                    style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-                  >
-                    {s.label}:
-                  </span>
-                  <span
-                    className="text-[11px] font-medium"
-                    style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-secondary)" }}
-                  >
-                    {s.val}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Squad table header */}
           <div
@@ -377,6 +383,16 @@ export function LeaderboardPage() {
       )}
 
       {/* Season summary */}
+      {(() => {
+        const avgCompletion = squadsData.length > 0
+          ? Math.round(squadsData.reduce((sum: number, s: any) => sum + s.completion, 0) / squadsData.length)
+          : 0;
+        const summaryStats = [
+          { val: String(squadsData.length), label: "Active squads" },
+          { val: String(operatorsData.length), label: "Operators" },
+          { val: `${avgCompletion}%`, label: "Avg completion" },
+        ];
+        return (
       <div
         className="mt-8 py-4 px-5"
         style={{
@@ -386,11 +402,7 @@ export function LeaderboardPage() {
         }}
       >
         <div className="grid grid-cols-3 gap-4">
-          {[
-            { val: "10", label: "Active squads" },
-            { val: "71", label: "Operators" },
-            { val: "72%", label: "Avg completion" },
-          ].map((s) => (
+          {summaryStats.map((s) => (
             <div key={s.label} className="text-center">
               <div
                 className="text-lg font-medium leading-none mb-1"
@@ -408,6 +420,8 @@ export function LeaderboardPage() {
           ))}
         </div>
       </div>
+        );
+      })()}
     </PageWrapper>
   );
 }

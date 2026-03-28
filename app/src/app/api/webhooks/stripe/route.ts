@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/server'
+import { createLogger } from '@/lib/logger'
+
+const log = createLogger('stripe-webhook')
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -22,7 +25,7 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     )
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message)
+    log.error('Webhook signature verification failed', { error: err.message })
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
@@ -35,7 +38,7 @@ export async function POST(request: NextRequest) {
       const customerId = session.customer as string
 
       if (!email) {
-        console.error('No email in checkout session')
+        log.error('No email in checkout session', { session_id: session.id })
         break
       }
 
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (!application) {
-        console.error('No matching application for:', email)
+        log.error('No matching application', { email })
         break
       }
 
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
       })
 
       if (authError) {
-        console.error('Error creating user:', authError)
+        log.error('Error creating user', { email, error: authError.message })
         break
       }
 
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
         email,
       })
 
-      console.log(`User created: ${email} (${userId})`)
+      log.info('User created from checkout', { email, user_id: userId })
       break
     }
 
@@ -126,6 +129,48 @@ export async function POST(request: NextRequest) {
       await supabase.from('profiles').update({
         subscription_status: 'canceled',
         status: 'churned',
+      }).eq('stripe_customer_id', customerId)
+      break
+    }
+
+    case 'invoice.payment_failed': {
+      const invoice = event.data.object as Stripe.Invoice
+      const customerId = invoice.customer as string
+
+      await supabase.from('profiles').update({
+        subscription_status: 'past_due',
+      }).eq('stripe_customer_id', customerId)
+
+      log.warn('Payment failed', { customer_id: customerId, invoice_id: invoice.id })
+      break
+    }
+
+    case 'charge.failed': {
+      const charge = event.data.object as Stripe.Charge
+      const customerId = charge.customer as string
+
+      if (customerId) {
+        log.warn('Charge failed', { customer_id: customerId, reason: charge.failure_message || 'unknown' })
+      }
+      break
+    }
+
+    case 'customer.subscription.paused': {
+      const subscription = event.data.object as Stripe.Subscription
+      const customerId = subscription.customer as string
+
+      await supabase.from('profiles').update({
+        subscription_status: 'paused',
+      }).eq('stripe_customer_id', customerId)
+      break
+    }
+
+    case 'customer.subscription.resumed': {
+      const subscription = event.data.object as Stripe.Subscription
+      const customerId = subscription.customer as string
+
+      await supabase.from('profiles').update({
+        subscription_status: subscription.status,
       }).eq('stripe_customer_id', customerId)
       break
     }

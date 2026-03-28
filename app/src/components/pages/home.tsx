@@ -5,6 +5,7 @@ import { useNavigation } from "@/lib/navigation-context";
 import { useApp } from "@/lib/app-context";
 import { useCoach } from "@/lib/hooks/use-coach";
 import { useDeclarations } from "@/lib/hooks/use-declarations";
+import { useCheckins } from "@/lib/hooks/use-checkins";
 import { PageWrapper } from "../page-wrapper";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -71,6 +72,7 @@ export function HomePage() {
   const { profile, sprint, squad, squadMembers } = useApp();
   const { whisper } = useCoach();
   const { declaration } = useDeclarations();
+  const { squadCheckins } = useCheckins();
   const [goals, setGoals] = useState(MOCK_GOALS);
   const [sprintWidth, setSprintWidth] = useState("0%");
 
@@ -82,8 +84,10 @@ export function HomePage() {
   const sprintPct = sprintWeeks > 0 ? Math.round((currentWeek / sprintWeeks) * 100) : 66;
   const memberInitials = squadMembers.length > 0
     ? squadMembers.filter(m => m.user_id !== profile?.id).map(m => m.profile.initials)
-    : MOCK_SQUAD_MEMBERS;
-  const coachWhisper = whisper?.content || "You\u2019re 12% ahead of your Week 4 average. Your professional goals land consistently, but this is the third week you\u2019ve dropped the personal goal. Pattern worth examining.";
+    : (profile ? [] : MOCK_SQUAD_MEMBERS);
+  const totalMembers = squadMembers.length > 0 ? squadMembers.length : 7;
+  const checkedInCount = squadCheckins.length > 0 ? squadCheckins.length : null;
+  const coachWhisper = whisper?.content || null;
 
   // Map declaration goals to display format
   useEffect(() => {
@@ -210,24 +214,26 @@ export function HomePage() {
       </div>
 
       {/* Coach Whisper */}
-      <div
-        className="mt-9 py-5 px-6"
-        style={{
-          background: "var(--accent-surface)",
-          borderLeft: "2px solid var(--accent)",
-          borderRadius: "0 4px 4px 0",
-        }}
-      >
+      {coachWhisper && (
         <div
-          className="text-[10px] uppercase tracking-[0.1em] font-medium mb-1.5"
-          style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+          className="mt-9 py-5 px-6"
+          style={{
+            background: "var(--accent-surface)",
+            borderLeft: "2px solid var(--accent)",
+            borderRadius: "0 4px 4px 0",
+          }}
         >
-          Coach
+          <div
+            className="text-[10px] uppercase tracking-[0.1em] font-medium mb-1.5"
+            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+          >
+            Coach
+          </div>
+          <div className="text-sm italic leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            {coachWhisper}
+          </div>
         </div>
-        <div className="text-sm italic leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-          {coachWhisper}
-        </div>
-      </div>
+      )}
 
       {/* Squad Summary */}
       <div
@@ -257,7 +263,7 @@ export function HomePage() {
             ))}
           </div>
           <div className="text-[13px]" style={{ color: "var(--text-secondary)" }}>
-            5 of 7 checked in
+            {checkedInCount !== null ? `${checkedInCount} of ${totalMembers} checked in` : `${totalMembers} members`}
           </div>
         </div>
         <div className="text-sm" style={{ color: "var(--text-muted)" }}>&rarr;</div>

@@ -5,9 +5,9 @@ import { chatCompletion, type ChatMessage } from '@/lib/minimax'
 // Event Bus Processor — processes inter-agent events from agent_events table
 // Called by cron (every 3 hours) or after agent actions
 
-const BASE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000'
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+  || 'https://divisionalpha.net'
 
 export async function POST(request: NextRequest) {
   try {
