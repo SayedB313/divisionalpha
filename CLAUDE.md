@@ -253,24 +253,25 @@ divisionalpha/
 - `agent_events` — inter-agent event bus
 - `notification_preferences` — per-user notification settings
 
-## API Routes (14)
+## API Routes (15)
 
 | Route | Method | Purpose |
 |-------|--------|---------|
-| `/api/coach` | POST | MiniMax 2.7 AI coach conversation |
+| `/api/coach` | POST | MiniMax 2.7 AI coach conversation (rate-limited: 20/hr/user) |
 | `/api/checkout` | POST | Create Stripe checkout session |
-| `/api/webhooks/stripe` | POST | Handle Stripe payment → create user |
+| `/api/webhooks/stripe` | POST | Handle Stripe payment → create user → send welcome email with magic link |
 | `/api/agents/matchmaker` | POST | Form squads from applicant pool |
-| `/api/agents/facilitator` | POST | Generate Mon/Wed/Fri prompts |
-| `/api/agents/guardian` | POST | Health scan, Life Check DMs |
+| `/api/agents/facilitator` | POST | Generate Mon/Wed/Fri prompts (MiniMax fallback included) |
+| `/api/agents/guardian` | POST | Health scan, Life Check DMs (MiniMax fallback included) |
 | `/api/agents/analytics` | POST | Calculate operator scores |
-| `/api/agents/cron` | POST | Scheduled dispatcher |
+| `/api/agents/cron` | GET | Scheduled dispatcher — auth via `Authorization: Bearer $CRON_SECRET` |
 | `/api/agents/ceremonies` | POST | Kickoff/Dip/Completion triggers |
-| `/api/agents/lifecycle` | POST | Sprint state transitions |
+| `/api/agents/lifecycle` | POST | Sprint state transitions (also called daily via cron) |
 | `/api/agents/events` | POST | Inter-agent event bus |
 | `/api/admin/dashboard` | GET | Platform metrics |
 | `/api/admin/trigger` | POST | Manual agent invocation |
 | `/api/email` | POST | Brevo email notifications (reminders, nudges, life checks) |
+| `/api/health` | GET | Health check — app + DB + env vars (used by uptime monitor) |
 
 ## Key Decisions
 
@@ -287,6 +288,25 @@ divisionalpha/
 - Self-hosted via Coolify (not Vercel) — full control, Docker + Traefik
 - Tier 3 deferred — ship Tier 2 first, build Tier 3 once operator pool exists
 
+## Server Infrastructure
+
+- **Auto-deploy:** Polling-based via `/opt/coolify-autodeploy.sh` (root cron, every 2 min). Polls GitHub → triggers Coolify restart on SHA change.
+- **Agent cron:** `/etc/cron.d/divisionalpha` — every 3 hours, sends `Authorization: Bearer $CRON_SECRET` to `/api/agents/cron`
+- **Lifecycle cron:** Called daily at midnight via agent cron dispatcher — handles sprint state transitions
+- **Health monitor:** `/opt/da-health-monitor.sh` via `/etc/cron.d/da-health-monitor` — checks `/api/health` every 5 min, Brevo alert to `sbw919@gmail.com` after 3 consecutive failures
+- **Backup:** `/etc/cron.d/da-backup` — weekly pg_dump every Sunday 2am UTC → `/var/backups/divisionalpha/`
+- **Log files:** `/var/log/divisionalpha-cron.log`, `/var/log/da-health-monitor.log`, `/var/log/da-backup.log`
+- **CRON_SECRET:** Set in `/data/coolify/applications/jkcc8gsg88okkgcscg48g00g/.env` — required by cron endpoint
+
+## Sprint 4 Timeline
+
+- **March 30, 2026:** Lifecycle cron → Sprint 4 `upcoming → handshake` (enrollment window)
+- **April 4-5:** Run matchmaker manually via admin trigger after applications close
+- **April 6, 2026:** Lifecycle cron → Sprint 4 `handshake → active, Week 1` → kickoff ceremony fires automatically
+- **Weekly:** Mon/Wed/Fri facilitator prompts + emails; Guardian scans every 6h on weekdays
+- **Week 3:** Dip intervention ceremony triggers automatically
+- **Week 6:** Completion ceremony, operator scores calculated, continuation votes
+
 ## What's Next
 
 - ~~Build the actual Next.js production app~~ — **DONE** (all 16 screens)
@@ -300,10 +320,19 @@ divisionalpha/
 - ~~Notification system~~ — **DONE** (unread count, badge in topbar)
 - ~~Theme toggle~~ — **DONE** (light/dark in topbar)
 - ~~Deploy to production server~~ — **DONE** (divisionalpha.net on Coolify, HTTP 200, Cloudflare CDN)
-- ~~Email notifications~~ — **DONE** (Brevo: sprint reminders, squad nudges, life checks, ceremonies)
+- ~~Email notifications~~ — **DONE** (Brevo: sprint reminders, squad nudges, life checks, ceremonies, welcome)
 - ~~Configure Supabase SMTP~~ — **DONE** (Brevo SMTP via `supabase config push`, 100 emails/hr limit)
 - ~~Create Sprint 4~~ — **DONE** (April 6 – May 15, 2026, handshake week March 30)
 - ~~Mobile responsiveness polish~~ — **DONE** (tap targets, overflow fixes, settings tabs)
 - ~~Deploy latest to Coolify~~ — **DONE** (auto-deploy on push, Brevo env vars live)
-- ~~Cron setup on server~~ — **DONE** (every 3h agent dispatch via system cron)
+- ~~Cron setup on server~~ — **DONE** (every 3h, CRON_SECRET auth, /etc/cron.d/divisionalpha)
+- ~~Critical bug fixes~~ — **DONE** (email recipients, localhost fallbacks, coach conversation history)
+- ~~Security hardening~~ — **DONE** (CRON_SECRET, HTML escaping, rate limiting, structured logging)
+- ~~Resilience~~ — **DONE** (MiniMax fallbacks on all 3 AI-calling agents, health check, Docker HEALTHCHECK)
+- ~~Observability~~ — **DONE** (health endpoint, uptime monitor, JSON structured logs, backup cron)
+- ~~Test coverage~~ — **DONE** (24 Vitest tests: email templates, rate limiter, cron scheduling)
+- ~~Sprint lifecycle in cron~~ — **DONE** (daily midnight lifecycle check — was missing, sprint transitions would never have fired)
+- ~~Welcome email~~ — **DONE** (magic link sent to new users after Stripe payment)
+- Recruit applicants for Sprint 4 — **IN PROGRESS** (0 real applicants as of March 28, 2026)
+- Run matchmaker — pending applicants (run ~April 4-5 via admin trigger)
 - Tier 3 (Operator Fund) — deferred until 500+ Tier 2 members
