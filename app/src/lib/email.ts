@@ -190,6 +190,30 @@ export function sprintKickoff(to: string, name: string, sprintNum: number, squad
   }
 }
 
+export function welcomeWithMagicLink(to: string, name: string, magicLink: string): SendEmailOptions {
+  const safe = escapeHtml(name)
+  return {
+    to,
+    subject: 'Welcome to Division Alpha — your login link',
+    html: wrap(`
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">You're in, ${safe}.</h2>
+      <p>Your payment went through. Your account is ready.</p>
+      <p>Click below to log in for the first time. This link expires in 24 hours.</p>
+      <a href="${magicLink}" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
+        Log in to Division Alpha
+      </a>
+      <p style="margin-top:24px;font-size:13px;color:#948d7e;">
+        If the button doesn't work, copy this link:<br/>
+        <span style="font-family:monospace;font-size:12px;word-break:break-all;">${magicLink}</span>
+      </p>
+      <p style="font-size:13px;color:#948d7e;">
+        Your squad assignment will be announced before Sprint launch. Watch your inbox.
+      </p>
+    `),
+    text: `You're in, ${name}. Log in here: ${magicLink}\n\nThis link expires in 24 hours. Your squad will be announced before Sprint launch.`,
+  }
+}
+
 export function sprintCompletion(to: string, name: string, sprintNum: number, score: number): SendEmailOptions {
   const safe = escapeHtml(name)
   return {

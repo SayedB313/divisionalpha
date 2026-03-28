@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createLogger } from '@/lib/logger'
+import { sendEmail, welcomeWithMagicLink } from '@/lib/email'
 
 const log = createLogger('stripe-webhook')
 
@@ -103,10 +104,21 @@ export async function POST(request: NextRequest) {
       }).eq('id', application.id)
 
       // Send magic link for first login
-      await supabase.auth.admin.generateLink({
+      const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email,
       })
+
+      if (linkError || !linkData?.properties?.action_link) {
+        log.error('Failed to generate magic link', { email, error: linkError?.message })
+      } else {
+        const magicLink = linkData.properties.action_link
+        const welcomeEmail = welcomeWithMagicLink(email, application.full_name, magicLink)
+        sendEmail(welcomeEmail).catch(err =>
+          log.error('Welcome email failed', { email, error: err.message })
+        )
+        log.info('Welcome email queued', { email })
+      }
 
       log.info('User created from checkout', { email, user_id: userId })
       break

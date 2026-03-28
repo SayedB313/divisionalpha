@@ -46,6 +46,7 @@ const STEPS = [
       { label: "Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?", choices: ["Yes \u2014 I\u2019m ready", "Not right now"] },
       { label: "Are you willing to share your progress \u2014 and your struggles \u2014 openly with 5-7 strangers?", choices: ["Yes", "I need to think about it"] },
       { label: "Do you understand that ghosting your squad isn\u2019t an option?", choices: ["Yes \u2014 if life happens, I communicate", "I understand"] },
+      { label: "How often do you want to hear from your coach?", choices: ["Daily check-ins", "A few times a week", "Weekly only", "Only when I reach out"] },
     ],
   },
 ];
@@ -275,6 +276,7 @@ export function ApplyPage() {
                   can_commit_3x_week: selectedOptions["Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?"]?.startsWith("Yes") || false,
                   willing_to_share: selectedOptions["Are you willing to share your progress \u2014 and your struggles \u2014 openly with 5-7 strangers?"] === "Yes",
                   no_ghosting_understood: true,
+                  communication_freq: selectedOptions["How often do you want to hear from your coach?"] || null,
                   status: "submitted",
                 });
               } catch (err) {

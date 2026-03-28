@@ -1,36 +1,38 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Division Alpha — Cron Setup for Coolify Server
 #
-# Run this on your Coolify server to set up the agent cron dispatcher.
-# The cron endpoint checks the day/time and fires the right agents:
-#   - Monday 7-9am: Declaration prompts + email reminders
-#   - Wednesday 11am-1pm: Check-in prompts + email reminders
-#   - Friday 2-4pm: Reflection prompts + email reminders
-#   - Friday 9-11pm: Weekly summary + score calculation
-#   - Weekdays every 6h: Guardian engagement scan
-#   - Late Mon/Wed 9-11pm: Nudge non-submitters
+# Installs the agent dispatch cron into /etc/cron.d/ (requires sudo/root).
+# The cron endpoint checks day/time and fires the right agents:
+#   - Monday 7-9am ET:    Declaration prompts + email reminders
+#   - Wednesday 11am-1pm ET: Check-in prompts + email reminders
+#   - Friday 2-4pm ET:    Reflection prompts + email reminders
+#   - Friday 9-11pm ET:   Weekly summary + score calculation
+#   - Weekdays, 6-hourly: Guardian engagement scan
+#   - Late Mon/Wed:       Nudge non-submitters
 #
-# Usage:
-#   chmod +x scripts/setup-cron.sh
-#   ./scripts/setup-cron.sh
+# Usage (on server as root or with sudo):
+#   CRON_SECRET=your-secret ./scripts/setup-cron.sh
+#
+# Env vars:
+#   CRON_SECRET  — must match CRON_SECRET in Coolify env vars
+#   SITE_URL     — defaults to https://divisionalpha.net
 
-CRON_SECRET="${CRON_SECRET:-div-alpha-cron-secret-change-in-production}"
+set -euo pipefail
+
+CRON_SECRET="${CRON_SECRET:?CRON_SECRET is required}"
 SITE_URL="${SITE_URL:-https://divisionalpha.net}"
+CRON_FILE="/etc/cron.d/divisionalpha"
 
-CRON_LINE="0 */3 * * * curl -sf -H 'Authorization: Bearer ${CRON_SECRET}' '${SITE_URL}/api/agents/cron' >> /var/log/divisionalpha-cron.log 2>&1"
+sudo tee "$CRON_FILE" > /dev/null << CRON
+# Division Alpha — agent dispatch (every 3 hours)
+CRON_TZ=UTC
+0 */3 * * * root curl -sf -H 'Authorization: Bearer ${CRON_SECRET}' -X POST '${SITE_URL}/api/agents/cron' >> /var/log/divisionalpha-cron.log 2>&1
+CRON
 
-# Check if cron job already exists
-if crontab -l 2>/dev/null | grep -q "divisionalpha.net/api/agents/cron"; then
-  echo "Cron job already exists. Updating..."
-  crontab -l 2>/dev/null | grep -v "divisionalpha.net/api/agents/cron" | crontab -
-fi
+sudo chmod 644 "$CRON_FILE"
 
-# Add the cron job
-(crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
-
-echo "Cron job installed:"
-echo "  Schedule: Every 3 hours"
-echo "  Endpoint: ${SITE_URL}/api/agents/cron"
-echo "  Log: /var/log/divisionalpha-cron.log"
+echo "Cron installed at $CRON_FILE:"
+sudo cat "$CRON_FILE"
 echo ""
-echo "Verify with: crontab -l"
+echo "Verify: sudo systemctl status cron"
+echo "Log:    sudo tail -f /var/log/divisionalpha-cron.log"
