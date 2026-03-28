@@ -61,6 +61,11 @@ export async function GET(request: NextRequest) {
     actions.push({ agent: 'guardian', action: 'scan', description: 'Guardian engagement scan' })
   }
 
+  // ── Lifecycle: Daily at midnight (always check for sprint transitions) ──
+  if (hour === 0) {
+    actions.push({ agent: 'lifecycle', action: 'check', description: 'Sprint lifecycle check' })
+  }
+
   // ── Late Monday/Wednesday: Nudge non-submitters ──
   if (dayOfWeek === 1 && hour >= 21 && hour <= 23) {
     actions.push({ agent: 'facilitator', action: 'monday_declaration', description: 'Late Monday nudge for non-declarers' })
@@ -81,9 +86,11 @@ export async function GET(request: NextRequest) {
         ? `${BASE_URL}/api/email`
         : action.agent === 'guardian'
           ? `${BASE_URL}/api/agents/guardian`
-          : `${BASE_URL}/api/agents/${action.agent}`
+          : action.agent === 'lifecycle'
+            ? `${BASE_URL}/api/agents/lifecycle`
+            : `${BASE_URL}/api/agents/${action.agent}`
 
-      const body = action.agent === 'guardian'
+      const body = (action.agent === 'guardian' || action.agent === 'lifecycle')
         ? {}
         : { action: action.action }
 
