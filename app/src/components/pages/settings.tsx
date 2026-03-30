@@ -422,6 +422,22 @@ export function SettingsPage() {
             ))}
           </div>
 
+          {/* Sign out */}
+          <button
+            onClick={async () => { await signOut(); navigateTo("landing"); }}
+            className="w-full text-[13px] font-medium py-3 px-5 cursor-pointer transition-colors duration-150"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: "4px",
+              color: "var(--text-secondary)",
+              fontFamily: "inherit",
+              textAlign: "left",
+            }}
+          >
+            Sign Out
+          </button>
+
           {/* Danger zone */}
           <div
             className="py-4 px-5"

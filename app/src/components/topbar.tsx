@@ -12,26 +12,27 @@ const PRIMARY_NAV = [
   { page: "checkin" as const, label: "Check-in" },
   { page: "reflect" as const, label: "Reflect" },
   { page: "squad" as const, label: "Squad" },
-  { page: "leaderboard" as const, label: "Board" },
-  { page: "coach" as const, label: "Coach" },
 ];
 
 const MORE_NAV = [
+  { page: "coach" as const, label: "Coach" },
+  { page: "leaderboard" as const, label: "Leaderboard" },
   { page: "kickoff" as const, label: "Sprint Kickoff" },
   { page: "completion" as const, label: "Sprint Completion" },
-  { page: "apply" as const, label: "Apply" },
-  { page: "admin" as const, label: "Admin Dashboard" },
+  { page: "admin" as const, label: "Admin" },
 ];
 
 export function Topbar() {
   const { currentPage, navigateTo, setScoreOpen } = useNavigation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { unreadCount, notifications, markAllRead, markRead } = useNotifications();
   const [moreOpen, setMoreOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const avatarRef = useRef<HTMLDivElement>(null);
 
   // Hide full nav on public pages when not authenticated
   const isPublicPage = ["landing", "login", "apply"].includes(currentPage);
@@ -58,6 +59,17 @@ export function Topbar() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [notifOpen]);
+
+  useEffect(() => {
+    if (!avatarOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [avatarOpen]);
 
   const isMoreActive = MORE_NAV.some((item) => item.page === currentPage);
 
@@ -298,18 +310,47 @@ export function Topbar() {
         )}
 
         {showFullNav && (
-          <button
-            onClick={() => navigateTo("settings")}
-            className="w-9 h-9 flex items-center justify-center text-[10px] font-semibold cursor-pointer transition-all duration-150 rounded-full ml-1"
-            style={{
-              background: currentPage === "settings" ? "var(--accent)" : "var(--surface-hover)",
-              color: currentPage === "settings" ? "var(--accent-text)" : "var(--text-secondary)",
-              border: "none",
-            }}
-            aria-label="Settings"
-          >
-            AM
-          </button>
+          <div className="relative" ref={avatarRef}>
+            <button
+              onClick={() => setAvatarOpen(!avatarOpen)}
+              className="w-9 h-9 flex items-center justify-center text-[10px] font-semibold cursor-pointer transition-all duration-150 rounded-full ml-1"
+              style={{
+                background: currentPage === "settings" || avatarOpen ? "var(--accent)" : "var(--surface-hover)",
+                color: currentPage === "settings" || avatarOpen ? "var(--accent-text)" : "var(--text-secondary)",
+                border: "none",
+              }}
+              aria-label="Account menu"
+            >
+              AM
+            </button>
+            {avatarOpen && (
+              <div
+                className="absolute top-full right-0 mt-1 py-1 min-w-[140px]"
+                style={{
+                  background: "var(--bg-page)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "4px",
+                  boxShadow: "var(--shadow-lg)",
+                }}
+              >
+                <button
+                  onClick={() => { navigateTo("settings"); setAvatarOpen(false); }}
+                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer transition-colors duration-150"
+                  style={{ color: "var(--text-secondary)", fontFamily: "inherit" }}
+                >
+                  Settings
+                </button>
+                <div style={{ borderTop: "1px solid var(--border-subtle)", margin: "2px 0" }} />
+                <button
+                  onClick={async () => { setAvatarOpen(false); await signOut(); navigateTo("landing"); }}
+                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer transition-colors duration-150"
+                  style={{ color: "var(--red)", fontFamily: "inherit" }}
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </header>

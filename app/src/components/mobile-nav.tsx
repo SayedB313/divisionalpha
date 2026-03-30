@@ -8,22 +8,19 @@ const MOBILE_ITEMS = [
   { page: "home" as const, icon: "\u25A0", label: "Home" },
   { page: "declare" as const, icon: "\u270E", label: "Declare" },
   { page: "checkin" as const, icon: "\u25CF", label: "Signal" },
-  { page: "reflect" as const, icon: "\u269B", label: "Reflect" },
   { page: "squad" as const, icon: "\u25C9", label: "Squad" },
 ];
 
 const MORE_ITEMS = [
+  { page: "reflect" as const, label: "Reflect" },
   { page: "coach" as const, label: "Coach" },
   { page: "leaderboard" as const, label: "Leaderboard" },
-  { page: "kickoff" as const, label: "Sprint Kickoff" },
-  { page: "completion" as const, label: "Sprint Completion" },
-  { page: "apply" as const, label: "Apply" },
   { page: "settings" as const, label: "Settings" },
 ];
 
 export function MobileNav() {
   const { currentPage, navigateTo } = useNavigation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
@@ -106,6 +103,16 @@ export function MobileNav() {
                 {item.label}
               </button>
             ))}
+            <button
+              onClick={async () => { setMoreOpen(false); await signOut(); navigateTo("landing"); }}
+              className="w-full text-left bg-transparent border-none text-[13px] font-medium px-4 py-3 cursor-pointer transition-colors duration-150"
+              style={{
+                color: "var(--red)",
+                fontFamily: "inherit",
+              }}
+            >
+              Sign Out
+            </button>
           </div>
         )}
       </div>
