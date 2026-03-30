@@ -11,7 +11,7 @@ Division Alpha is an AI-orchestrated peer accountability platform connected to *
 ## Three Tiers
 
 1. **Tier 1 — Community** ($10/mo): General access, community features, content
-2. **Tier 2 — Sprint Access** ($49/mo or $20/mo Oumafy Premium): 6-week accountability sprints with squads of 6-8 people. Monday declarations, Wednesday G/Y/R check-ins, Friday reflections
+2. **Tier 2 — Sprint Access** ($49/mo or $20/mo Oumafy Premium): 6-week accountability sprints with squads of 5-6 people. Monday declarations, Wednesday G/Y/R check-ins, Friday reflections
 3. **Tier 3 — The Operator Fund** ($297/mo + equity): Venture studio for top-performing operators. Build real businesses together. Musharakah-compliant (Islamic partnership structure). **NOT YET BUILT — deferred until Tier 2 has 500+ members.**
 
 ## Tech Stack (Production)
@@ -106,13 +106,18 @@ divisionalpha/
 │   ├── Oumafy_Tier3_Operator_Fund_Spec.docx ← Tier 3 Operator Fund full spec
 │   ├── Division Alpha.rtf                    ← Original product vision doc
 │   ├── Teir2 Stuff.rtf                       ← Tier 2 sprint mechanics detail
-│   └── Instructions.rtf                      ← Build instructions and requirements
+│   ├── Instructions.rtf                      ← Build instructions and requirements
+│   ├── DESIGN-DOC-2026-03-29.md              ← gstack design doc (post-pivot rewrite)
+│   ├── CONTRARIAN-PROSECUTION.md             ← Contrarian skill: 76/100 RED KILL on generic positioning
+│   ├── CONTRARIAN-ANALYSIS.md                ← Contrarian analysis summary
+│   ├── PATHFINDER-DEFENSE.md                 ← Pathfinder Defense: CONDITIONAL GO for Muslim pivot
+│   └── MARKET-INTELLIGENCE.md                ← 21 competitors, 7 audiences, cold email strategy
 ├── mockups/
 │   ├── Division_Alpha_App_v7.html            ← CURRENT: Full interactive prototype (approved)
 │   ├── Division_Alpha_Landing.html           ← CURRENT: Public-facing landing page
 │   └── (v1-v5 archived — rejected iterations)
 ├── supabase/
-│   └── migrations/                           ← 14 migration files
+│   └── migrations/                           ← 15 migration files
 │       ├── 001_extensions.sql                ← uuid-ossp, pgvector, pg_cron
 │       ├── 002_profiles.sql                  ← User profiles (extends Supabase auth)
 │       ├── 003_applications.sql              ← Onboarding applications (4-step flow)
@@ -126,7 +131,8 @@ divisionalpha/
 │       ├── 011_rls_policies.sql              ← Row Level Security for all tables
 │       ├── 012_views.sql                     ← squad_activity, leaderboard views
 │       ├── 013_notification_prefs.sql        ← Notification preferences per user
-│       └── 014_fix_anon_applications.sql     ← Allow unauthenticated applications
+│       ├── 014_fix_anon_applications.sql     ← Allow unauthenticated applications
+│       └── 015_add_referral_source.sql       ← Referral tracking column on applications
 ├── app/                                       ← Next.js production app
 │   ├── src/
 │   │   ├── app/
@@ -202,9 +208,9 @@ divisionalpha/
 - **SPA routing:** All pages render from a single Next.js route (`page.tsx`). Navigation is handled client-side via `navigation-context.tsx` — no file-based routing for pages.
 - **Auth gating:** `page.tsx` checks auth state. Unauthenticated users see Landing or Login. Authenticated users see the dashboard.
 - **Page type union:** Every new page must be added to the `Page` type in both `navigation-context.tsx` and `page-wrapper.tsx`, then rendered in `page.tsx`.
-- **Desktop nav:** Primary items in topbar, overflow items (Kickoff, Completion, Apply) in `...` dropdown. Theme toggle (sun/moon) in topbar.
-- **Mobile nav:** 5 primary items in bottom bar (Home, Declare, Signal, Reflect, Squad) + "More" popup menu for Coach, Leaderboard, ceremonies, Apply, Settings.
-- **Profile avatar:** "AM" circle button in topbar (always visible) navigates to Settings page.
+- **Desktop nav:** 5 primary items (Home, Declare, Check-in, Reflect, Squad) + `...` dropdown (Coach, Leaderboard, Sprint Kickoff, Sprint Completion, Admin). Theme toggle (sun/moon) in topbar.
+- **Mobile nav:** 4 primary items in bottom bar (Home, Declare, Signal, Squad) + "More" popup (Reflect, Coach, Leaderboard, Settings, Sign Out).
+- **Profile avatar:** "AM" circle button in topbar opens dropdown with Settings + Sign Out.
 - **Fonts loaded via `next/font/google`** in `layout.tsx` — DM Sans, DM Mono, Instrument Serif.
 - **CSS custom properties** for all colors/spacing in `globals.css` — supports light/dark themes.
 - **Data hooks:** 7 custom hooks in `lib/hooks/` — all use Supabase client, return real data when authenticated, fall back to mock data when not.
@@ -236,11 +242,11 @@ divisionalpha/
 
 ## Database (Supabase)
 
-14 migrations, key tables:
+15 migrations, key tables:
 - `profiles` — extends Supabase auth.users (name, bio, avatar, timezone, persona, tier, stripe IDs)
 - `applications` — 4-step onboarding data
 - `sprints` — 6-week sprint definitions (enrollment → active → completing → completed)
-- `squads` — squad of 6-8 members per sprint
+- `squads` — squad of 5-6 members per sprint
 - `squad_members` — membership with role (member/captain)
 - `declarations` — Monday goals
 - `checkins` — Wednesday G/Y/R signals per goal
@@ -276,6 +282,7 @@ divisionalpha/
 ## Key Decisions
 
 - Custom app from day one (no Discord)
+- **Pivot strategy (2026-03-29):** Brand stays universal, marketing targets Muslim founders. Contrarian scored 76/100 RED KILL on generic positioning. Pathfinder Defense found viable path: Muslim accountability for halal execution. Fills Tier 2 (Discipline) in Oumafy ecosystem (Belonging→Discipline→Economy). Kill gates: Sprint 4 (5+ members), Sprint 4 completion (70%+ goal, <5% churn), Month 3 (20+ members).
 - Islamic values integration (Tawakkul, Amal, Ikhlas) — subtle, not heavy-handed
 - Revenue allocation: 70% → Tier 3 Project Fund, 20% → Operations, 10% → Profit
 - Musharakah (Islamic partnership) for Tier 3 ventures — profit/loss sharing, no interest
@@ -333,7 +340,10 @@ divisionalpha/
 - ~~Test coverage~~ — **DONE** (24 Vitest tests: email templates, rate limiter, cron scheduling)
 - ~~Sprint lifecycle in cron~~ — **DONE** (daily midnight lifecycle check — was missing, sprint transitions would never have fired)
 - ~~Welcome email~~ — **DONE** (magic link sent to new users after Stripe payment)
-- Recruit applicants for Sprint 4 — **IN PROGRESS** (0 real applicants as of March 28, 2026)
+- ~~Sprint 4 launch updates~~ — **DONE** (countdown timer, Founding Operator badge, referral tracking, OG tags, values-aligned copy)
+- ~~Pivot strategy~~ — **DONE** (Contrarian→Pathfinder→design doc rewrite. Brand universal, marketing Muslim founders.)
+- ~~Nav cleanup~~ — **DONE** (sign-out button added in 3 places, menus simplified: desktop 7→5, mobile 5→4)
+- Recruit applicants for Sprint 4 — **IN PROGRESS** (0 real applicants as of March 29. Focus: 30 warm DMs to Muslim founders, cold email via Scribe)
 - Run matchmaker — pending applicants (run ~April 4-5 via admin trigger)
 - Tier 3 (Operator Fund) — deferred until 500+ Tier 2 members
 
