@@ -336,3 +336,63 @@ divisionalpha/
 - Recruit applicants for Sprint 4 — **IN PROGRESS** (0 real applicants as of March 28, 2026)
 - Run matchmaker — pending applicants (run ~April 4-5 via admin trigger)
 - Tier 3 (Operator Fund) — deferred until 500+ Tier 2 members
+
+## Go-To-Market Strategy (2026-03-28)
+
+### Competitive Position
+
+Division Alpha sits in a **$20-100/mo gap** that no competitor fills:
+- **Free tier** (Reddit, Discord, apps): 73% failure rate within 60 days. Partner ghosting, no structure, no consequences.
+- **Mid tier** ($49/mo — DIVISION ALPHA): AI + human squads + proactive follow-up. Nobody else does this.
+- **Premium tier** ($200-600/mo): Commit Action ($199/mo for 20-min weekly call), GoFounder ($500/mo), Vistage ($15-20K/yr).
+
+Key competitors: Focusmate (body doubling, $10/mo, 50K+ members), Commit Action (human coaching, $199/mo, 8K+ coached), FLOWN (facilitated sessions, $25/mo, 50K+ members), Boss as a Service (virtual boss, $25/mo), Shelpful (AI+human hybrid, $35-65/mo).
+
+**Division Alpha's moats:**
+1. AI + human squad hybrid at $49/mo (nobody else)
+2. Squad model solves 73% ghosting rate (distributed accountability > 1:1 partnerships)
+3. Always-on AI layer (coaches sleep, AI doesn't)
+4. Proactive, not passive (comes to YOU, not another dashboard to open)
+5. Price disruption (75% cheaper than Commit Action, 88% cheaper than RE coaching)
+
+### Target Audiences (Cold Email — Ranked)
+
+**Tier 1 — Primary campaigns:**
+1. **Solopreneurs ($100K+):** ~6M addressable in US. Pain: 9/10 (isolation, zero structure). Already spend $100-500/mo on tools. Source: Apollo.io (company size=1, revenue $100K+).
+2. **Real Estate Agents:** 3M licensed in US. Pain: 8/10 (73% hire coaches FOR accountability). Already pay $400+/mo for coaching. Source: state licensing boards, Realtor.com, NAR directories.
+
+**Tier 2 — Secondary campaigns:**
+3. **SDRs/Sales Reps:** ~800K in US. Pain: 9/10 (75% burnout, 15-month avg tenure). They live in email — highest cold email receptiveness. Source: Apollo.io, LinkedIn Sales Navigator.
+
+**Tier 3 — Ads/community (not cold email):**
+4. Remote workers (32.6M but B2C lean), Content creators (high pain but low income), Freelancers (personal emails, anti-cold-outreach).
+
+### Distribution Channels
+
+1. **Cold email (free, immediate):** 90 warmed inboxes, 1,000 sends/day capacity. Conservative projection: 30K sends/month → 150-300 replies → 15-60 paying members ($735-2,940/mo).
+2. **Paid ads (parallel):** Google Ads ("accountability partner," "accountability group"), Facebook/Instagram (interest targeting: entrepreneurship, productivity, solopreneur).
+3. **Muslim Take podcast (long-term):** Audience building → Division Alpha funnel. Organic, compounding.
+4. **Reddit/community (organic):** r/AccountabilityPartners (50K), r/GetMotivatedBuddies (200K), r/Entrepreneur (2M), r/getdisciplined (900K).
+
+### Cold Email Playbook
+
+Position as **professional performance tool**, NOT personal self-help. This keeps it B2B where reply rates are 4-5% vs 0.8% B2C.
+
+**Benchmarks:** Avg B2B reply rate 4%, good is 6%+. Thursday sends get 6.87% reply rate. Under 80 words optimal. 42% of replies come from follow-ups.
+
+**Campaign 1 — Solopreneurs:**
+- Subject: "Quick question about working solo"
+- Angle: "You built a profitable solo business. But who makes sure you actually do the hard things on Tuesday when nobody's watching?"
+
+**Campaign 2 — RE Agents:**
+- Subject: "What your broker doesn't provide"
+- Angle: "Most agents pay $400+/mo for a coach whose main value is accountability. Same thing. $49/mo. AI-powered."
+
+**Campaign 3 — SDRs:**
+- Subject: "The 15-month wall"
+- Angle: "75% of SDRs burn out within 15 months. The ones who make AE have a system."
+
+### Full Market Intelligence
+
+See Obsidian: `/Users/cool/Obsidian-OP3/03-Projects/Division Alpha/Market Intelligence Report.md`
+(21 competitors mapped, 7 audiences ranked, cold email math, community/forum research, price sensitivity data)

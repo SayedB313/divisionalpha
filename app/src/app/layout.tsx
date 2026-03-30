@@ -31,8 +31,19 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Division Alpha",
-  description: "AI-orchestrated peer accountability. 6-week sprint squads holding each other to declared goals.",
+  title: "Division Alpha — Accountability Squads for Founders Who Take Their Commitments Seriously",
+  description: "AI-orchestrated peer accountability. 5-6 person squads, 6-week sprints, Monday/Wednesday/Friday rhythm. $49/mo. Your squad holds you to your word.",
+  openGraph: {
+    title: "Division Alpha — Your Q2 Starts Here",
+    description: "Accountability squads for founders who take their commitments seriously. AI handles the infrastructure. Your squad handles the accountability. $49/mo.",
+    siteName: "Division Alpha",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Division Alpha — Your Q2 Starts Here",
+    description: "Accountability squads for founders who take their commitments seriously. AI handles the infrastructure. Your squad handles the accountability.",
+  },
 };
 
 export default function RootLayout({

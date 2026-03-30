@@ -28,6 +28,7 @@ const STEPS = [
     ],
     extraFields: [
       { type: "textarea", label: "Why are you applying?", placeholder: "What\u2019s driving you to seek accountability right now?" },
+      { type: "text", label: "How did you hear about Division Alpha? (optional)", placeholder: "e.g. a friend, Discord, LinkedIn, community name" },
     ],
   },
   {
@@ -44,7 +45,7 @@ const STEPS = [
     fields: [],
     options: [
       { label: "Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?", choices: ["Yes \u2014 I\u2019m ready", "Not right now"] },
-      { label: "Are you willing to share your progress \u2014 and your struggles \u2014 openly with 5-7 strangers?", choices: ["Yes", "I need to think about it"] },
+      { label: "Are you willing to share your progress \u2014 and your struggles \u2014 openly with your squad?", choices: ["Yes", "I need to think about it"] },
       { label: "Do you understand that ghosting your squad isn\u2019t an option?", choices: ["Yes \u2014 if life happens, I communicate", "I understand"] },
       { label: "How often do you want to hear from your coach?", choices: ["Daily check-ins", "A few times a week", "Weekly only", "Only when I reach out"] },
     ],
@@ -270,11 +271,12 @@ export function ApplyPage() {
                   primary_focus: selectedOptions["Primary focus"] || null,
                   current_stage: selectedOptions["Current stage"] || null,
                   why_applying: formRef.current["Why are you applying?"] || "",
+                  referral_source: formRef.current["How did you hear about Division Alpha? (optional)"] || null,
                   accountability_style: selectedOptions["How do you respond best to accountability?"] || null,
                   support_instinct: selectedOptions["When someone in your squad is struggling, what\u2019s your instinct?"] || null,
                   persona_type: personaType || null,
                   can_commit_3x_week: selectedOptions["Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?"]?.startsWith("Yes") || false,
-                  willing_to_share: selectedOptions["Are you willing to share your progress \u2014 and your struggles \u2014 openly with 5-7 strangers?"] === "Yes",
+                  willing_to_share: selectedOptions["Are you willing to share your progress \u2014 and your struggles \u2014 openly with your squad?"] === "Yes",
                   no_ghosting_understood: true,
                   communication_freq: selectedOptions["How often do you want to hear from your coach?"] || null,
                   status: "submitted",

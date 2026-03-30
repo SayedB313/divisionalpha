@@ -16,7 +16,6 @@ function useNextSprint() {
   useEffect(() => {
     const supabase = createClient();
     (async () => {
-      // Get next upcoming or active sprint
       const { data: sprint } = await supabase
         .from('sprints')
         .select('*')
@@ -27,13 +26,11 @@ function useNextSprint() {
 
       if (!sprint) return;
 
-      // Count enrolled members to estimate remaining spots
       const { count } = await supabase
         .from('squad_members')
         .select('id', { count: 'exact', head: true })
         .eq('status', 'active');
 
-      // Estimate spots: ~50 target capacity minus enrolled
       const capacity = sprint.max_members || 50;
       const enrolled = count || 0;
       const remaining = Math.max(0, capacity - enrolled);
@@ -53,6 +50,50 @@ function useNextSprint() {
   return sprintInfo;
 }
 
+function Countdown({ targetDate }: { targetDate: string }) {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+
+  useEffect(() => {
+    const target = new Date(targetDate).getTime();
+    const update = () => {
+      const now = Date.now();
+      const diff = Math.max(0, target - now);
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+      });
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  if (timeLeft.days <= 0 && timeLeft.hours <= 0 && timeLeft.minutes <= 0) return null;
+
+  return (
+    <div
+      className="flex items-center gap-4 py-3 px-5 mb-6"
+      style={{ background: "var(--accent-surface)", border: "1px solid var(--accent)", borderRadius: "4px" }}
+    >
+      <span className="text-[11px] uppercase tracking-[0.08em] font-medium" style={{ color: "var(--accent)" }}>
+        Enrollment closes in
+      </span>
+      <div className="flex gap-3">
+        {[
+          { value: timeLeft.days, label: "d" },
+          { value: timeLeft.hours, label: "h" },
+          { value: timeLeft.minutes, label: "m" },
+        ].map((t) => (
+          <span key={t.label} style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }} className="text-[15px] font-medium">
+            {t.value}{t.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function LandingPage() {
   const { navigateTo } = useNavigation();
   const nextSprint = useNextSprint();
@@ -65,6 +106,8 @@ export function LandingPage() {
     <PageWrapper page="landing">
       {/* ── Hero ── */}
       <div className="pt-4 pb-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+        <Countdown targetDate="2026-04-04T23:59:00" />
+
         <div
           className="text-[10px] uppercase tracking-[0.12em] mb-6"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
@@ -101,7 +144,7 @@ export function LandingPage() {
             className="py-4 px-8 text-[15px] font-medium border-none cursor-pointer transition-all duration-150 hover:-translate-y-px"
             style={{ background: "var(--accent)", color: "var(--accent-text)", borderRadius: "2px", fontFamily: "inherit" }}
           >
-            Apply for the Next Sprint
+            Apply for Sprint {sprintNum}
           </button>
           <button
             onClick={() => navigateTo("login")}
@@ -116,7 +159,7 @@ export function LandingPage() {
           className="mt-6 text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          Sprint {sprintNum} begins {sprintDate} &middot; {spotsLeft} spots remaining &middot; $49/month
+          Sprint {sprintNum} begins {sprintDate} &middot; {spotsLeft} spots remaining &middot; $49/month &middot; Founding Operators get permanent badge
         </div>
       </div>
 
@@ -129,13 +172,13 @@ export function LandingPage() {
           How It Works
         </div>
         <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-6">
-          6 people who know your goals.<br />
+          5 people who know your goals.<br />
           AI makes it run at scale.
         </h2>
 
         <p className="text-[15px] leading-[1.7] mb-8" style={{ color: "var(--text-secondary)" }}>
-          You are placed in a squad of 6&ndash;8 operators. Not random strangers&thinsp;&mdash;&thinsp;people
-          matched by timezone, goal type, personality, and experience level. Real humans
+          You are placed in a squad of 5&ndash;6 operators. Not random strangers&thinsp;&mdash;&thinsp;people
+          matched by timezone, goal type, and values. Real humans
           who will ask you every Friday what happened with Monday&apos;s commitments.
           The AI handles the matching, the scheduling, the nudging. Your squad handles
           the part that actually changes behavior.
@@ -271,17 +314,19 @@ export function LandingPage() {
           This is not for everyone.
         </h2>
         <p className="text-[15px] leading-[1.7] mb-6" style={{ color: "var(--text-secondary)" }}>
-          Division Alpha is for solo founders, ambitious professionals, and operators who
-          have goals they keep failing to hit&thinsp;&mdash;&thinsp;not because they lack ability, but because
-          they lack the structure. If you have never set a goal and struggled to finish it,
+          Division Alpha is for founders and operators who take their commitments seriously.
+          People building businesses aligned with their values, who have goals they keep
+          failing to hit&thinsp;&mdash;&thinsp;not because they lack ability, but because they lack
+          the structure. If you have never set a goal and struggled to finish it,
           this product is not for you. If you have, keep reading.
         </p>
 
         <div className="space-y-3">
           {[
-            "You have a project, a business, or a transformation you have been putting off",
+            "You are building something meaningful and nobody holds you to your word",
             "You work alone and nobody asks you what happened with last week\u2019s plan",
             "You have tried accountability apps, habit trackers, and AI coaches. They did not work because there was no human on the other end who cared",
+            "You want a squad that actually gets it \u2014 your goals, your values, your hustle",
             "You would pay $49/month if it meant actually finishing what you start",
           ].map((item, i) => (
             <div key={i} className="flex gap-3 py-2">
@@ -310,7 +355,7 @@ export function LandingPage() {
           <div className="text-lg font-semibold mb-3">Sprint Access &middot; $49/mo</div>
           <div className="space-y-2">
             {[
-              "AI-matched squad of 6\u20138 operators",
+              "AI-matched squad of 5\u20136 operators who share your drive",
               "6-week structured sprint with Monday/Wednesday/Friday rhythm",
               "Private AI coach available 24/7",
               "Operator Score tracking across 6 performance factors",
@@ -323,24 +368,38 @@ export function LandingPage() {
               </div>
             ))}
           </div>
+          <div
+            className="mt-4 pt-3 flex items-center gap-2"
+            style={{ borderTop: "1px solid var(--border-subtle)" }}
+          >
+            <span
+              className="text-[10px] uppercase tracking-[0.06em] py-1 px-2"
+              style={{ fontFamily: "var(--font-dm-mono), monospace", background: "var(--accent)", color: "var(--accent-text)", borderRadius: "2px" }}
+            >
+              Founding Operator
+            </span>
+            <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>
+              Sprint {sprintNum} members earn a permanent Founding Operator badge on their profile
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ── The Question ── */}
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-4">
-          The question is not whether accountability works.
+          Your Q2 starts here.
         </h2>
         <p className="text-[15px] leading-[1.7] mb-8" style={{ color: "var(--text-secondary)" }}>
-          The research settled that decades ago. The question is whether you will build
-          the structure around yourself, or keep hoping discipline alone will be enough.
+          The research settled the accountability question decades ago. The people who
+          achieve consistently are not more disciplined. They are more accountable.
+          They have people who know their goals and will not let them hide.
           <br /><br />
-          It will not. It never has. The people who achieve consistently are not more
-          disciplined. They are more accountable. They have people who know their goals
-          and will not let them hide.
+          Division Alpha builds that structure for you. A squad that holds you to your word.
+          AI that never forgets. A rhythm that turns intention into execution. Every Monday.
+          Every Wednesday. Every Friday.
           <br /><br />
-          That is what Division Alpha builds for you. Every Monday. Every Wednesday.
-          Every Friday. For as long as you show up.
+          Sprint {sprintNum} begins {sprintDate}. The founding cohort is forming now.
         </p>
 
         <button
