@@ -122,9 +122,9 @@ describe("shell chrome", () => {
     expect(html).toContain("Boss");
     expect(html).toContain("Journey");
     expect(html).toContain("Squad");
-    expect(html).toContain("Settings");
-    expect(html).toContain("Admin");
-    expect(html).toContain("Sign Out");
+    expect(html).toContain("Coach");
+    expect(html).toContain("Proof");
+    expect(html).toContain("Division Alpha");
   });
 
   it("applies the requested width variant in page wrapper", () => {

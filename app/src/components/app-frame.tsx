@@ -17,7 +17,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
   return (
     <>
       <Topbar />
-      <main className={showMemberShell ? "min-h-screen pt-[56px] md:pt-[var(--shell-topbar)] md:pl-[var(--shell-rail)]" : "min-h-screen pt-[56px]"}>
+      <main className={showMemberShell ? "min-h-screen pt-[56px] md:pt-[var(--shell-topbar)] md:pl-[var(--shell-rail)] transition-[padding] duration-200" : "min-h-screen pt-[56px]"}>
         {children}
       </main>
       <MobileNav />

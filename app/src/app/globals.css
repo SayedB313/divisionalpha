@@ -12,9 +12,15 @@
 /* ══════ LIGHT THEME (Primary — morning journal energy) ══════ */
 :root,
 [data-theme="light"] {
-  --shell-rail: 56px;
-  --shell-flyout: 220px;
-  --shell-topbar: 40px;
+  --shell-rail: 64px;
+  --shell-topbar: 48px;
+  --rail-bg: #f2ece0;
+  --rail-icon-bg: #e8e2d5;
+  --rail-icon-border: #ddd6c8;
+  --rail-icon-active-bg: #3d6b4a;
+  --rail-icon-active-text: #ffffff;
+  --topbar-bg: #faf7f0;
+  --flyout-accent-line: #3d6b4a;
   --bg: #f5f0e6;
   --bg-page: #faf7f0;
   --surface: #ede8dc;
@@ -42,9 +48,15 @@
 
 /* ══════ DARK THEME (Secondary — evening review energy) ══════ */
 [data-theme="dark"] {
-  --shell-rail: 56px;
-  --shell-flyout: 220px;
-  --shell-topbar: 40px;
+  --shell-rail: 64px;
+  --shell-topbar: 48px;
+  --rail-bg: #1a1918;
+  --rail-icon-bg: #242320;
+  --rail-icon-border: #2e2c28;
+  --rail-icon-active-bg: #6db882;
+  --rail-icon-active-text: #111110;
+  --topbar-bg: #151514;
+  --flyout-accent-line: #6db882;
   --bg: #111110;
   --bg-page: #151514;
   --surface: #1c1b19;
