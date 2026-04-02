@@ -103,6 +103,50 @@ export function mondayDeclarationReminder(to: string, name: string, week: number
   }
 }
 
+export function dailyBossPulse(
+  to: string,
+  name: string,
+  prompt: string,
+  sprintNum: number,
+  week: number
+): SendEmailOptions {
+  const safeName = escapeHtml(name)
+  const safePrompt = escapeHtml(prompt)
+
+  return {
+    to,
+    subject: `Daily Boss Pulse — Sprint ${sprintNum} Week ${week}`,
+    html: wrap(`
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">The Boss is checking in.</h2>
+      <p>${safeName}, this is today's pulse:</p>
+      <p style="font-size:16px;color:#3d6b4a;margin:16px 0 0;"><strong>${safePrompt}</strong></p>
+      <p style="margin-top:16px;">Open Division Alpha and answer honestly. A real answer protects the streak. Silence does not.</p>
+      <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
+        Submit today's pulse
+      </a>
+    `),
+    text: `${name}, today's Boss pulse: ${prompt}\n\nOpen Division Alpha and answer honestly.`,
+  }
+}
+
+export function dailyBossNudge(to: string, name: string): SendEmailOptions {
+  const safeName = escapeHtml(name)
+
+  return {
+    to,
+    subject: 'Your Boss pulse is still open',
+    html: wrap(`
+      <h2 style="font-size:22px;font-weight:700;margin:0 0 8px;">Your pulse is still waiting.</h2>
+      <p>${safeName}, you haven't answered today's Boss pulse yet.</p>
+      <p>Reply with honesty, not theater. One clean signal keeps the system truthful.</p>
+      <a href="https://divisionalpha.net" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#3d6b4a;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">
+        Open Division Alpha
+      </a>
+    `),
+    text: `${name}, your Boss pulse is still open. Open Division Alpha and answer honestly before the day closes.`,
+  }
+}
+
 export function wednesdayCheckinReminder(to: string, name: string, week: number, sprintNum: number): SendEmailOptions {
   const safe = escapeHtml(name)
   return {

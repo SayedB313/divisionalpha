@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase/server'
 
-// Admin Dashboard API — platform health, KPIs, at-risk users
-// Protected: requires admin/founder role
+const ENTER_PRICE = 19
+const PROVEN_PRICE = 49
+const ELITE_PRICE = 149
 
-export async function GET(request: NextRequest) {
+function isPaying(status: string | null | undefined) {
+  return status === 'active' || status === 'trialing'
+}
+
+export async function GET(_request: NextRequest) {
   try {
-    // Auth check
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -15,7 +19,6 @@ export async function GET(request: NextRequest) {
     }
 
     const service = createServiceClient()
-
     const { data: profile } = await service
       .from('profiles')
       .select('role')
@@ -26,157 +29,194 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    // Gather all dashboard data in parallel
+    const sprintRes = await service
+      .from('sprints')
+      .select('*')
+      .in('status', ['handshake', 'active', 'dip_week', 'completing'])
+      .order('start_date', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    const sprint = sprintRes.data
+
     const [
-      sprintRes,
       profilesRes,
-      activeSquadsRes,
       applicationsRes,
+      activeSquadsRes,
       atRiskRes,
       pausesRes,
       recentEventsRes,
       scoresRes,
+      bossPulsesRes,
     ] = await Promise.all([
-      // Current sprint
-      service.from('sprints').select('*')
-        .in('status', ['active', 'dip_week', 'completing'])
-        .order('start_date', { ascending: false }).limit(1).single(),
-
-      // User counts
-      service.from('profiles').select('status, tier, subscription_status', { count: 'exact' }),
-
-      // Active squads with health
-      service.from('squads').select('id, name, member_count, health_score, completion_rate, status, streak')
-        .in('status', ['active', 'completing'])
-        .order('health_score', { ascending: true }),
-
-      // Pending applications
-      service.from('applications').select('*', { count: 'exact' })
-        .eq('status', 'submitted'),
-
-      // At-risk users (2+ consecutive misses)
-      service.from('engagement_events').select('user_id, consecutive_misses, event_type, created_at, profile:profiles(display_name, email)')
-        .gte('consecutive_misses', 2)
-        .order('created_at', { ascending: false })
-        .limit(20),
-
-      // Active pauses
-      service.from('pauses').select('*, profile:profiles(display_name, email)')
-        .eq('status', 'active'),
-
-      // Recent agent events (last 24h)
-      service.from('agent_events').select('*')
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order('created_at', { ascending: false })
-        .limit(20),
-
-      // Score distribution
-      service.from('operator_scores').select('total_score')
-        .eq('sprint_id', (await service.from('sprints').select('id').in('status', ['active', 'dip_week']).limit(1).single()).data?.id || '')
-        .is('week_number', null),
+      service.from('profiles').select('id, display_name, email, status, tier, subscription_status, sprints_completed, created_at'),
+      service.from('applications').select('id, status, created_at', { count: 'exact' }),
+      sprint
+        ? service.from('squads').select('id, name, member_count, health_score, completion_rate, status, streak').eq('sprint_id', sprint.id).in('status', ['active', 'completing'])
+        : Promise.resolve({ data: [] }),
+      service.from('admin_at_risk_users').select('*').limit(20),
+      service.from('pauses').select('paused_at, user_id, profile:profiles(display_name)').eq('status', 'active').limit(20),
+      service.from('agent_events').select('source_agent, target_agent, event_type, processed, created_at').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).order('created_at', { ascending: false }).limit(20),
+      sprint
+        ? service.from('operator_scores').select('user_id, total_score, current_streak, best_streak').eq('sprint_id', sprint.id).is('week_number', null)
+        : Promise.resolve({ data: [] }),
+      sprint
+        ? service.from('boss_pulses').select('user_id, pulse_date, status, responded_at').eq('sprint_id', sprint.id)
+        : Promise.resolve({ data: [] }),
     ])
 
-    const sprint = sprintRes.data
-    const profiles = profilesRes.data || []
+    const profiles = profilesRes.data ?? []
+    const scores = scoresRes.data ?? []
+    const bossPulses = bossPulsesRes.data ?? []
+    const squads = activeSquadsRes.data ?? []
 
-    // Calculate KPIs
-    const totalUsers = profiles.length
-    const activeUsers = profiles.filter((p: any) => p.status === 'active').length
-    const pausedUsers = profiles.filter((p: any) => p.status === 'paused').length
-    const churnedUsers = profiles.filter((p: any) => p.status === 'churned').length
-    const tier2Users = profiles.filter((p: any) => p.tier === 2 && p.status === 'active').length
-    const tier3Users = profiles.filter((p: any) => p.tier === 3 && p.status === 'active').length
-    const payingUsers = profiles.filter((p: any) => p.subscription_status === 'active').length
+    const scoreMap = new Map<string, number>(scores.map((score: any) => [score.user_id, Number(score.total_score ?? 0)] as const))
 
-    const squads = activeSquadsRes.data || []
-    const avgHealthScore = squads.length > 0
-      ? Math.round(squads.reduce((sum: number, s: any) => sum + (Number(s.health_score) || 0), 0) / squads.length)
+    let enterCount = 0
+    let provenCount = 0
+    let eliteCount = 0
+    let payingCount = 0
+
+    for (const member of profiles as any[]) {
+      const active = member.status === 'active'
+      const score = Number(scoreMap.get(member.id) ?? 0)
+      const elite = member.tier === 3 || (score >= 90 && (member.sprints_completed ?? 0) >= 2)
+      const proven = !elite && (member.tier === 2 || score >= 70)
+
+      if (isPaying(member.subscription_status)) payingCount += 1
+
+      if (!active) continue
+
+      if (elite) eliteCount += 1
+      else if (proven) provenCount += 1
+      else enterCount += 1
+    }
+
+    const activeUsers = enterCount + provenCount + eliteCount
+    const pausedUsers = profiles.filter((member: any) => member.status === 'paused').length
+    const churnedUsers = profiles.filter((member: any) => member.status === 'churned').length
+
+    const estimatedMrr = enterCount * ENTER_PRICE + provenCount * PROVEN_PRICE + eliteCount * ELITE_PRICE
+    const avgScore = scores.length > 0
+      ? Math.round(scores.reduce((sum: number, score: any) => sum + Number(score.total_score ?? 0), 0) / scores.length)
       : 0
-    const avgCompletionRate = squads.length > 0
-      ? Math.round(squads.reduce((sum: number, s: any) => sum + (Number(s.completion_rate) || 0), 0) / squads.length)
-      : 0
 
-    // Score distribution
-    const scores = (scoresRes.data || []).map((s: any) => Number(s.total_score))
-    const avgScore = scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : 0
-    const tier3Eligible = scores.filter((s: number) => s >= 85).length // top 5% threshold approx
+    const today = new Date().toISOString().slice(0, 10)
+    const sevenDaysAgo = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    const fourteenDaysAgo = new Date(Date.now() - 13 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
-    // Monthly revenue estimate
-    const monthlyRevenue = tier2Users * 49 + tier3Users * 297
+    const pulsesToday = bossPulses.filter((pulse: any) => pulse.pulse_date === today)
+    const pulses7d = bossPulses.filter((pulse: any) => pulse.pulse_date >= sevenDaysAgo)
+    const pulses14d = bossPulses.filter((pulse: any) => pulse.pulse_date >= fourteenDaysAgo)
+
+    const answered7d = pulses7d.filter((pulse: any) => ['completed', 'blocked', 'missed'].includes(pulse.status))
+    const answerRate7d = pulses7d.length > 0 ? Math.round((answered7d.length / pulses7d.length) * 100) : 0
+    const respondedUsers7d = new Set(answered7d.map((pulse: any) => pulse.user_id))
+    const respondedUsers14d = new Set(
+      pulses14d
+        .filter((pulse: any) => ['completed', 'blocked', 'missed'].includes(pulse.status))
+        .map((pulse: any) => pulse.user_id),
+    )
+
+    const provenReady = scores.filter((score: any) => Number(score.total_score ?? 0) >= 70).length
+    const eliteCandidates = profiles.filter((member: any) => {
+      const score = scoreMap.get(member.id) ?? 0
+      return Number(score) >= 90 && (member.sprints_completed ?? 0) >= 2
+    }).length
 
     return NextResponse.json({
       sprint: sprint ? {
+        id: sprint.id,
         name: sprint.name,
         number: sprint.number,
         current_week: sprint.current_week,
         status: sprint.status,
         duration_weeks: sprint.duration_weeks,
       } : null,
-
+      pricing: {
+        enter: ENTER_PRICE,
+        proven: PROVEN_PRICE,
+        elite: ELITE_PRICE,
+      },
+      thresholds: {
+        enter: 30,
+        proven: 70,
+        elite: 90,
+      },
       kpis: {
-        total_users: totalUsers,
+        total_users: profiles.length,
         active_users: activeUsers,
-        paying_users: payingUsers,
+        paying_users: payingCount,
         paused_users: pausedUsers,
         churned_users: churnedUsers,
-        tier2_users: tier2Users,
-        tier3_users: tier3Users,
-        monthly_revenue_estimate: monthlyRevenue,
-        arr_estimate: monthlyRevenue * 12,
         avg_operator_score: avgScore,
-        tier3_eligible: tier3Eligible,
+        monthly_revenue_estimate: estimatedMrr,
+        arr_estimate: estimatedMrr * 12,
       },
-
+      tiers: {
+        enter: enterCount,
+        proven: provenCount,
+        elite: eliteCount,
+      },
+      boss: {
+        pulses_sent_today: pulsesToday.length,
+        answered_today: pulsesToday.filter((pulse: any) => ['completed', 'blocked', 'missed'].includes(pulse.status)).length,
+        blocked_today: pulsesToday.filter((pulse: any) => pulse.status === 'blocked').length,
+        missed_today: pulsesToday.filter((pulse: any) => pulse.status === 'missed').length,
+        answer_rate_7d: answerRate7d,
+      },
+      retention: {
+        active_7d: respondedUsers7d.size,
+        active_14d: respondedUsers14d.size,
+      },
+      funnel: {
+        submitted_applications: applicationsRes.count || 0,
+        paying_users: payingCount,
+        proven_unlock_volume: provenReady,
+        elite_candidate_pipeline: eliteCandidates,
+      },
       squads: {
         active_count: squads.length,
-        avg_health_score: avgHealthScore,
-        avg_completion_rate: avgCompletionRate,
-        list: squads.map((s: any) => ({
-          name: s.name,
-          members: s.member_count,
-          health: s.health_score,
-          completion: s.completion_rate,
-          streak: s.streak,
+        avg_health_score: squads.length > 0
+          ? Math.round(squads.reduce((sum: number, squad: any) => sum + Number(squad.health_score ?? 0), 0) / squads.length)
+          : 0,
+        avg_completion_rate: squads.length > 0
+          ? Math.round(squads.reduce((sum: number, squad: any) => sum + Number(squad.completion_rate ?? 0), 0) / squads.length)
+          : 0,
+        list: squads.map((squad: any) => ({
+          id: squad.id,
+          name: squad.name,
+          members: squad.member_count,
+          health: squad.health_score,
+          completion: squad.completion_rate,
+          streak: squad.streak,
         })),
       },
-
-      applications: {
-        pending: applicationsRes.count || 0,
-      },
-
       at_risk: {
         count: (atRiskRes.data || []).length,
-        users: (atRiskRes.data || []).map((e: any) => ({
-          name: e.profile?.display_name,
-          email: e.profile?.email,
-          consecutive_misses: e.consecutive_misses,
-          last_event: e.event_type,
-          event_at: e.created_at,
+        users: (atRiskRes.data || []).map((entry: any) => ({
+          name: entry.display_name,
+          squad_name: entry.squad_name,
+          consecutive_misses: entry.consecutive_misses,
+          latest_event: entry.latest_event,
+          event_at: entry.event_at,
         })),
       },
-
       active_pauses: {
         count: (pausesRes.data || []).length,
-        users: (pausesRes.data || []).map((p: any) => ({
-          name: p.profile?.display_name,
-          paused_at: p.paused_at,
-          resume_by: p.resume_by,
+        users: (pausesRes.data || []).map((entry: any) => ({
+          name: entry.profile?.display_name,
+          paused_at: entry.paused_at,
+          user_id: entry.user_id,
         })),
       },
-
       recent_agent_activity: {
         last_24h: (recentEventsRes.data || []).length,
-        events: (recentEventsRes.data || []).map((e: any) => ({
-          source: e.source_agent,
-          target: e.target_agent,
-          type: e.event_type,
-          processed: e.processed,
-          at: e.created_at,
-        })),
+        events: recentEventsRes.data || [],
       },
     })
-  } catch (err) {
-    console.error('Dashboard error:', err)
+  } catch (error) {
+    console.error('Dashboard error:', error)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }

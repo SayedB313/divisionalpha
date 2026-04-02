@@ -26,7 +26,7 @@ CRON_FILE="/etc/cron.d/divisionalpha"
 sudo tee "$CRON_FILE" > /dev/null << CRON
 # Division Alpha — agent dispatch (every 3 hours)
 CRON_TZ=UTC
-0 */3 * * * root curl -sf -H 'Authorization: Bearer ${CRON_SECRET}' -X POST '${SITE_URL}/api/agents/cron' >> /var/log/divisionalpha-cron.log 2>&1
+0 */3 * * * root curl -sf -H 'Authorization: Bearer ${CRON_SECRET}' '${SITE_URL}/api/agents/cron' >> /var/log/divisionalpha-cron.log 2>&1
 CRON
 
 sudo chmod 644 "$CRON_FILE"

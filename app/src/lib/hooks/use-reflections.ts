@@ -43,7 +43,7 @@ export function useReflections(weekNumber?: number) {
       goals_hit: number
       goals_total: number
     }) => {
-      if (!user || !sprint || !squad || !week) throw new Error('Missing context')
+      if (!user || !sprint || !week) throw new Error('Missing context')
 
       const completion_pct = payload.goals_total > 0
         ? (payload.goals_hit / payload.goals_total) * 100
@@ -54,7 +54,7 @@ export function useReflections(weekNumber?: number) {
         .upsert({
           user_id: user.id,
           sprint_id: sprint.id,
-          squad_id: squad.id,
+          squad_id: squad?.id ?? null,
           week_number: week,
           wins: payload.wins,
           misses: payload.misses,

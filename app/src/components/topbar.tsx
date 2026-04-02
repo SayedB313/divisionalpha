@@ -1,30 +1,31 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigation } from "@/lib/navigation-context";
 import { useAuth } from "@/lib/auth-context";
+import { useApp } from "@/lib/app-context";
+import { useTierState } from "@/lib/hooks/use-tier-state";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { useTheme } from "./theme-provider";
 
 const PRIMARY_NAV = [
-  { page: "home" as const, label: "Home" },
-  { page: "declare" as const, label: "Declare" },
-  { page: "checkin" as const, label: "Check-in" },
-  { page: "reflect" as const, label: "Reflect" },
+  { page: "boss" as const, label: "Boss" },
+  { page: "journey" as const, label: "Journey" },
   { page: "squad" as const, label: "Squad" },
+  { page: "coach" as const, label: "Coach" },
+  { page: "proof" as const, label: "Proof" },
 ];
 
 const MORE_NAV = [
-  { page: "coach" as const, label: "Coach" },
-  { page: "leaderboard" as const, label: "Leaderboard" },
-  { page: "kickoff" as const, label: "Sprint Kickoff" },
-  { page: "completion" as const, label: "Sprint Completion" },
+  { page: "settings" as const, label: "Settings" },
   { page: "admin" as const, label: "Admin" },
 ];
 
 export function Topbar() {
   const { currentPage, navigateTo, setScoreOpen } = useNavigation();
   const { user, signOut } = useAuth();
+  const { profile, sprint } = useApp();
+  const tier = useTierState();
   const { theme, toggleTheme } = useTheme();
   const { unreadCount, notifications, markAllRead, markRead } = useNotifications();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -34,139 +35,104 @@ export function Topbar() {
   const notifRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
 
-  // Hide full nav on public pages when not authenticated
   const isPublicPage = ["landing", "login", "apply"].includes(currentPage);
-  const showFullNav = !!user && !isPublicPage;
+  const showMemberShell = !!user && !isPublicPage;
+  const initials = profile?.initials || profile?.display_name?.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "DA";
+  const tierLabel = tier.activeTier.toUpperCase();
+  const visibleMoreNav = MORE_NAV.filter((item) => item.page !== "admin" || profile?.role === "admin" || profile?.role === "founder");
+  const isMoreActive = visibleMoreNav.some((item) => item.page === currentPage);
 
   useEffect(() => {
-    if (!moreOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setMoreOpen(false);
-      }
+    if (!moreOpen && !notifOpen && !avatarOpen) return;
+
+    const handler = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (moreRef.current && !moreRef.current.contains(target)) setMoreOpen(false);
+      if (notifRef.current && !notifRef.current.contains(target)) setNotifOpen(false);
+      if (avatarRef.current && !avatarRef.current.contains(target)) setAvatarOpen(false);
     };
+
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [moreOpen]);
-
-  useEffect(() => {
-    if (!notifOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [notifOpen]);
-
-  useEffect(() => {
-    if (!avatarOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
-        setAvatarOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [avatarOpen]);
-
-  const isMoreActive = MORE_NAV.some((item) => item.page === currentPage);
+  }, [moreOpen, notifOpen, avatarOpen]);
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 h-[52px] flex items-center justify-between z-[100] transition-colors duration-300"
+      className="fixed top-0 left-0 right-0 h-[56px] flex items-center justify-between z-[100]"
       style={{
         background: "var(--bg-page)",
         borderBottom: "1px solid var(--border-subtle)",
-        padding: "0 clamp(12px, 3vw, 32px)",
+        padding: "0 clamp(12px, 3vw, 28px)",
       }}
     >
-      {/* Brand — clickable home link */}
       <button
-        onClick={() => navigateTo(user ? "home" : "landing")}
+        onClick={() => navigateTo(user ? "boss" : "landing")}
         className="flex items-center gap-3 shrink-0 bg-transparent border-none cursor-pointer p-0"
         style={{ fontFamily: "inherit" }}
       >
-        <div
-          className="text-[13px] font-semibold tracking-[0.04em] uppercase whitespace-nowrap"
-          style={{ color: "var(--text)" }}
-        >
-          Division Alpha
+        <div>
+          <div className="text-[13px] font-semibold tracking-[0.04em] uppercase" style={{ color: "var(--text)" }}>
+            Division Alpha
+          </div>
+          <div className="text-[10px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
+            Step into the arena
+          </div>
         </div>
-        <div
-          className="text-[10px] px-1.5 py-[2px] hidden sm:block"
-          style={{
-            fontFamily: "var(--font-dm-mono), monospace",
-            color: "var(--text-muted)",
-            background: "var(--surface)",
-            borderRadius: "2px",
-          }}
-        >
-          S3 W4
-        </div>
+        {showMemberShell && (
+          <div
+            className="hidden sm:block py-1.5 px-2"
+            style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "2px" }}
+          >
+            <div className="text-[10px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}>
+              {tierLabel}
+            </div>
+            <div className="text-[10px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
+              {sprint ? `S${sprint.number} · W${sprint.current_week}` : "Waiting"}
+            </div>
+          </div>
+        )}
       </button>
 
-      {/* Desktop nav — hidden on mobile, hidden on public pages */}
-      <div className="hidden md:flex items-center gap-0" style={{ display: showFullNav ? undefined : "none" }}>
+      <div className="hidden md:flex items-center gap-0" style={{ display: showMemberShell ? undefined : "none" }}>
         {PRIMARY_NAV.map((item) => (
           <button
             key={item.page}
             onClick={() => navigateTo(item.page)}
-            className="bg-transparent border-none text-[12px] font-medium px-2 lg:px-2.5 py-2 cursor-pointer relative transition-colors duration-150 whitespace-nowrap"
-            style={{
-              color: currentPage === item.page ? "var(--text)" : "var(--text-muted)",
-            }}
+            className="bg-transparent border-none text-[12px] font-medium px-2.5 py-2 cursor-pointer relative"
+            style={{ color: currentPage === item.page ? "var(--text)" : "var(--text-muted)" }}
           >
             {item.label}
             {currentPage === item.page && (
-              <span
-                className="absolute bottom-[-1px] left-2 right-2 h-[1.5px]"
-                style={{ background: "var(--accent)" }}
-              />
+              <span className="absolute bottom-[-1px] left-2 right-2 h-[1.5px]" style={{ background: "var(--accent)" }} />
             )}
           </button>
         ))}
 
-        {/* More dropdown */}
         <div className="relative" ref={moreRef}>
           <button
-            onClick={() => setMoreOpen(!moreOpen)}
-            className="bg-transparent border-none text-[12px] font-medium px-2 lg:px-2.5 py-2 cursor-pointer relative transition-colors duration-150"
-            style={{
-              color: isMoreActive ? "var(--text)" : "var(--text-muted)",
-            }}
+            onClick={() => setMoreOpen((open) => !open)}
+            className="bg-transparent border-none text-[12px] font-medium px-2.5 py-2 cursor-pointer relative"
+            style={{ color: isMoreActive ? "var(--text)" : "var(--text-muted)" }}
           >
-            &middot;&middot;&middot;
+            More
             {isMoreActive && (
-              <span
-                className="absolute bottom-[-1px] left-2 right-2 h-[1.5px]"
-                style={{ background: "var(--accent)" }}
-              />
+              <span className="absolute bottom-[-1px] left-2 right-2 h-[1.5px]" style={{ background: "var(--accent)" }} />
             )}
           </button>
           {moreOpen && (
             <div
-              className="absolute top-full right-0 mt-1 py-1 min-w-[160px]"
-              style={{
-                background: "var(--bg-page)",
-                border: "1px solid var(--border)",
-                borderRadius: "4px",
-                boxShadow: "var(--shadow-lg)",
-              }}
+              className="absolute top-full right-0 mt-1 py-1 min-w-[150px]"
+              style={{ background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: "4px", boxShadow: "var(--shadow-lg)" }}
             >
-              {MORE_NAV.map((item) => (
+              {visibleMoreNav.map((item) => (
                 <button
                   key={item.page}
                   onClick={() => {
                     navigateTo(item.page);
                     setMoreOpen(false);
                   }}
-                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer transition-colors duration-150"
-                  style={{
-                    color: currentPage === item.page ? "var(--accent)" : "var(--text-secondary)",
-                    fontFamily: "inherit",
-                  }}
+                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer"
+                  style={{ color: currentPage === item.page ? "var(--accent)" : "var(--text-secondary)", fontFamily: "inherit" }}
                 >
                   {item.label}
                 </button>
@@ -175,41 +141,28 @@ export function Topbar() {
           )}
         </div>
 
-        <div
-          className="w-px h-5 mx-1.5"
-          style={{ background: "var(--border-subtle)" }}
-        />
+        <div className="w-px h-5 mx-1.5" style={{ background: "var(--border-subtle)" }} />
       </div>
 
-      {/* Action buttons */}
       <div className="flex items-center gap-1">
-        {/* Theme toggle — always visible */}
         <button
           onClick={toggleTheme}
-          className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
-          style={{
-            border: "1px solid var(--border)",
-            background: "none",
-            color: "var(--text-muted)",
-            borderRadius: "2px",
-          }}
+          className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer"
+          style={{ border: "1px solid var(--border)", background: "none", color: "var(--text-muted)", borderRadius: "2px" }}
           aria-label="Toggle theme"
         >
           {theme === "light" ? "\u263E" : "\u2600"}
         </button>
 
-        {/* Notification bell — only when authenticated */}
-        {showFullNav && (
+        {showMemberShell && (
           <div className="relative" ref={notifRef}>
             <button
-              onClick={() => { setNotifOpen(!notifOpen); if (!notifOpen) markAllRead(); }}
-              className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer transition-all duration-150 relative"
-              style={{
-                border: "1px solid var(--border)",
-                background: notifOpen ? "var(--surface)" : "none",
-                color: "var(--text-muted)",
-                borderRadius: "2px",
+              onClick={() => {
+                setNotifOpen((open) => !open);
+                if (!notifOpen) markAllRead();
               }}
+              className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer relative"
+              style={{ border: "1px solid var(--border)", background: notifOpen ? "var(--surface)" : "none", color: "var(--text-muted)", borderRadius: "2px" }}
               aria-label="Notifications"
             >
               &#9993;
@@ -223,16 +176,10 @@ export function Topbar() {
               )}
             </button>
 
-            {/* Notification dropdown */}
             {notifOpen && (
               <div
                 className="absolute right-0 top-[40px] w-[calc(100vw-24px)] max-w-[300px] max-h-[400px] overflow-y-auto z-[150]"
-                style={{
-                  background: "var(--bg-page)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "4px",
-                  boxShadow: "var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.12))",
-                }}
+                style={{ background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: "4px", boxShadow: "var(--shadow-lg)" }}
               >
                 <div className="flex items-center justify-between py-2.5 px-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                   <span className="text-[11px] font-medium uppercase tracking-[0.06em]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
@@ -254,35 +201,29 @@ export function Topbar() {
                     No notifications yet
                   </div>
                 ) : (
-                  notifications.slice(0, 10).map((n: any) => (
+                  notifications.slice(0, 10).map((notification: any) => (
                     <button
-                      key={n.id}
+                      key={notification.id}
                       onClick={() => {
-                        markRead(n.id);
-                        if (n.action_page) navigateTo(n.action_page);
+                        markRead(notification.id);
+                        if (notification.action_page) navigateTo(notification.action_page);
                         setNotifOpen(false);
                       }}
                       className="w-full text-left py-3 px-3 cursor-pointer transition-colors duration-150 bg-transparent border-none"
                       style={{
                         borderBottom: "1px solid var(--border-subtle)",
-                        background: n.read ? "transparent" : "var(--accent-surface)",
+                        background: notification.read ? "transparent" : "var(--accent-surface)",
                         fontFamily: "inherit",
                       }}
                     >
                       <div className="text-[13px] font-medium mb-0.5" style={{ color: "var(--text)" }}>
-                        {n.title}
+                        {notification.title}
                       </div>
-                      {n.body && (
-                        <div className="text-[11px] leading-[1.4]" style={{ color: "var(--text-muted)" }}>
-                          {n.body}
+                      {notification.body && (
+                        <div className="text-[11px] leading-[1.45]" style={{ color: "var(--text-muted)" }}>
+                          {notification.body}
                         </div>
                       )}
-                      <div
-                        className="text-[9px] mt-1 uppercase tracking-[0.06em]"
-                        style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-                      >
-                        {new Date(n.created_at).toLocaleDateString()}
-                      </div>
                     </button>
                   ))
                 )}
@@ -291,17 +232,11 @@ export function Topbar() {
           </div>
         )}
 
-        {/* Score + Avatar — only when authenticated */}
-        {showFullNav && (
+        {showMemberShell && (
           <button
             onClick={() => setScoreOpen(true)}
-            className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer transition-all duration-150"
-            style={{
-              border: "1px solid var(--border)",
-              background: "var(--surface)",
-              color: "var(--text-muted)",
-              borderRadius: "2px",
-            }}
+            className="w-9 h-9 flex items-center justify-center text-xs cursor-pointer"
+            style={{ border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text-muted)", borderRadius: "2px" }}
             title="Operator Score"
             aria-label="View Operator Score"
           >
@@ -309,11 +244,11 @@ export function Topbar() {
           </button>
         )}
 
-        {showFullNav && (
+        {showMemberShell && (
           <div className="relative" ref={avatarRef}>
             <button
-              onClick={() => setAvatarOpen(!avatarOpen)}
-              className="w-9 h-9 flex items-center justify-center text-[10px] font-semibold cursor-pointer transition-all duration-150 rounded-full ml-1"
+              onClick={() => setAvatarOpen((open) => !open)}
+              className="w-9 h-9 flex items-center justify-center text-[10px] font-semibold cursor-pointer rounded-full ml-1"
               style={{
                 background: currentPage === "settings" || avatarOpen ? "var(--accent)" : "var(--surface-hover)",
                 color: currentPage === "settings" || avatarOpen ? "var(--accent-text)" : "var(--text-secondary)",
@@ -321,29 +256,49 @@ export function Topbar() {
               }}
               aria-label="Account menu"
             >
-              AM
+              {initials}
             </button>
             {avatarOpen && (
               <div
-                className="absolute top-full right-0 mt-1 py-1 min-w-[140px]"
-                style={{
-                  background: "var(--bg-page)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "4px",
-                  boxShadow: "var(--shadow-lg)",
-                }}
+                className="absolute top-full right-0 mt-1 py-1 min-w-[160px]"
+                style={{ background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: "4px", boxShadow: "var(--shadow-lg)" }}
               >
+                <div className="px-4 py-2" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                  <div className="text-[12px] font-medium">{profile?.display_name || "Operator"}</div>
+                  <div className="text-[10px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
+                    {tierLabel} · score {tier.score}
+                  </div>
+                </div>
                 <button
-                  onClick={() => { navigateTo("settings"); setAvatarOpen(false); }}
-                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer transition-colors duration-150"
+                  onClick={() => {
+                    navigateTo("settings");
+                    setAvatarOpen(false);
+                  }}
+                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer"
                   style={{ color: "var(--text-secondary)", fontFamily: "inherit" }}
                 >
                   Settings
                 </button>
+                {(profile?.role === "admin" || profile?.role === "founder") && (
+                  <button
+                    onClick={() => {
+                      navigateTo("admin");
+                      setAvatarOpen(false);
+                    }}
+                    className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer"
+                    style={{ color: "var(--text-secondary)", fontFamily: "inherit" }}
+                  >
+                    Admin
+                  </button>
+                )}
                 <div style={{ borderTop: "1px solid var(--border-subtle)", margin: "2px 0" }} />
                 <button
-                  onClick={async () => { setAvatarOpen(false); await signOut(); navigateTo("landing"); }}
-                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer transition-colors duration-150"
+                  onClick={async () => {
+                    setAvatarOpen(false);
+                    await signOut();
+                    navigateTo("landing");
+                  }}
+                  className="w-full text-left bg-transparent border-none text-[12px] font-medium px-4 py-2.5 cursor-pointer"
                   style={{ color: "var(--red)", fontFamily: "inherit" }}
                 >
                   Sign Out

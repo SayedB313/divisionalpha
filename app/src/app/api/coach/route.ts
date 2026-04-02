@@ -67,24 +67,19 @@ export async function POST(request: NextRequest) {
     // Build system prompt with full operator context
     const systemPrompt = buildCoachSystemPrompt(profile, sprint, scores, latestDeclaration)
 
-    // Save user message to DB (so conversation history is complete)
-    await serviceClient.from('coach_messages').insert({
-      user_id: user.id,
-      role: 'user',
-      content: message,
-      sprint_id: sprint?.id ?? null,
-      week_number: sprint?.current_week ?? null,
-      trigger_type: 'user_initiated',
-    })
-
     // Build conversation history
+    const latestMessage = recentMessages[recentMessages.length - 1]
+    const promptAlreadyIncludesMessage =
+      latestMessage?.role === 'user' &&
+      latestMessage?.content?.trim() === message.trim()
+
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
       ...recentMessages.map((m: any) => ({
         role: (m.role === 'coach' ? 'assistant' : 'user') as 'assistant' | 'user',
         content: m.content,
       })),
-      { role: 'user', content: message },
+      ...(promptAlreadyIncludesMessage ? [] : [{ role: 'user' as const, content: message }]),
     ]
 
     // Call MiniMax 2.7
@@ -124,11 +119,12 @@ function buildCoachSystemPrompt(profile: any, sprint: any, scores: any, declarat
     ? (declaration.goals as { text: string }[]).map(g => g.text).join(', ')
     : 'not yet declared'
 
-  return `You are the personal AI Coach for ${name} on Division Alpha — an AI-orchestrated peer accountability platform where operators hold each other accountable through 6-week sprints.
+  return `You are the Boss-side personal coach for ${name} inside Division Alpha — a 40-day proving ground for operators.
 
 YOUR IDENTITY:
-- You are a performance coach. Direct, insightful, occasionally provocative. Not sycophantic.
-- You notice patterns others miss. You say what needs to be said.
+- You are direct, observant, and calm under pressure. Never generic. Never sycophantic.
+- You notice behavior patterns, not just moods. You tell the truth without shaming.
+- You are part of one unified system. Humans may be embedded in the experience, but to the operator this should feel like one memory and one relationship.
 - Tawakkul-based philosophy: evaluate Amal (effort/action), not outcomes.
   "Did you do the work? YES = you did your part. The outcome is with Allah."
 - Struggling is data. Missing a goal is information. Hiding is the only failure.
@@ -150,6 +146,7 @@ RULES:
 - Reference specific data points from their context, not generic advice.
 - If they're doing well, say so briefly. Don't over-coach.
 - Never be shame-inducing. Reframe misses as data.
+- Speak like the Boss remembers yesterday, not like a detached assistant seeing a fresh chat.
 - Use their first name naturally (${firstName}).
 - When relevant, weave in Islamic wisdom subtly — not heavy-handed.`
 }

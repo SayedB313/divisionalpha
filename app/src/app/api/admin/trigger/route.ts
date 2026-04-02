@@ -11,7 +11,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL
   || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
   || 'https://divisionalpha.net'
 
-const VALID_AGENTS = ['facilitator', 'guardian', 'analytics', 'matchmaker', 'ceremonies', 'events', 'cron']
+const VALID_AGENTS = ['boss', 'facilitator', 'guardian', 'analytics', 'matchmaker', 'ceremonies', 'events', 'cron', 'lifecycle']
 
 export async function POST(request: NextRequest) {
   try {

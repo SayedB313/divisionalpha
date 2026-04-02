@@ -17,26 +17,26 @@ function useNextSprint() {
     const supabase = createClient();
     (async () => {
       const { data: sprint } = await supabase
-        .from('sprints')
-        .select('*')
-        .in('status', ['upcoming', 'handshake', 'active'])
-        .order('start_date', { ascending: true })
+        .from("sprints")
+        .select("*")
+        .in("status", ["upcoming", "handshake", "active"])
+        .order("start_date", { ascending: true })
         .limit(1)
         .maybeSingle();
 
       if (!sprint) return;
 
       const { count } = await supabase
-        .from('squad_members')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'active');
+        .from("squad_members")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "active");
 
       const capacity = sprint.max_members || 50;
       const enrolled = count || 0;
       const remaining = Math.max(0, capacity - enrolled);
 
       const startDate = new Date(sprint.start_date);
-      const formatted = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+      const formatted = startDate.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
       setSprintInfo({
         name: sprint.name,
@@ -86,7 +86,8 @@ function Countdown({ targetDate }: { targetDate: string }) {
           { value: timeLeft.minutes, label: "m" },
         ].map((t) => (
           <span key={t.label} style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }} className="text-[15px] font-medium">
-            {t.value}{t.label}
+            {t.value}
+            {t.label}
           </span>
         ))}
       </div>
@@ -97,6 +98,21 @@ function Countdown({ targetDate }: { targetDate: string }) {
 export function LandingPage() {
   const { navigateTo } = useNavigation();
   const nextSprint = useNextSprint();
+  const [checkoutState, setCheckoutState] = useState<"success" | "cancel" | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get("checkout");
+
+    if (state !== "success" && state !== "cancel") return;
+
+    setCheckoutState(state);
+    params.delete("checkout");
+
+    const next = params.toString();
+    const cleanUrl = `${window.location.pathname}${next ? `?${next}` : ""}${window.location.hash}`;
+    window.history.replaceState({}, "", cleanUrl);
+  }, []);
 
   const sprintNum = nextSprint?.number ?? 4;
   const sprintDate = nextSprint?.startDate ?? "April 6";
@@ -104,38 +120,55 @@ export function LandingPage() {
 
   return (
     <PageWrapper page="landing">
-      {/* ── Hero ── */}
       <div className="pt-4 pb-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <Countdown targetDate="2026-04-04T23:59:00" />
+
+        {checkoutState && (
+          <div
+            className="py-4 px-5 mb-6"
+            style={{
+              background: checkoutState === "success" ? "var(--accent-surface)" : "var(--surface)",
+              border: `1px solid ${checkoutState === "success" ? "var(--accent)" : "var(--border)"}`,
+              borderRadius: "4px",
+            }}
+          >
+            <div
+              className="text-[10px] uppercase tracking-[0.08em] mb-1"
+              style={{ fontFamily: "var(--font-dm-mono), monospace", color: checkoutState === "success" ? "var(--accent)" : "var(--text-muted)" }}
+            >
+              {checkoutState === "success" ? "Checkout complete" : "Checkout canceled"}
+            </div>
+            <p className="text-[14px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
+              {checkoutState === "success"
+                ? "You are in. Check your email for your magic link and Sprint 4 next steps."
+                : "No problem. Your place is still here if you want to step back into the arena."}
+            </p>
+          </div>
+        )}
 
         <div
           className="text-[10px] uppercase tracking-[0.12em] mb-6"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
         >
-          Structured Peer Accountability
+          40-Day Proving Ground
         </div>
 
         <h1 className="text-[2rem] md:text-[2.5rem] font-bold leading-[1.15] mb-6">
-          People who set goals alone{" "}
-          <span style={{ color: "var(--text-muted)", textDecoration: "line-through", textDecorationColor: "var(--red)" }}>
-            complete 43%
-          </span>
+          Everyone gets a chance.
           <br />
-          People with accountability partners{" "}
-          <span style={{ color: "var(--accent)" }}>complete 76%</span>
+          The best <span style={{ color: "var(--accent)" }}>earn their squad.</span>
         </h1>
 
         <p className="text-[17px] leading-[1.7] mb-8" style={{ color: "var(--text-secondary)" }}>
-          The research is not ambiguous. Dr. Gail Matthews at Dominican University proved it.
-          The ASTD pushed the number to 95% with scheduled accountability appointments.
-          <br /><br />
-          The problem was never motivation. The problem was infrastructure.
-          Who matches you with the right people? Who runs the check-ins?
-          Who catches you when you go quiet in Week 3?
-          <br /><br />
-          That used to require a human facilitator charging $200/hour.
+          Division Alpha starts at <strong>ENTER</strong>. For 40 days, the Boss tracks what you said
+          you would do, what you actually did, and whether your score says you belong higher.
           <br />
-          Now it requires Division Alpha.
+          <br />
+          Daily pulse. Five-minute micro-sessions. A visible streak. A score that updates in real time.
+          Humans show up when it matters, but the experience stays unified. One system. One memory.
+          <br />
+          <br />
+          You do not buy your way into a squad here. You prove your way into one.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -159,11 +192,10 @@ export function LandingPage() {
           className="mt-6 text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          Sprint {sprintNum} begins {sprintDate} &middot; {spotsLeft} spots remaining &middot; $49/month &middot; Founding Operators get permanent badge
+          Sprint {sprintNum} begins {sprintDate} &middot; {spotsLeft} spots remaining &middot; ENTER $19/mo &middot; PROVEN unlocks at 70+
         </div>
       </div>
 
-      {/* ── The Mechanism ── */}
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <div
           className="text-[10px] uppercase tracking-[0.12em] mb-4"
@@ -172,34 +204,30 @@ export function LandingPage() {
           How It Works
         </div>
         <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-6">
-          5 people who know your goals.<br />
-          AI makes it run at scale.
+          The Boss runs the proving ground.
         </h2>
 
         <p className="text-[15px] leading-[1.7] mb-8" style={{ color: "var(--text-secondary)" }}>
-          You are placed in a squad of 5&ndash;6 operators. Not random strangers&thinsp;&mdash;&thinsp;people
-          matched by timezone, goal type, and values. Real humans
-          who will ask you every Friday what happened with Monday&apos;s commitments.
-          The AI handles the matching, the scheduling, the nudging. Your squad handles
-          the part that actually changes behavior.
+          The daily entry point is simple on purpose. The depth comes from what the Boss remembers,
+          what your score reflects, and whether you can hold your line for 40 days without drifting.
         </p>
 
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
-              day: "Monday",
-              title: "Declare",
-              desc: "You tell your squad exactly what you will deliver this week. Not vague intentions. Specific, measurable commitments. Your squad sees them. There is nowhere to hide.",
+              day: "Daily",
+              title: "Pulse",
+              desc: "Every morning the Boss asks one clean question: did you move yesterday? Reply, update the streak, move the score, stay in the fight.",
             },
             {
-              day: "Wednesday",
-              title: "Signal",
-              desc: "Green, Yellow, or Red. For each goal, one honest signal. If you are stuck, your squad knows before Friday. Marcus is blocked on Stripe? Sara integrated it last month. The AI connects them in minutes.",
+              day: "Weekly",
+              title: "Rhythm",
+              desc: "Monday declare. Wednesday signal. Friday reflect. The week has posture, not just reminders. The Boss keeps the narrative intact.",
             },
             {
-              day: "Friday",
-              title: "Reflect",
-              desc: "What landed. What did not. What you learned. No shame, no performance theater. Just data. The squad celebrates wins and extracts learning from misses. Then you rest. Monday starts again.",
+              day: "Earned",
+              title: "Progression",
+              desc: "ENTER is open. PROVEN is earned at 70+. ELITE is 90+ across multiple sprints. Access rises with evidence.",
             },
           ].map((item) => (
             <div
@@ -224,142 +252,157 @@ export function LandingPage() {
         </div>
       </div>
 
-      {/* ── The AI Layer ── */}
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <div
           className="text-[10px] uppercase tracking-[0.12em] mb-4"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          What the AI Does
+          Earned Progression
         </div>
         <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-4">
-          The infrastructure that makes squads work.
+          One path. Three levels.
         </h2>
         <p className="text-[15px] leading-[1.7] mb-8" style={{ color: "var(--text-secondary)" }}>
-          Every mastermind group that works has a facilitator. The best ones have
-          a coach, a matchmaker, and someone watching for disengagement. Division Alpha
-          has all five&thinsp;&mdash;&thinsp;running in the background so your squad can focus on
-          what matters: holding each other accountable.
+          Division Alpha is not selling the same promise to everyone. The front door is open.
+          The climb is earned. That is the brand.
         </p>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { name: "Matchmaker", desc: "Forms your squad from the applicant pool. Timezone, personality, goal diversity, experience level. Gets smarter every sprint." },
-            { name: "Facilitator", desc: "Runs the Monday/Wednesday/Friday rhythm. Posts prompts, acknowledges submissions, connects members who can help each other." },
-            { name: "Coach", desc: "Your private AI advisor. 24/7. Full context on your goals, your patterns, your check-in history. Says what needs to be said." },
-            { name: "Guardian", desc: "Watches for silence. Two missed check-ins and you get a private message. Not a threat. A question: are you struggling, or just busy?" },
-            { name: "Analytics", desc: "Calculates your Operator Score across 6 factors. Tracks squad health. Predicts who might disengage before they do." },
-          ].map((agent) => (
-            <div key={agent.name} className="flex gap-4 py-3" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-              <span
-                className="text-[11px] uppercase tracking-[0.06em] w-[90px] shrink-0 pt-0.5"
+            {
+              name: "ENTER",
+              stat: "$19",
+              desc: "40-day proving ground. Daily Boss pulse, streak, score, weekly operator session, and embedded human support.",
+            },
+            {
+              name: "PROVEN",
+              stat: "70+",
+              desc: "Earned squad access. Matched operators, weekly squad sessions, leaderboard pressure, and squad damage.",
+            },
+            {
+              name: "ELITE",
+              stat: "90+",
+              desc: "Top-end operator signal across multiple sprints. Venture formation, advisory, and high-trust building with the best.",
+            },
+          ].map((tier) => (
+            <div
+              key={tier.name}
+              className="py-5 px-6"
+              style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
+            >
+              <div
+                className="text-[10px] uppercase tracking-[0.08em] mb-3"
                 style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
               >
-                {agent.name}
-              </span>
-              <p className="text-[14px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
-                {agent.desc}
+                {tier.name}
+              </div>
+              <div
+                className="text-[1.75rem] font-bold leading-none mb-3"
+                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+              >
+                {tier.stat}
+              </div>
+              <p className="text-[14px] leading-[1.65]" style={{ color: "var(--text-secondary)" }}>
+                {tier.desc}
               </p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── The Numbers ── */}
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-6">
-          The research that built this product.
+          Why this feels different.
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="space-y-4 mb-8">
           {[
-            { stat: "43%", label: "Goal completion rate when you set goals alone", cite: "Dominican University" },
-            { stat: "76%", label: "With an accountability partner and weekly reports", cite: "Dr. Gail Matthews" },
-            { stat: "95%", label: "With scheduled accountability appointments", cite: "ASTD" },
+            {
+              title: "One experience",
+              desc: "The Boss is the relationship. Humans appear inside it when they matter. No split between app, coach, and system memory.",
+            },
+            {
+              title: "Your score tells the truth",
+              desc: "The score is not decoration. It determines whether you stay at ENTER, unlock PROVEN, or eventually reach ELITE.",
+            },
+            {
+              title: "Squads are earned",
+              desc: "You do not get placed into a random pod on hope. You prove yourself first, then earn a stronger room.",
+            },
           ].map((item) => (
             <div
-              key={item.stat}
-              className="text-center py-5 px-3"
+              key={item.title}
+              className="py-5 px-6"
               style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
             >
-              <div
-                className="text-[2rem] font-bold leading-none mb-1"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
-              >
-                {item.stat}
-              </div>
-              <div className="text-[12px] leading-[1.5] mb-1" style={{ color: "var(--text-secondary)" }}>
-                {item.label}
-              </div>
-              <div
-                className="text-[10px] uppercase tracking-[0.06em]"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-              >
-                {item.cite}
+              <div className="text-[15px] font-semibold mb-2">{item.title}</div>
+              <div className="text-[14px] leading-[1.65]" style={{ color: "var(--text-secondary)" }}>
+                {item.desc}
               </div>
             </div>
           ))}
         </div>
 
         <p className="text-[15px] leading-[1.7]" style={{ color: "var(--text-secondary)" }}>
-          Division Alpha gives you the squad, the scheduled appointments, the weekly reports,
-          and the group pressure that research proves works&thinsp;&mdash;&thinsp;at a fraction of the cost of a
-          human mastermind. AI handles the logistics. Your squad handles the accountability.
+          Accountability works when there is follow-through, visibility, and consequence.
+          Division Alpha gives you all three without turning the experience into a noisy dashboard
+          or a dead chatbot.
         </p>
       </div>
 
-      {/* ── Who This Is For ── */}
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-4">
           This is not for everyone.
         </h2>
         <p className="text-[15px] leading-[1.7] mb-6" style={{ color: "var(--text-secondary)" }}>
-          Division Alpha is for founders and operators who take their commitments seriously.
-          People building businesses aligned with their values, who have goals they keep
-          failing to hit&thinsp;&mdash;&thinsp;not because they lack ability, but because they lack
-          the structure. If you have never set a goal and struggled to finish it,
-          this product is not for you. If you have, keep reading.
+          Division Alpha is for builders who are tired of private promises. People with real work
+          to ship, values they care about, and enough self-awareness to admit that talent without
+          structure still leaks.
         </p>
 
         <div className="space-y-3">
           {[
-            "You are building something meaningful and nobody holds you to your word",
-            "You work alone and nobody asks you what happened with last week\u2019s plan",
-            "You have tried accountability apps, habit trackers, and AI coaches. They did not work because there was no human on the other end who cared",
-            "You want a squad that actually gets it \u2014 your goals, your values, your hustle",
-            "You would pay $49/month if it meant actually finishing what you start",
+            "You work alone and the hardest part is follow-through, not ideas",
+            "You want a system that notices when you drift instead of waiting for you to ask for help",
+            "You can handle the truth of a visible score and a broken streak",
+            "You want the chance to prove yourself before you earn a stronger room",
+            "You are willing to pay $19 to step in and let your behavior decide what opens next",
           ].map((item, i) => (
             <div key={i} className="flex gap-3 py-2">
-              <span className="text-[13px] shrink-0 mt-0.5" style={{ color: "var(--accent)" }}>&#10003;</span>
-              <p className="text-[14px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>{item}</p>
+              <span className="text-[13px] shrink-0 mt-0.5" style={{ color: "var(--accent)" }}>
+                &#10003;
+              </span>
+              <p className="text-[14px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
+                {item}
+              </p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Pricing ── */}
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-        <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-2">$49/month.</h2>
+        <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-2">ENTER &middot; $19/month.</h2>
         <p className="text-[15px] leading-[1.7] mb-6" style={{ color: "var(--text-secondary)" }}>
-          Human-led masterminds charge $97&ndash;$2,000 per month. AI coaching apps charge $20
-          but give you a chatbot with no skin in the game.
-          <br /><br />
-          Division Alpha gives you a squad of real humans, AI that actually knows your history,
-          and a structure that research proves works. For $49.
+          The entry point is deliberately low-friction. Everyone gets a chance to step in.
+          The filter is not price. The filter is whether you can hold your line for 40 days.
+          <br />
+          <br />
+          If you do, the next room opens. If you do not, the score tells the truth.
         </p>
 
         <div
           className="py-5 px-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div className="text-lg font-semibold mb-3">Sprint Access &middot; $49/mo</div>
+          <div className="text-lg font-semibold mb-3">ENTER &middot; $19/mo</div>
           <div className="space-y-2">
             {[
-              "AI-matched squad of 5\u20136 operators who share your drive",
-              "6-week structured sprint with Monday/Wednesday/Friday rhythm",
-              "Private AI coach available 24/7",
-              "Operator Score tracking across 6 performance factors",
-              "Squad continuation vote every 6 weeks",
+              "40-day proving ground with daily Boss pulse",
+              "5-minute micro-sessions and Monday/Wednesday/Friday rhythm",
+              "Visible streak + real-time Operator Score",
+              "Weekly operator session, monthly 1:1, Guardian escalation",
+              "Private AI coach with full context on your goals and patterns",
+              "PROVEN invitation when you finish at 70+",
               "Cancel anytime. No contracts.",
             ].map((item, i) => (
               <div key={i} className="flex gap-2 text-[14px]" style={{ color: "var(--text-secondary)" }}>
@@ -385,21 +428,16 @@ export function LandingPage() {
         </div>
       </div>
 
-      {/* ── The Question ── */}
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
         <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-4">
-          Your Q2 starts here.
+          Step into the arena.
         </h2>
         <p className="text-[15px] leading-[1.7] mb-8" style={{ color: "var(--text-secondary)" }}>
-          The research settled the accountability question decades ago. The people who
-          achieve consistently are not more disciplined. They are more accountable.
-          They have people who know their goals and will not let them hide.
-          <br /><br />
-          Division Alpha builds that structure for you. A squad that holds you to your word.
-          AI that never forgets. A rhythm that turns intention into execution. Every Monday.
-          Every Wednesday. Every Friday.
-          <br /><br />
-          Sprint {sprintNum} begins {sprintDate}. The founding cohort is forming now.
+          Sprint {sprintNum} begins {sprintDate}. The daily pulse starts the relationship.
+          The score tracks whether you are climbing. The best operators earn their squad next.
+          <br />
+          <br />
+          The question is not whether you are interested. The question is whether you can keep your word for 40 days.
         </p>
 
         <button
@@ -414,11 +452,10 @@ export function LandingPage() {
           className="mt-4 text-center text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          {spotsLeft} spots remaining &middot; Applications reviewed within 48 hours
+          {spotsLeft} spots remaining &middot; ENTER starts at $19/mo &middot; Applications reviewed within 48 hours
         </div>
       </div>
 
-      {/* ── Footer ── */}
       <div className="py-8 text-center">
         <div
           className="text-[12px] font-semibold tracking-[0.04em] uppercase mb-2"
@@ -427,7 +464,7 @@ export function LandingPage() {
           Division Alpha
         </div>
         <p className="text-[12px]" style={{ color: "var(--text-muted)" }}>
-          Your squad holds you accountable. AI makes it scale.
+          Everyone gets a chance. The best earn their squad.
         </p>
         <div className="mt-4 flex justify-center gap-4">
           <button

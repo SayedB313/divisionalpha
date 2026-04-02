@@ -81,7 +81,7 @@ export function SettingsPage() {
             className="text-[13px]"
             style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
           >
-            {squad?.name || "Alpha Vanguard"} &middot; S{profile?.sprints_completed ?? 3} Operator
+            {squad?.name || "ENTER"} &middot; S{profile?.sprints_completed ?? 3} Operator
           </p>
         </div>
       </div>
@@ -357,9 +357,9 @@ export function SettingsPage() {
             >
               Current Plan
             </div>
-            <div className="text-lg font-semibold mb-1">Sprint Access</div>
+            <div className="text-lg font-semibold mb-1">ENTER</div>
             <div className="text-[13px] mb-3" style={{ color: "var(--text-secondary)" }}>
-              $49/mo &middot; 6-week accountability sprints with squads
+              $19/mo &middot; 40-day proving ground with earned progression to PROVEN
             </div>
             <div className="flex flex-wrap gap-3">
               <button
@@ -385,7 +385,7 @@ export function SettingsPage() {
                   fontFamily: "inherit",
                 }}
               >
-                Upgrade to Operator Fund
+                View PROVEN Path
               </button>
             </div>
           </div>
@@ -404,7 +404,7 @@ export function SettingsPage() {
               { label: "Email", value: profile?.email || "amir@example.com" },
               { label: "Member since", value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "January 2026" },
               { label: "Sprints completed", value: String(profile?.sprints_completed ?? 2) },
-              { label: "Current squad", value: squad?.name || "Alpha Vanguard" },
+              { label: "Current squad", value: squad?.name || "Not earned yet" },
             ].map((info) => (
               <div
                 key={info.label}

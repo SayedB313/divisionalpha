@@ -60,11 +60,14 @@ export async function POST(request: NextRequest) {
     // Check notification preferences — skip users who opted out of email
     const { data: prefs } = await supabase
       .from('notification_preferences')
-      .select('user_id, email_enabled')
+      .select('user_id, sprint_reminders, squad_activity, coach_messages, weekly_digest')
       .in('user_id', targetUsers.map(u => u.id))
 
+    const prefKey = getPreferenceKey(action)
     const optedOut = new Set(
-      (prefs || []).filter((p: any) => p.email_enabled === false).map((p: any) => p.user_id)
+      (prefs || [])
+        .filter((pref: any) => prefKey && pref[prefKey] === false)
+        .map((pref: any) => pref.user_id)
     )
     targetUsers = targetUsers.filter(u => !optedOut.has(u.id))
 
@@ -134,5 +137,22 @@ export async function POST(request: NextRequest) {
   } catch (err: any) {
     log.error('Route error', { error: err.message })
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+  }
+}
+
+function getPreferenceKey(action: string): 'sprint_reminders' | 'squad_activity' | 'coach_messages' | 'weekly_digest' | null {
+  switch (action) {
+    case 'monday_reminder':
+    case 'wednesday_reminder':
+    case 'friday_reminder':
+    case 'sprint_kickoff':
+    case 'sprint_completion':
+      return 'sprint_reminders'
+    case 'squad_nudge':
+      return 'squad_activity'
+    case 'life_check':
+      return 'coach_messages'
+    default:
+      return null
   }
 }

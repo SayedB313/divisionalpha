@@ -99,6 +99,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      setSquad(null)
+      setSquadMembers([])
+
       // Load profile
       const { data: profileData } = await supabase
         .from('profiles')
@@ -106,7 +109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .eq('id', user.id)
         .single()
 
-      if (profileData) setProfile(profileData)
+      setProfile(profileData ?? null)
 
       // Load current active sprint
       const { data: sprintData } = await supabase
@@ -117,7 +120,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         .limit(1)
         .single()
 
-      if (sprintData) setSprint(sprintData)
+      setSprint(sprintData ?? null)
 
       // Load user's active squad
       if (sprintData) {
@@ -130,7 +133,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           .eq('user_id', user.id)
           .eq('status', 'active')
           .eq('squads.sprint_id', sprintData.id)
-          .single()
+          .maybeSingle()
 
         if (memberData?.squads) {
           const squadData = memberData.squads as unknown as Squad

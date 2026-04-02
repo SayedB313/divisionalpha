@@ -63,14 +63,14 @@ export function useCheckins(weekNumber?: number) {
 
   const submit = useMutation({
     mutationFn: async (signals: CheckinSignal[]) => {
-      if (!user || !sprint || !squad || !week) throw new Error('Missing context')
+      if (!user || !sprint || !week) throw new Error('Missing context')
 
       const { data, error } = await supabase
         .from('checkins')
         .upsert({
           user_id: user.id,
           sprint_id: sprint.id,
-          squad_id: squad.id,
+          squad_id: squad?.id ?? null,
           week_number: week,
           signals,
         }, {
@@ -84,7 +84,9 @@ export function useCheckins(weekNumber?: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['checkin'] })
-      queryClient.invalidateQueries({ queryKey: ['squad-checkins'] })
+      if (squad) {
+        queryClient.invalidateQueries({ queryKey: ['squad-checkins'] })
+      }
     },
   })
 

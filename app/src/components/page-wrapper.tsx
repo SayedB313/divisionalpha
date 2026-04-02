@@ -1,14 +1,13 @@
 "use client";
 
-import { useNavigation } from "@/lib/navigation-context";
+import { useNavigation, type Page, type LegacyPage, resolvePage } from "@/lib/navigation-context";
 import type { ReactNode } from "react";
 
-type Page = "landing" | "login" | "home" | "declare" | "checkin" | "reflect" | "squad" | "squad-chat" | "coach" | "leaderboard" | "kickoff" | "completion" | "apply" | "settings" | "admin";
-
-export function PageWrapper({ page, children }: { page: Page; children: ReactNode }) {
+export function PageWrapper({ page, children }: { page: Page | LegacyPage; children: ReactNode }) {
   const { currentPage } = useNavigation();
+  const resolvedPage = resolvePage(page);
 
-  if (currentPage !== page) return null;
+  if (currentPage !== resolvedPage) return null;
 
   return (
     <section

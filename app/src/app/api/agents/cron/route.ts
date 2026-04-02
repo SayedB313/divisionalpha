@@ -32,6 +32,11 @@ export async function GET(request: NextRequest) {
 
   const actions: { agent: string; action: string; description: string }[] = []
 
+  // ── Daily Boss pulse: morning dispatch for every active user ──
+  if (hour >= 7 && hour <= 9) {
+    actions.push({ agent: 'boss', action: 'dispatch_daily_pulse', description: 'Daily Boss pulse dispatch' })
+  }
+
   // ── Monday: Declaration prompts + email reminders ──
   if (dayOfWeek === 1 && hour >= 7 && hour <= 9) {
     actions.push({ agent: 'facilitator', action: 'monday_declaration', description: 'Monday declaration prompt' })
@@ -64,6 +69,11 @@ export async function GET(request: NextRequest) {
   // ── Lifecycle: Daily at midnight (always check for sprint transitions) ──
   if (hour === 0) {
     actions.push({ agent: 'lifecycle', action: 'check', description: 'Sprint lifecycle check' })
+  }
+
+  // ── Daily Boss pulse: evening nudge for unanswered pulses ──
+  if (hour >= 18 && hour <= 20) {
+    actions.push({ agent: 'boss', action: 'pulse_nudge', description: 'Daily Boss pulse nudge' })
   }
 
   // ── Late Monday/Wednesday: Nudge non-submitters ──

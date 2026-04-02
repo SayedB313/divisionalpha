@@ -2,17 +2,34 @@
 
 ## What Is This
 
-Division Alpha is an AI-orchestrated peer accountability platform connected to **Oumafy** (Islamic-branded parent company). It's a premium members-only experience where driven operators hold each other accountable through structured 6-week sprints.
+Division Alpha is a 40-day proving ground for operators. The Boss (AI-powered, human-amplified, one unified system) measures your execution daily. Your score tells the truth. The best earn their squad. The elite build together. Connected to **Oumafy** (Islamic-branded parent company).
 
-**Tagline energy:** "Declare or be declared upon." / "No Excuses. No Exceptions."
+**Tagline energy:** "Step into the arena." / "The Boss is watching."
 **Domain:** divisionalpha.net
 **Hosting:** Self-hosted server via Coolify (Docker + Traefik), domain on Cloudflare
+**Master Plan:** `docs/DIVISION-ALPHA-MASTER-PLAN-2026-04-01.md` (single source of truth for strategy)
+**Contrarian Score:** v1=76 RED KILL → v3=65 ORANGE → v6=53 ORANGE (4 points from PROCEED)
 
-## Three Tiers
+## Current Model: Elite Proving Ground (v6 — Single Experience)
 
-1. **Tier 1 — Community** ($10/mo): General access, community features, content
-2. **Tier 2 — Sprint Access** ($49/mo or $20/mo Oumafy Premium): 6-week accountability sprints with squads of 5-6 people. Monday declarations, Wednesday G/Y/R check-ins, Friday reflections
-3. **Tier 3 — The Operator Fund** ($297/mo + equity): Venture studio for top-performing operators. Build real businesses together. Musharakah-compliant (Islamic partnership structure). **NOT YET BUILT — deferred until Tier 2 has 500+ members.**
+**Key insight:** The Boss IS the system. Human moments are embedded inside the Boss, NOT alongside it. Split hybrid coaching underperforms when the user experiences two separate systems. Division Alpha is one experience, one memory, one identity.
+
+**Positioning:** Division Alpha is NOT a self-help tool. It's a proving ground. Public claim depends on ICP: broad entry = everyone gets a chance, operator-facing = earn your squad, elite-facing = "85% don't make it." Same doctrine, different emphasis.
+
+## Current Status (2026-04-01)
+
+- **Adaptive redesign implemented in repo:** the live shell is now `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, `admin`
+- **Public funnel updated:** landing, apply, login, and checkout all reinforce `ENTER first, PROVEN earned later`
+- **Boss loop built:** `/api/agents/boss`, `/api/boss/pulse`, streak/score orchestration, daily pulse UI, and Boss-triggered admin controls are all in the codebase
+- **Admin updated:** business logic now reflects `ENTER $19 / PROVEN $49 / ELITE $149` and `30 / 70 / 90`
+- **Correctness fixes shipped:** coach duplicate insert fixed, cron installer now matches GET cron route, stale 6-week / Operator Fund copy removed from active surfaces
+- **Important live follow-up:** Supabase migrations `016_allow_enter_without_squad.sql` and `017_daily_boss_loop.sql` still need to be applied before the Boss-first model works in production
+
+## Three Tiers (Earned Progression)
+
+1. **ENTER ($19/mo):** AI Boss daily check-ins, 5-min micro-sessions (Mon-Fri), streak counter, real-time Operator Score (65% passive), cohort feed, Boss-orchestrated weekly call + monthly 1:1 + Guardian escalation. 40-day proving ground. Works from user #1.
+2. **PROVEN ($49/mo):** Requires Score 70+ after completing a 40-day sprint. Squad access (4-5 proven operators), leaderboard, badges, squad damage mechanic, Boss-orchestrated weekly squad sessions, bi-weekly 1:1 coaching.
+3. **ELITE ($149/mo + equity):** Top 5% across 2+ sprints. Venture formation, Musharakah-compliant funding, mastermind calls, advisory. 10-20 max. **NOT YET BUILT — deferred until PROVEN validates.**
 
 ## Tech Stack (Production)
 
@@ -25,42 +42,48 @@ Division Alpha is an AI-orchestrated peer accountability platform connected to *
 - **Hosting:** Self-hosted server (Docker/Coolify + Traefik), domain on Cloudflare
 - **No Discord** — custom app from day one
 
-## 5 AI Agents (All Built)
+## 6 System Agents (Built in Repo)
 
-1. **Matchmaker** (`/api/agents/matchmaker`) — Forms squads based on goals, personality, timezone, commitment level. Runs at sprint enrollment close.
-2. **Facilitator** (`/api/agents/facilitator`) — Runs the weekly rhythm (Mon/Wed/Fri prompts, reminders, check-in summaries). Scheduled via cron.
-3. **Coach** (`/api/coach`) — Private 1-on-1 performance coaching via MiniMax 2.7. Real AI responses, conversation history, operator context.
-4. **Guardian** (`/api/agents/guardian`) — Monitors squad health every 6 hours. Flags disengagement, triggers Life Check DMs, Pause Protocol.
-5. **Analytics** (`/api/agents/analytics`) — Generates Operator Scores (6-factor weighted), squad health metrics, trends.
+1. **Boss** (`/api/agents/boss`) — Dispatches daily Boss pulses, sends nudges, reconciles missed pulses, and drives the ENTER-first loop.
+2. **Matchmaker** (`/api/agents/matchmaker`) — Forms squads based on goals, personality, timezone, commitment level. Runs at sprint enrollment close.
+3. **Facilitator** (`/api/agents/facilitator`) — Runs the weekly rhythm (Mon/Wed/Fri prompts, reminders, summaries). Scheduled via cron.
+4. **Coach** (`/api/coach`) — Private 1-on-1 performance coaching via MiniMax 2.7 with full operator context and conversation history.
+5. **Guardian** (`/api/agents/guardian`) — Monitors operator/squad health every 6 hours. Flags disengagement, triggers Life Check DMs, Pause Protocol.
+6. **Analytics** (`/api/agents/analytics`) — Generates Operator Scores, streak-aware score state, squad health metrics, and trends.
 
 ### Agent Support Infrastructure
 
 - **Event Bus** (`/api/agents/events`) — Inter-agent communication via `agent_events` table
-- **Cron Dispatcher** (`/api/agents/cron`) — Scheduled trigger for Facilitator (Mon/Wed/Fri) + Guardian (6-hourly)
-- **Ceremony Engine** (`/api/agents/ceremonies`) — Kickoff (Week 1), Dip Intervention (Week 3), Completion (Week 6)
+- **Cron Dispatcher** (`/api/agents/cron`) — Scheduled trigger for Boss (daily), Facilitator (Mon/Wed/Fri), Guardian (6-hourly), and Lifecycle (daily)
+- **Boss Pulse API** (`/api/boss/pulse`) — User pulse submission, score delta, streak updates
+- **Ceremony Engine** (`/api/agents/ceremonies`) — Journey ceremonies: squad reveal, kickoff, dip intervention, completion
 - **Lifecycle Manager** (`/api/agents/lifecycle`) — Sprint state transitions (enrollment → active → completing → completed)
 - **Admin Trigger** (`/api/admin/trigger`) — Manual agent invocation for testing
-- **Admin Dashboard** (`/api/admin/dashboard`) — Platform metrics, squad health, agent activity
+- **Admin Dashboard** (`/api/admin/dashboard`) — Pricing/tier metrics, Boss pulse metrics, funnel metrics, squad health, agent activity
 
 ## Sprint Rhythm
 
-- **Monday:** Declare weekly goals to squad
-- **Wednesday:** Green / Yellow / Red check-in
-- **Friday:** Reflection + sync call
-- **Week 1:** Kickoff ceremony
-- **Week 3:** Dip Intervention (AI detects mid-sprint slump)
-- **Week 6:** Completion Ceremony + Continuation Vote (same squad or reshuffle)
+- **Daily:** Boss pulse, streak update, score movement
+- **Monday:** Declare weekly goals
+- **Wednesday:** Green / Yellow / Red signal
+- **Friday:** Reflection + operator session
+- **Early sprint:** Kickoff ceremony
+- **Midpoint:** Dip intervention
+- **Day 40 close:** Completion ceremony + continuation / unlock decision
 
-## Operator Score (6 Factors)
+Internal scheduling still tracks week-based rituals in the DB, but the lived product is a 40-day Boss-led arc rather than a collection of separate pages.
 
-- Goal Completion: 25%
-- Attendance: 20%
-- Squad Contribution: 20%
-- Leadership: 15%
-- Growth: 10%
-- Communication: 10%
+## Operator Score (Daily, Passive-First)
 
-Score qualifies operators for Tier 3 invitation (top 5%, score ≥ ~85).
+Score updates DAILY (not sprint-end). ~65% passive or AI-inferred, ~35% active input.
+
+- Consistency (passive): 40% — streak, reply speed, check-in frequency
+- Goal Progress: 25% — G/Y/R signal patterns (Wed only)
+- Engagement Quality (passive): 15% — response depth, session completion
+- Community (passive): 10% — kudos, feed interactions, call attendance
+- Growth (minimal report): 10% — Fri reflection, carry-forward goals
+
+Score 70+ qualifies for PROVEN invitation. Top performers at 90+ across 2+ sprints qualify for ELITE consideration.
 
 ## Permission Model
 
@@ -90,7 +113,8 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - v4: Retro Art Deco terminal — rejected ("not the vibe")
 - v5: First Warm Editorial attempt — approved direction but needed refinement
 - v6: (skipped)
-- **v7 (current):** Full interactive prototype — all screens, day-contextual, ceremonies, onboarding, coach DM
+- **v7:** Full interactive prototype — day-contextual, ceremonies, onboarding, coach DM
+- **v8 (current repo shell):** Adaptive Boss-led redesign — Boss Home, Journey, Squad, Coach, Proof, rebuilt admin, earned progression states
 
 ## Project Structure
 
@@ -98,26 +122,20 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 divisionalpha/
 ├── CLAUDE.md                                 ← You are here
 ├── DESIGN.md                                 ← Locked design system (typography, color, spacing, layout, motion)
+├── AGENTS.md                                 ← Shared repo-memory file with the same project context
 ├── scripts/
 │   └── setup-cron.sh                         ← Cron setup for Coolify server (every 3h agent dispatch)
 ├── docs/
-│   ├── DIVISION_ALPHA_COMPLETE_REFERENCE.md  ← A-Z reference: every aspect of the product (1,023 lines, 30 sections)
-│   ├── Division_Alpha_Complete_UX_Flow.md    ← Every touchpoint from first click to third sprint
-│   ├── Oumafy_Tier3_Operator_Fund_Spec.docx ← Tier 3 Operator Fund full spec
-│   ├── Division Alpha.rtf                    ← Original product vision doc
-│   ├── Teir2 Stuff.rtf                       ← Tier 2 sprint mechanics detail
-│   ├── Instructions.rtf                      ← Build instructions and requirements
-│   ├── DESIGN-DOC-2026-03-29.md              ← gstack design doc (post-pivot rewrite)
-│   ├── CONTRARIAN-PROSECUTION.md             ← Contrarian skill: 76/100 RED KILL on generic positioning
-│   ├── CONTRARIAN-ANALYSIS.md                ← Contrarian analysis summary
-│   ├── PATHFINDER-DEFENSE.md                 ← Pathfinder Defense: CONDITIONAL GO for Muslim pivot
-│   └── MARKET-INTELLIGENCE.md                ← 21 competitors, 7 audiences, cold email strategy
+│   ├── DIVISION-ALPHA-MASTER-PLAN-2026-04-01.md ← **v6 Master Plan (single source of truth)**
+│   ├── CONTRARIAN-V7-RESPONSE-MATRIX-2026-04-01.md ← Working defense board: objection → answer → proof type
+│   ├── MARKET-INTELLIGENCE.md                ← GTM and cold outreach research
+│   └── ... legacy reference docs / earlier pivots
 ├── mockups/
-│   ├── Division_Alpha_App_v7.html            ← CURRENT: Full interactive prototype (approved)
-│   ├── Division_Alpha_Landing.html           ← CURRENT: Public-facing landing page
+│   ├── Division_Alpha_App_v7.html            ← Approved interactive prototype reference
+│   ├── Division_Alpha_Landing.html           ← Public landing direction reference
 │   └── (v1-v5 archived — rejected iterations)
 ├── supabase/
-│   └── migrations/                           ← 15 migration files
+│   └── migrations/                           ← 17 migration files
 │       ├── 001_extensions.sql                ← uuid-ossp, pgvector, pg_cron
 │       ├── 002_profiles.sql                  ← User profiles (extends Supabase auth)
 │       ├── 003_applications.sql              ← Onboarding applications (4-step flow)
@@ -132,14 +150,17 @@ divisionalpha/
 │       ├── 012_views.sql                     ← squad_activity, leaderboard views
 │       ├── 013_notification_prefs.sql        ← Notification preferences per user
 │       ├── 014_fix_anon_applications.sql     ← Allow unauthenticated applications
-│       └── 015_add_referral_source.sql       ← Referral tracking column on applications
+│       ├── 015_add_referral_source.sql       ← Referral tracking column on applications
+│       ├── 016_allow_enter_without_squad.sql ← ENTER works before squad assignment
+│       └── 017_daily_boss_loop.sql           ← Daily Boss pulses, streak state, score metadata
 ├── app/                                       ← Next.js production app
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── layout.tsx                    ← Root layout: fonts, AuthProvider, ThemeProvider, Topbar, MobileNav, ScoreOverlay
-│   │   │   ├── page.tsx                      ← Single-route SPA: auth gating, renders all page components
+│   │   │   ├── page.tsx                      ← Single-route SPA: auth gating, renders adaptive shell pages
 │   │   │   ├── globals.css                   ← Full design system CSS variables (light/dark), zoom: 1.3
 │   │   │   └── api/
+│   │   │       ├── boss/pulse/route.ts       ← User pulse submission API
 │   │   │       ├── coach/route.ts            ← MiniMax 2.7 AI coach endpoint
 │   │   │       ├── checkout/route.ts         ← Stripe checkout session creation
 │   │   │       ├── email/route.ts            ← Brevo email notifications (reminders, nudges, ceremonies)
@@ -148,6 +169,7 @@ divisionalpha/
 │   │   │       │   ├── dashboard/route.ts    ← Admin metrics API
 │   │   │       │   └── trigger/route.ts      ← Manual agent trigger
 │   │   │       └── agents/
+│   │   │           ├── boss/route.ts         ← Daily Boss dispatch + nudge orchestrator
 │   │   │           ├── matchmaker/route.ts   ← Squad formation algorithm
 │   │   │           ├── facilitator/route.ts  ← Mon/Wed/Fri prompt generation
 │   │   │           ├── guardian/route.ts     ← Health scan + Life Check DMs
@@ -163,12 +185,20 @@ divisionalpha/
 │   │   │   ├── query-provider.tsx            ← React Query provider for data fetching
 │   │   │   ├── minimax.ts                    ← MiniMax 2.7 API client
 │   │   │   ├── email.ts                      ← Brevo email client + 7 templates
+│   │   │   ├── boss-loop.ts                  ← Boss prompt, timezone, pulse status helpers
+│   │   │   ├── operator-score.ts             ← Shared score recalculation logic
+│   │   │   ├── sprint-utils.ts               ← 40-day sprint day/progress/phase helpers
 │   │   │   ├── supabase/
 │   │   │   │   ├── client.ts                 ← Browser Supabase client
 │   │   │   │   ├── server.ts                 ← Server-side Supabase client
 │   │   │   │   └── middleware.ts             ← Auth middleware (session refresh)
 │   │   │   └── hooks/
-│   │   │       ├── use-current-sprint.ts     ← Current sprint + squad data
+│   │   │       ├── use-boss-pulse.ts         ← Daily pulse fetch + submit
+│   │   │       ├── use-dashboard-snapshot.ts ← Boss Home read model
+│   │   │       ├── use-journey-state.ts      ← Journey page read model
+│   │   │       ├── use-proof-state.ts        ← Proof page read model
+│   │   │       ├── use-squad-state.ts        ← Squad page read model
+│   │   │       ├── use-tier-state.ts         ← ENTER/PROVEN/ELITE state model
 │   │   │       ├── use-declarations.ts       ← Monday declarations CRUD
 │   │   │       ├── use-checkins.ts           ← Wednesday check-ins CRUD
 │   │   │       ├── use-reflections.ts        ← Friday reflections CRUD
@@ -178,27 +208,23 @@ divisionalpha/
 │   │   │       └── use-notifications.ts      ← Notification preferences + unread count
 │   │   ├── middleware.ts                     ← Next.js middleware (auth session refresh)
 │   │   └── components/
-│   │       ├── topbar.tsx                    ← Fixed top nav: logo, desktop nav, overflow dropdown, theme toggle, score, avatar
-│   │       ├── mobile-nav.tsx                ← Fixed bottom nav (mobile): 5 items + "More" popup
+│   │       ├── topbar.tsx                    ← Adaptive desktop nav: Boss / Journey / Squad / Coach / Proof
+│   │       ├── mobile-nav.tsx                ← Adaptive mobile nav mirroring the same IA
 │   │       ├── page-wrapper.tsx              ← Shared page container: 660px max-width, fadeUp animation
-│   │       ├── score-overlay.tsx             ← Modal overlay: animated score count-up, Instrument Serif, factor bars
+│   │       ├── score-overlay.tsx             ← Score reveal + quick proof summary
 │   │       ├── theme-provider.tsx            ← Theme context: light/dark toggle via data-theme attribute
 │   │       └── pages/
 │   │           ├── landing.tsx               ← Public landing page (Ogilvy-style copy)
 │   │           ├── login.tsx                 ← Magic link login page
-│   │           ├── home.tsx                  ← Day-contextual dashboard (wired to real data)
-│   │           ├── declare.tsx               ← Monday goal declaration (wired to real data)
-│   │           ├── checkin.tsx               ← Wednesday G/Y/R check-in (wired to real data)
-│   │           ├── reflect.tsx               ← Friday reflection (wired to real data)
-│   │           ├── squad.tsx                 ← Squad activity feed (wired to Supabase Realtime)
-│   │           ├── squad-chat.tsx            ← Real-time squad chat (wired to Supabase Realtime)
-│   │           ├── coach.tsx                 ← Private AI coach DM (wired to MiniMax 2.7)
-│   │           ├── leaderboard.tsx           ← Squad + operator rankings (wired to real data)
-│   │           ├── kickoff.tsx               ← Sprint kickoff ceremony
-│   │           ├── completion.tsx            ← Sprint completion ceremony
+│   │           ├── boss.tsx                  ← Boss Home
+│   │           ├── journey.tsx               ← Journey page with declaration / signal / reflection modules
+│   │           ├── squad.tsx                 ← Locked preview in ENTER, live squad hub in PROVEN
+│   │           ├── coach.tsx                 ← Unified Boss-side private thread
+│   │           ├── proof.tsx                 ← Score, thresholds, badges, leaderboard
 │   │           ├── apply.tsx                 ← 4-step onboarding → Stripe checkout
 │   │           ├── settings.tsx              ← Profile, preferences, notifications, account
 │   │           └── admin.tsx                 ← Admin dashboard (metrics, squad health, agent logs)
+│   │           └── ... legacy pages retained as implementation details / fallback references
 │   ├── package.json
 │   └── tailwind.config.ts
 ```
@@ -206,66 +232,63 @@ divisionalpha/
 ## Architecture Notes
 
 - **SPA routing:** All pages render from a single Next.js route (`page.tsx`). Navigation is handled client-side via `navigation-context.tsx` — no file-based routing for pages.
-- **Auth gating:** `page.tsx` checks auth state. Unauthenticated users see Landing or Login. Authenticated users see the dashboard.
+- **Auth gating:** `page.tsx` checks auth state. Unauthenticated users see Landing / Login / Apply. Authenticated users land in `boss`.
 - **Page type union:** Every new page must be added to the `Page` type in both `navigation-context.tsx` and `page-wrapper.tsx`, then rendered in `page.tsx`.
-- **Desktop nav:** 5 primary items (Home, Declare, Check-in, Reflect, Squad) + `...` dropdown (Coach, Leaderboard, Sprint Kickoff, Sprint Completion, Admin). Theme toggle (sun/moon) in topbar.
-- **Mobile nav:** 4 primary items in bottom bar (Home, Declare, Signal, Squad) + "More" popup (Reflect, Coach, Leaderboard, Settings, Sign Out).
-- **Profile avatar:** "AM" circle button in topbar opens dropdown with Settings + Sign Out.
+- **Adaptive shell:** primary member IA is `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, `admin`.
+- **Legacy page map:** old pages like `home`, `declare`, `checkin`, `reflect`, `leaderboard`, `kickoff`, `completion`, and `squad-chat` now map into the new shell instead of being primary destinations.
+- **Desktop nav:** `Boss / Journey / Squad / Coach / Proof` + `More` (`Settings`, `Admin` when allowed).
+- **Mobile nav:** `Boss / Journey / Squad / Proof` + `More` (`Coach`, `Settings`, `Admin`, `Sign Out`).
+- **Profile avatar:** dynamic initials from profile; opens settings/admin/sign-out controls.
 - **Fonts loaded via `next/font/google`** in `layout.tsx` — DM Sans, DM Mono, Instrument Serif.
 - **CSS custom properties** for all colors/spacing in `globals.css` — supports light/dark themes.
-- **Data hooks:** 7 custom hooks in `lib/hooks/` — all use Supabase client, return real data when authenticated, fall back to mock data when not.
-- **Agent communication:** Agents emit events to `agent_events` table. Cron dispatcher triggers Facilitator and Guardian on schedule.
+- **Adaptive read models:** `useTierState`, `useDashboardSnapshot`, `useJourneyState`, `useSquadState`, and `useProofState` compose the Boss-first experience from existing tables.
+- **Agent communication:** Agents emit events to `agent_events` table. Cron dispatcher triggers Boss, Facilitator, Guardian, and Lifecycle on schedule.
 
-## App Screens (Production — 16 total)
+## App Screens (Adaptive Shell)
 
 ### Public (3)
 1. **Landing** — Ogilvy-style conversion page with apply CTA
 2. **Login** — Magic link authentication
 3. **Apply** — 4-step onboarding: identity, goals, accountability style, commitment → Stripe checkout
 
-### Authenticated (12)
-4. **Home** — day-contextual (Mon=declare, Wed=check-in, Fri=reflect, Tue/Thu=execution, weekend=rest)
-5. **Declare** — Monday goal declaration with blocker field
-6. **Check-in** — Wednesday per-goal G/Y/R signals with context notes on yellow/red
-7. **Reflect** — Friday reflection: wins, misses, learnings, carry-forward, peer appreciation
-8. **Squad** — Activity feed (real-time), squad health bar, facilitator insights, chat CTA
-9. **Squad Chat** — Real-time messaging UI via Supabase Realtime
-10. **Coach** — Private DM thread with MiniMax 2.7 AI coach
-11. **Leaderboard** — Squad rankings + operator rankings, tabbed view
-12. **Score** — Hidden behind crest tap (overlay), animated score reveal, factor breakdown, Tier 3 whisper
-13. **Kickoff** — Week 1 ceremony: meet squad, norms, "I'm in" commitment
-14. **Completion** — Week 6 ceremony: stats, transformation reflection, gratitude, continuation vote
-15. **Settings** — Profile (avatar, name, bio, timezone), preferences (theme, display), notifications, account
+### Authenticated (6 + admin)
+4. **Boss** — Boss Home: daily pulse, today’s command, score/streak/progression strip, next ritual, unlock previews, coach whisper
+5. **Journey** — 40-day arc, milestone timeline, and embedded declaration / signal / reflection modules
+6. **Squad** — Locked preview in ENTER, live squad hub and thread in PROVEN
+7. **Coach** — Unified Boss-side private thread with real MiniMax responses
+8. **Proof** — Score, red-line / elite-line progress, badges, operator leaderboard, squad leaderboard
+9. **Settings** — Profile, preferences, notifications, account
 
 ### Admin (1)
-16. **Admin Dashboard** — Platform metrics, active squads, agent activity, engagement stats
+10. **Admin Dashboard** — Pricing/tier metrics, Boss pulse metrics, funnel metrics, squad health, and manual agent controls
+
+Legacy pages still exist in the codebase as implementation details or historical references, but they are not the product’s primary IA anymore.
 
 ## Database (Supabase)
 
-15 migrations, key tables:
-- `profiles` — extends Supabase auth.users (name, bio, avatar, timezone, persona, tier, stripe IDs)
-- `applications` — 4-step onboarding data
-- `sprints` — 6-week sprint definitions (enrollment → active → completing → completed)
-- `squads` — squad of 5-6 members per sprint
-- `squad_members` — membership with role (member/captain)
-- `declarations` — Monday goals
-- `checkins` — Wednesday G/Y/R signals per goal
-- `reflections` — Friday reflections
-- `squad_messages` — real-time squad chat
-- `coach_messages` — private AI coach conversation history
-- `operator_scores` — 6-factor weighted scores per sprint
-- `engagement_logs` — participation tracking for Guardian
-- `agent_memory` — persistent agent context (key-value per agent per user)
-- `agent_events` — inter-agent event bus
-- `notification_preferences` — per-user notification settings
+17 migrations, key tables:
+- `profiles` — extends `auth.users` (identity, persona, tier, subscription, role)
+- `applications` — 4-step onboarding + referral + checkout capture
+- `sprints` — 40-day sprint definitions (~6 calendar weeks of scheduling)
+- `squads` / `squad_members` — earned rooms for PROVEN operators
+- `declarations` / `checkins` / `reflections` — weekly rhythm tables; `squad_id` can now be null so ENTER works before squad assignment
+- `squad_messages` — real-time room thread
+- `coach_messages` — private Boss/coach conversation history
+- `operator_scores` — sprint score + streak metadata (`current_streak`, `best_streak`, `last_pulse_*`)
+- `boss_pulses` — daily Boss pulse lifecycle, nudge state, score delta, streak-after snapshot
+- `engagement_events` / `pauses` — Guardian and pause protocol state
+- `agent_memory` / `agent_events` — inter-agent memory and event bus
+- `notification_preferences` / `notifications` — user notification settings and in-app notifications
 
-## API Routes (15)
+## API Routes (17)
 
 | Route | Method | Purpose |
 |-------|--------|---------|
+| `/api/boss/pulse` | POST | Submit daily Boss pulse and update streak / score |
 | `/api/coach` | POST | MiniMax 2.7 AI coach conversation (rate-limited: 20/hr/user) |
 | `/api/checkout` | POST | Create Stripe checkout session |
 | `/api/webhooks/stripe` | POST | Handle Stripe payment → create user → send welcome email with magic link |
+| `/api/agents/boss` | POST | Dispatch daily Boss pulses and nudges |
 | `/api/agents/matchmaker` | POST | Form squads from applicant pool |
 | `/api/agents/facilitator` | POST | Generate Mon/Wed/Fri prompts (MiniMax fallback included) |
 | `/api/agents/guardian` | POST | Health scan, Life Check DMs (MiniMax fallback included) |
@@ -282,18 +305,25 @@ divisionalpha/
 ## Key Decisions
 
 - Custom app from day one (no Discord)
-- **Pivot strategy (2026-03-29):** Brand stays universal, marketing targets Muslim founders. Contrarian scored 76/100 RED KILL on generic positioning. Pathfinder Defense found viable path: Muslim accountability for halal execution. Fills Tier 2 (Discipline) in Oumafy ecosystem (Belonging→Discipline→Economy). Kill gates: Sprint 4 (5+ members), Sprint 4 completion (70%+ goal, <5% churn), Month 3 (20+ members).
+- **v6 Single Experience Model (2026-04-01):** Boss IS the system. Human moments embedded inside (weekly call, monthly 1:1, Guardian escalation). Split hybrid fails when AI and humans feel separate. Division Alpha is one experience.
+- **Adaptive shell shipped in repo (2026-04-01):** Boss Home, Journey, Squad, Coach, Proof, Settings, Admin replaced the old Home/Declare/Check-in/Reflect/Leaderboard primary IA.
+- **Elite Proving Ground positioning:** Division Alpha is a proving ground, not a self-help tool. Public claim changes by ICP: everyone gets a chance, earn your squad, 85% don't make it.
+- **Earned progression:** ENTER 30+ → PROVEN 70+ → ELITE 90+. Behavior gates, not price gates.
+- **ENTER works from user #1 in code:** weekly rhythm no longer requires immediate squad assignment; Boss-first progression comes before squad assignment.
+- **Daily Boss loop exists in code:** pulse dispatch, pulse submission, streak state, score updates, and Boss-triggered nudges are implemented, but require DB migration apply before production use.
+- **6-layer retention engine:** Daily pulse (variable rewards), 5-min micro-sessions, streak system, passive-first scoring (65% automatic), cohort feed (default-on), Boss personality (context-aware, escalating, references human interactions).
+- **Pivot history:** v1 generic pods (76 KILL) → v2 Muslim pivot (CONDITIONAL GO) → v3 elite proving ground (65 RETHINK) → v6 single experience model (53 RETHINK). All in under 1 week.
+- Brand stays universal, marketing targets Muslim founders
 - Islamic values integration (Tawakkul, Amal, Ikhlas) — subtle, not heavy-handed
-- Revenue allocation: 70% → Tier 3 Project Fund, 20% → Operations, 10% → Profit
-- Musharakah (Islamic partnership) for Tier 3 ventures — profit/loss sharing, no interest
+- Musharakah (Islamic partnership) for ELITE tier ventures — profit/loss sharing, no interest
 - Design should feel like a **high-end members club** — not generic SaaS, not military bunker
 - DM Sans is the primary font everywhere — user strongly prefers its readability
 - Instrument Serif only for Operator Score number (one place in the entire app)
-- Score hidden by default — revealed by deliberate crest tap (earned, not displayed)
 - MiniMax 2.7 for all AI agents — cost-effective, good quality
-- OpenClaw deferred — will add later for Coach skill ecosystem and memory
 - Self-hosted via Coolify (not Vercel) — full control, Docker + Traefik
-- Tier 3 deferred — ship Tier 2 first, build Tier 3 once operator pool exists
+- ELITE deferred — ship ENTER first, build PROVEN once Sprint 4 validates, build ELITE once PROVEN has 500+ members
+- **No financial stakes** (Beeminder-style deposits rejected by founder — doesn't fit brand)
+- **Captain pipeline:** PROVEN operators at 90+ score → facilitate for free PROVEN + ELITE pathway. Exact mechanics deferred until real data.
 
 ## Server Infrastructure
 
@@ -312,58 +342,37 @@ divisionalpha/
 - **April 6, 2026:** Lifecycle cron → Sprint 4 `handshake → active, Week 1` → kickoff ceremony fires automatically
 - **Weekly:** Mon/Wed/Fri facilitator prompts + emails; Guardian scans every 6h on weekdays
 - **Week 3:** Dip intervention ceremony triggers automatically
-- **Week 6:** Completion ceremony, operator scores calculated, continuation votes
+- **Day 40 close:** Completion ceremony, operator scores calculated, continuation / unlock decisions
 
 ## What's Next
 
-- ~~Build the actual Next.js production app~~ — **DONE** (all 16 screens)
-- ~~Supabase schema design + backend integration~~ — **DONE** (14 migrations, RLS, views)
-- ~~AI agent implementation~~ — **DONE** (5 agents + event bus + cron + ceremonies + lifecycle)
-- ~~Authentication flow~~ — **DONE** (Supabase Auth, magic links, auth context, middleware)
-- ~~Wire frontend to real data~~ — **DONE** (7 hooks, Coach calls MiniMax, Squad Chat uses Realtime)
-- ~~Stripe integration~~ — **DONE** (checkout + webhook, live keys)
-- ~~Landing page~~ — **DONE** (Ogilvy-style copy)
-- ~~Admin dashboard~~ — **DONE** (API + frontend)
-- ~~Notification system~~ — **DONE** (unread count, badge in topbar)
-- ~~Theme toggle~~ — **DONE** (light/dark in topbar)
-- ~~Deploy to production server~~ — **DONE** (divisionalpha.net on Coolify, HTTP 200, Cloudflare CDN)
-- ~~Email notifications~~ — **DONE** (Brevo: sprint reminders, squad nudges, life checks, ceremonies, welcome)
-- ~~Configure Supabase SMTP~~ — **DONE** (Brevo SMTP via `supabase config push`, 100 emails/hr limit)
-- ~~Create Sprint 4~~ — **DONE** (April 6 – May 15, 2026, handshake week March 30)
-- ~~Mobile responsiveness polish~~ — **DONE** (tap targets, overflow fixes, settings tabs)
-- ~~Deploy latest to Coolify~~ — **DONE** (auto-deploy on push, Brevo env vars live)
-- ~~Cron setup on server~~ — **DONE** (every 3h, CRON_SECRET auth, /etc/cron.d/divisionalpha)
-- ~~Critical bug fixes~~ — **DONE** (email recipients, localhost fallbacks, coach conversation history)
-- ~~Security hardening~~ — **DONE** (CRON_SECRET, HTML escaping, rate limiting, structured logging)
-- ~~Resilience~~ — **DONE** (MiniMax fallbacks on all 3 AI-calling agents, health check, Docker HEALTHCHECK)
-- ~~Observability~~ — **DONE** (health endpoint, uptime monitor, JSON structured logs, backup cron)
-- ~~Test coverage~~ — **DONE** (24 Vitest tests: email templates, rate limiter, cron scheduling)
-- ~~Sprint lifecycle in cron~~ — **DONE** (daily midnight lifecycle check — was missing, sprint transitions would never have fired)
-- ~~Welcome email~~ — **DONE** (magic link sent to new users after Stripe payment)
-- ~~Sprint 4 launch updates~~ — **DONE** (countdown timer, Founding Operator badge, referral tracking, OG tags, values-aligned copy)
-- ~~Pivot strategy~~ — **DONE** (Contrarian→Pathfinder→design doc rewrite. Brand universal, marketing Muslim founders.)
-- ~~Nav cleanup~~ — **DONE** (sign-out button added in 3 places, menus simplified: desktop 7→5, mobile 5→4)
-- Recruit applicants for Sprint 4 — **IN PROGRESS** (0 real applicants as of March 29. Focus: 30 warm DMs to Muslim founders, cold email via Scribe)
-- Run matchmaker — pending applicants (run ~April 4-5 via admin trigger)
-- Tier 3 (Operator Fund) — deferred until 500+ Tier 2 members
+- Apply Supabase migrations `016_allow_enter_without_squad.sql` and `017_daily_boss_loop.sql`
+- Run a browser QA pass across `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, `admin`
+- Smoke-test the live Boss loop end-to-end:
+  - dispatch `/api/agents/boss` with `dispatch_daily_pulse`
+  - answer the pulse in-app
+  - verify streak + score movement
+  - verify email/notification behavior
+- Push/deploy the redesign once the migration-backed smoke test passes
+- Start outreach once the live product and funnel are verified
+- Run matchmaker only after real PROVEN qualifiers exist or once the first earned-squad cohort is intentionally formed
+- Keep ELITE deferred until PROVEN validates with real users
+- Keep captain pipeline deferred until real 90+ PROVEN operators emerge
 
-## Go-To-Market Strategy (2026-03-28)
+## Go-To-Market Strategy (Updated April 1, 2026)
 
 ### Competitive Position
 
-Division Alpha sits in a **$20-100/mo gap** that no competitor fills:
-- **Free tier** (Reddit, Discord, apps): 73% failure rate within 60 days. Partner ghosting, no structure, no consequences.
-- **Mid tier** ($49/mo — DIVISION ALPHA): AI + human squads + proactive follow-up. Nobody else does this.
-- **Premium tier** ($200-600/mo): Commit Action ($199/mo for 20-min weekly call), GoFounder ($500/mo), Vistage ($15-20K/yr).
+Division Alpha combines what no competitor does: **low entry ($19) + behavior filtering + single-experience Boss system + earned squad progression.**
 
-Key competitors: Focusmate (body doubling, $10/mo, 50K+ members), Commit Action (human coaching, $199/mo, 8K+ coached), FLOWN (facilitated sessions, $25/mo, 50K+ members), Boss as a Service (virtual boss, $25/mo), Shelpful (AI+human hybrid, $35-65/mo).
+Key competitors: Focusmate ($10/mo, 50K+), Commit Action ($199/mo, 8K+), Boss as a Service ($25/mo), Shelpful ($35-65/mo, AI+human hybrid).
 
 **Division Alpha's moats:**
-1. AI + human squad hybrid at $49/mo (nobody else)
-2. Squad model solves 73% ghosting rate (distributed accountability > 1:1 partnerships)
-3. Always-on AI layer (coaches sleep, AI doesn't)
-4. Proactive, not passive (comes to YOU, not another dashboard to open)
-5. Price disruption (75% cheaper than Commit Action, 88% cheaper than RE coaching)
+1. Single-experience Boss system (Boss IS the system, human moments embedded) — nobody else
+2. Earned progression (ENTER → PROVEN → ELITE) — behavior gates, not price gates
+3. Proactive, not passive (Boss comes to YOU via email/SMS, not another dashboard)
+4. Speed (concept → production in ~2 weeks, 6 strategic iterations in <1 week)
+5. Islamic framing for Muslim founder niche (real but limits TAM)
 
 ### Target Audiences (Cold Email — Ranked)
 
@@ -396,7 +405,7 @@ Position as **professional performance tool**, NOT personal self-help. This keep
 
 **Campaign 2 — RE Agents:**
 - Subject: "What your broker doesn't provide"
-- Angle: "Most agents pay $400+/mo for a coach whose main value is accountability. Same thing. $49/mo. AI-powered."
+- Angle: "Most agents pay $400+/mo for a coach whose main value is accountability. Division Alpha starts at $19/mo, with the stronger room earned through proof."
 
 **Campaign 3 — SDRs:**
 - Subject: "The 15-month wall"

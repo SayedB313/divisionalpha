@@ -1,25 +1,56 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { PageWrapper } from "../page-wrapper";
 
 interface DashboardData {
   sprint: { name: string; number: number; current_week: number; status: string; duration_weeks: number } | null;
+  pricing: { enter: number; proven: number; elite: number };
+  thresholds: { enter: number; proven: number; elite: number };
   kpis: {
-    total_users: number; active_users: number; paying_users: number;
-    paused_users: number; churned_users: number; tier2_users: number;
-    monthly_revenue_estimate: number; arr_estimate: number;
-    avg_operator_score: number; tier3_eligible: number;
+    total_users: number;
+    active_users: number;
+    paying_users: number;
+    paused_users: number;
+    churned_users: number;
+    avg_operator_score: number;
+    monthly_revenue_estimate: number;
+    arr_estimate: number;
+  };
+  tiers: { enter: number; proven: number; elite: number };
+  boss: {
+    pulses_sent_today: number;
+    answered_today: number;
+    blocked_today: number;
+    missed_today: number;
+    answer_rate_7d: number;
+  };
+  retention: { active_7d: number; active_14d: number };
+  funnel: {
+    submitted_applications: number;
+    paying_users: number;
+    proven_unlock_volume: number;
+    elite_candidate_pipeline: number;
   };
   squads: {
-    active_count: number; avg_health_score: number; avg_completion_rate: number;
-    list: { name: string; members: number; health: number; completion: number; streak: number }[];
+    active_count: number;
+    avg_health_score: number;
+    avg_completion_rate: number;
+    list: { id: string; name: string; members: number; health: number; completion: number; streak: number }[];
   };
-  applications: { pending: number };
-  at_risk: { count: number; users: { name: string; consecutive_misses: number; last_event: string }[] };
-  active_pauses: { count: number; users: { name: string; paused_at: string }[] };
-  recent_agent_activity: { last_24h: number };
+  at_risk: {
+    count: number;
+    users: { name: string; squad_name: string | null; consecutive_misses: number; latest_event: string; event_at: string }[];
+  };
+  active_pauses: {
+    count: number;
+    users: { name: string; paused_at: string; user_id: string }[];
+  };
+  recent_agent_activity: {
+    last_24h: number;
+    events: { source_agent: string; target_agent: string; event_type: string; processed: boolean; created_at: string }[];
+  };
 }
 
 export function AdminPage() {
@@ -31,156 +62,250 @@ export function AdminPage() {
 
   useEffect(() => {
     if (!user) return;
+
     fetch("/api/admin/dashboard")
-      .then(res => res.json())
-      .then(d => { if (d.error) setError(d.error); else setData(d); })
-      .catch(e => setError(e.message))
+      .then((response) => response.json())
+      .then((payload) => {
+        if (payload.error) setError(payload.error);
+        else setData(payload);
+      })
+      .catch((reason) => setError(reason.message))
       .finally(() => setLoading(false));
   }, [user]);
 
   const triggerAgent = async (agent: string, params: Record<string, any> = {}) => {
     setTriggerResult("Running...");
     try {
-      const res = await fetch("/api/admin/trigger", {
+      const response = await fetch("/api/admin/trigger", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agent, ...params }),
       });
-      const d = await res.json();
-      setTriggerResult(JSON.stringify(d, null, 2));
-    } catch (e: any) {
-      setTriggerResult(`Error: ${e.message}`);
+      const payload = await response.json();
+      setTriggerResult(JSON.stringify(payload, null, 2));
+    } catch (reason: any) {
+      setTriggerResult(`Error: ${reason.message}`);
     }
   };
 
-  const monoStyle = { fontFamily: "var(--font-dm-mono), monospace" };
-  const cardStyle = { background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" };
-  const labelStyle = { ...monoStyle, color: "var(--text-muted)", fontSize: "10px", textTransform: "uppercase" as const, letterSpacing: "0.08em" };
+  const mono = { fontFamily: "var(--font-dm-mono), monospace" };
+  const card = { background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" };
+  const label = { ...mono, color: "var(--text-muted)", fontSize: "10px", textTransform: "uppercase" as const, letterSpacing: "0.08em" };
 
-  if (loading) return <PageWrapper page="admin"><div className="text-center py-12" style={{ color: "var(--text-muted)" }}>Loading dashboard...</div></PageWrapper>;
-  if (error) return <PageWrapper page="admin"><div className="py-8"><h1 className="text-xl font-semibold mb-2">Admin Dashboard</h1><div className="py-4 px-5" style={{ ...cardStyle, borderColor: "var(--red)" }}><div className="text-[13px]" style={{ color: "var(--red)" }}>{error}</div></div></div></PageWrapper>;
+  if (loading) {
+    return (
+      <PageWrapper page="admin">
+        <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>Loading dashboard...</div>
+      </PageWrapper>
+    );
+  }
 
-  const k = data!.kpis;
+  if (error || !data) {
+    return (
+      <PageWrapper page="admin">
+        <div className="py-8">
+          <h1 className="text-[1.75rem] font-bold mb-2">Admin</h1>
+          <div className="py-4 px-5" style={{ ...card, borderColor: "var(--red)" }}>
+            <div className="text-[13px]" style={{ color: "var(--red)" }}>{error || "No dashboard data found."}</div>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper page="admin">
-      <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-1">Admin Dashboard</h1>
-      <p className="text-[13px] mb-8" style={{ ...monoStyle, color: "var(--text-muted)" }}>
-        {data!.sprint ? `${data!.sprint.name} \u00B7 Week ${data!.sprint.current_week} of ${data!.sprint.duration_weeks} \u00B7 ${data!.sprint.status}` : "No active sprint"}
-      </p>
+      <div className="mb-8">
+        <div style={label}>Admin</div>
+        <h1 className="text-[1.9rem] font-bold leading-[1.12] mb-2">Operator control room</h1>
+        <p className="text-[13px]" style={{ ...mono, color: "var(--text-muted)" }}>
+          {data.sprint ? `${data.sprint.name} · Week ${data.sprint.current_week} of ${data.sprint.duration_weeks} · ${data.sprint.status}` : "No active sprint"}
+        </p>
+      </div>
 
-      {/* KPI Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         {[
-          { val: k.active_users, label: "Active Users", color: "var(--text)" },
-          { val: k.paying_users, label: "Paying", color: "var(--accent)" },
-          { val: `$${k.monthly_revenue_estimate.toLocaleString()}`, label: "MRR", color: "var(--accent)" },
-          { val: `$${k.arr_estimate.toLocaleString()}`, label: "ARR", color: "var(--accent)" },
-          { val: k.paused_users, label: "Paused", color: "var(--yellow)" },
-          { val: k.churned_users, label: "Churned", color: "var(--red)" },
-          { val: k.avg_operator_score || "—", label: "Avg Score", color: "var(--text)" },
-          { val: data!.applications.pending, label: "Pending Apps", color: "var(--text)" },
-        ].map((kpi) => (
-          <div key={kpi.label} className="text-center py-4 px-2" style={cardStyle}>
-            <div className="text-xl font-bold leading-none mb-1" style={{ ...monoStyle, color: kpi.color }}>
-              {kpi.val}
+          { label: "Active users", value: data.kpis.active_users, color: "var(--text)" },
+          { label: "Paying", value: data.kpis.paying_users, color: "var(--accent)" },
+          { label: "MRR", value: `$${data.kpis.monthly_revenue_estimate.toLocaleString()}`, color: "var(--accent)" },
+          { label: "Avg score", value: data.kpis.avg_operator_score || "—", color: "var(--text)" },
+          { label: "ENTER", value: data.tiers.enter, color: "var(--text)" },
+          { label: "PROVEN", value: data.tiers.proven, color: "var(--accent)" },
+          { label: "ELITE", value: data.tiers.elite, color: "var(--accent)" },
+          { label: "Apps", value: data.funnel.submitted_applications, color: "var(--text)" },
+        ].map((item) => (
+          <div key={item.label} className="text-center py-4 px-2" style={card}>
+            <div className="text-xl font-bold leading-none mb-1" style={{ ...mono, color: item.color }}>
+              {item.value}
             </div>
-            <div style={labelStyle}>{kpi.label}</div>
+            <div style={label}>{item.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Squads */}
-      <div className="mb-8">
-        <div className="mb-3" style={labelStyle}>Squads ({data!.squads.active_count} active)</div>
-        <div className="py-3 px-4 mb-2 flex gap-3" style={{ ...monoStyle, fontSize: "11px", color: "var(--text-muted)" }}>
-          <span className="flex-1">Squad</span>
-          <span className="w-12 text-right">Health</span>
-          <span className="w-14 text-right">Completion</span>
-          <span className="w-10 text-right">Streak</span>
-        </div>
-        {data!.squads.list.map((s) => (
-          <div key={s.name} className="flex items-center gap-3 py-3 px-4" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-            <div className="flex-1">
-              <div className="text-[13px] font-medium">{s.name}</div>
-              <div className="text-[10px]" style={{ ...monoStyle, color: "var(--text-muted)" }}>{s.members} members</div>
+      <div className="grid grid-cols-1 gap-5 mb-8">
+        <section className="p-5" style={card}>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <div style={label}>Business model</div>
+              <h2 className="text-[1.2rem] font-semibold">Pricing and thresholds</h2>
             </div>
-            <div className="w-12 text-right text-[13px] font-medium" style={{
-              ...monoStyle,
-              color: (s.health ?? 0) >= 75 ? "var(--green)" : (s.health ?? 0) >= 50 ? "var(--yellow)" : "var(--red)",
-            }}>
-              {s.health ?? "—"}
-            </div>
-            <div className="w-14 text-right text-[13px]" style={monoStyle}>{s.completion ?? "—"}%</div>
-            <div className="w-10 text-right text-[11px]" style={{ ...monoStyle, color: "var(--text-muted)" }}>{s.streak}</div>
           </div>
-        ))}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { name: "ENTER", price: `$${data.pricing.enter}`, line: `${data.thresholds.enter}+ visible floor` },
+              { name: "PROVEN", price: `$${data.pricing.proven}`, line: `${data.thresholds.proven}+ unlock line` },
+              { name: "ELITE", price: `$${data.pricing.elite}`, line: `${data.thresholds.elite}+ candidate line` },
+            ].map((item) => (
+              <div key={item.name} className="py-4 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <div className="text-[14px] font-medium">{item.name}</div>
+                  <div style={label}>{item.price}</div>
+                </div>
+                <div className="text-[13px]" style={{ color: "var(--text-secondary)" }}>{item.line}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="p-5" style={card}>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <div style={label}>Boss loop</div>
+              <h2 className="text-[1.2rem] font-semibold">Daily pulse health</h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {[
+              { label: "Sent today", value: data.boss.pulses_sent_today },
+              { label: "Answered", value: data.boss.answered_today },
+              { label: "Blocked", value: data.boss.blocked_today },
+              { label: "Missed", value: data.boss.missed_today },
+              { label: "7d rate", value: `${data.boss.answer_rate_7d}%` },
+            ].map((item) => (
+              <div key={item.label} className="py-4 px-3 text-center" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+                <div className="text-[1rem] font-medium mb-1" style={{ ...mono, color: "var(--text)" }}>{item.value}</div>
+                <div style={label}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="py-4 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+              <div style={label}>Active 7d</div>
+              <div className="text-[1.1rem] font-medium" style={{ ...mono }}>{data.retention.active_7d}</div>
+            </div>
+            <div className="py-4 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+              <div style={label}>Active 14d</div>
+              <div className="text-[1.1rem] font-medium" style={{ ...mono }}>{data.retention.active_14d}</div>
+            </div>
+          </div>
+        </section>
+
+        <section className="p-5" style={card}>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <div style={label}>Unlock funnel</div>
+              <h2 className="text-[1.2rem] font-semibold">Who is moving up</h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { label: "Applications", value: data.funnel.submitted_applications },
+              { label: "PROVEN ready", value: data.funnel.proven_unlock_volume },
+              { label: "ELITE pipeline", value: data.funnel.elite_candidate_pipeline },
+            ].map((item) => (
+              <div key={item.label} className="py-4 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+                <div className="text-[1.1rem] font-medium mb-1" style={{ ...mono }}>{item.value}</div>
+                <div style={label}>{item.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
 
-      {/* At Risk */}
-      {data!.at_risk.count > 0 && (
-        <div className="mb-8">
-          <div className="mb-3" style={labelStyle}>At-Risk Users ({data!.at_risk.count})</div>
-          {data!.at_risk.users.map((u, i) => (
-            <div key={i} className="flex items-center justify-between py-3 px-4" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-              <div className="text-[13px] font-medium">{u.name}</div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] py-1 px-2" style={{ ...monoStyle, background: "var(--red)", color: "#fff", borderRadius: "2px", opacity: 0.8 }}>
-                  {u.consecutive_misses} missed
-                </span>
-                <span className="text-[10px]" style={{ ...monoStyle, color: "var(--text-muted)" }}>{u.last_event}</span>
-              </div>
+      <div className="grid grid-cols-1 gap-5 mb-8">
+        <section className="p-5" style={card}>
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div>
+              <div style={label}>Squads</div>
+              <h2 className="text-[1.2rem] font-semibold">Earned rooms currently active</h2>
             </div>
-          ))}
-        </div>
-      )}
-
-      {/* Active Pauses */}
-      {data!.active_pauses.count > 0 && (
-        <div className="mb-8">
-          <div className="mb-3" style={labelStyle}>Active Pauses ({data!.active_pauses.count})</div>
-          {data!.active_pauses.users.map((u, i) => (
-            <div key={i} className="flex items-center justify-between py-3 px-4" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-              <div className="text-[13px] font-medium">{u.name}</div>
-              <div className="text-[10px]" style={{ ...monoStyle, color: "var(--text-muted)" }}>
-                Since {new Date(u.paused_at).toLocaleDateString()}
-              </div>
+            <div className="text-[12px]" style={{ color: "var(--text-muted)" }}>
+              {data.squads.active_count} active · avg health {data.squads.avg_health_score}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+          <div className="space-y-2">
+            {data.squads.list.length > 0 ? data.squads.list.map((squad) => (
+              <div key={squad.id} className="flex items-center gap-3 py-3 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+                <div className="flex-1">
+                  <div className="text-[14px] font-medium">{squad.name}</div>
+                  <div className="text-[11px]" style={{ ...mono, color: "var(--text-muted)" }}>{squad.members} members</div>
+                </div>
+                <div className="w-12 text-right text-[12px]" style={{ ...mono, color: (squad.health ?? 0) >= 75 ? "var(--green)" : (squad.health ?? 0) >= 50 ? "var(--yellow)" : "var(--red)" }}>
+                  {squad.health ?? "—"}
+                </div>
+                <div className="w-14 text-right text-[12px]" style={{ ...mono }}>
+                  {squad.completion ?? "—"}%
+                </div>
+                <div className="w-10 text-right text-[11px]" style={{ ...mono, color: "var(--text-muted)" }}>
+                  {squad.streak}
+                </div>
+              </div>
+            )) : (
+              <div className="text-[14px]" style={{ color: "var(--text-secondary)" }}>
+                No active squads yet.
+              </div>
+            )}
+          </div>
+        </section>
 
-      {/* Agent Triggers */}
-      <div className="mb-8">
-        <div className="mb-3" style={labelStyle}>Agent Controls</div>
-        <div className="py-4 px-5" style={cardStyle}>
-          <div className="text-[13px] mb-3" style={{ color: "var(--text-secondary)" }}>
-            Agent events last 24h: <strong>{data!.recent_agent_activity.last_24h}</strong>
+        {data.at_risk.count > 0 && (
+          <section className="p-5" style={card}>
+            <div className="mb-4">
+              <div style={label}>At-risk</div>
+              <h2 className="text-[1.2rem] font-semibold">Who may need Guardian attention</h2>
+            </div>
+            <div className="space-y-2">
+              {data.at_risk.users.map((member, index) => (
+                <div key={`${member.name}-${index}`} className="flex items-center justify-between gap-3 py-3 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+                  <div>
+                    <div className="text-[14px] font-medium">{member.name}</div>
+                    <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      {member.squad_name || "ENTER"} · {member.latest_event}
+                    </div>
+                  </div>
+                  <div className="text-[10px] py-1 px-2" style={{ ...mono, background: "var(--red-soft)", color: "var(--red)", borderRadius: "2px" }}>
+                    {member.consecutive_misses} misses
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="p-5" style={card}>
+          <div className="mb-4">
+            <div style={label}>Manual controls</div>
+            <h2 className="text-[1.2rem] font-semibold">Run the system by hand</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "Monday Declare", agent: "facilitator", params: { action: "monday_declaration" } },
-              { label: "Wednesday Check-in", agent: "facilitator", params: { action: "wednesday_checkin" } },
-              { label: "Friday Reflect", agent: "facilitator", params: { action: "friday_reflection" } },
-              { label: "Weekly Summary", agent: "facilitator", params: { action: "weekly_summary" } },
+              { label: "Boss Pulse", agent: "boss", params: { action: "dispatch_daily_pulse" } },
+              { label: "Boss Nudge", agent: "boss", params: { action: "pulse_nudge" } },
+              { label: "Mon Declare", agent: "facilitator", params: { action: "monday_declaration" } },
+              { label: "Wed Signal", agent: "facilitator", params: { action: "wednesday_checkin" } },
+              { label: "Fri Reflection", agent: "facilitator", params: { action: "friday_reflection" } },
               { label: "Guardian Scan", agent: "guardian", params: {} },
-              { label: "Calculate Scores", agent: "analytics", params: { action: "calculate_all_scores" } },
-              { label: "Process Events", agent: "events", params: {} },
-              { label: "Lifecycle Check", agent: "lifecycle", params: {} },
-            ].map((btn) => (
+              { label: "Scores", agent: "analytics", params: { action: "calculate_all_scores" } },
+              { label: "Lifecycle", agent: "lifecycle", params: {} },
+            ].map((button) => (
               <button
-                key={btn.label}
-                onClick={() => triggerAgent(btn.agent, btn.params)}
-                className="py-2 px-3 text-[11px] font-medium cursor-pointer transition-all duration-150"
-                style={{
-                  background: "none",
-                  border: "1px solid var(--border)",
-                  color: "var(--text-secondary)",
-                  borderRadius: "2px",
-                  fontFamily: "inherit",
-                }}
+                key={button.label}
+                onClick={() => triggerAgent(button.agent, button.params)}
+                className="py-2.5 px-3 text-[11px] font-medium cursor-pointer"
+                style={{ background: "none", border: "1px solid var(--border)", color: "var(--text-secondary)", borderRadius: "2px", fontFamily: "inherit" }}
               >
-                {btn.label}
+                {button.label}
               </button>
             ))}
           </div>
@@ -188,20 +313,38 @@ export function AdminPage() {
           {triggerResult && (
             <pre
               className="mt-4 py-3 px-4 text-[11px] leading-relaxed overflow-x-auto"
-              style={{
-                ...monoStyle,
-                background: "var(--bg)",
-                border: "1px solid var(--border-subtle)",
-                borderRadius: "4px",
-                color: "var(--text-secondary)",
-                maxHeight: "200px",
-                overflowY: "auto",
-              }}
+              style={{ ...mono, background: "var(--bg)", border: "1px solid var(--border-subtle)", borderRadius: "4px", color: "var(--text-secondary)", maxHeight: "220px", overflowY: "auto" }}
             >
               {triggerResult}
             </pre>
           )}
-        </div>
+        </section>
+
+        <section className="p-5" style={card}>
+          <div className="mb-4">
+            <div style={label}>Recent agent activity</div>
+            <h2 className="text-[1.2rem] font-semibold">Last 24 hours</h2>
+          </div>
+          <div className="space-y-2">
+            {data.recent_agent_activity.events.length > 0 ? data.recent_agent_activity.events.map((event, index) => (
+              <div key={`${event.source_agent}-${event.created_at}-${index}`} className="py-3 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
+                <div className="flex items-center justify-between gap-3 mb-1">
+                  <div className="text-[13px] font-medium">{event.source_agent} → {event.target_agent || "system"}</div>
+                  <div className="text-[10px]" style={{ ...mono, color: "var(--text-muted)" }}>
+                    {new Date(event.created_at).toLocaleString()}
+                  </div>
+                </div>
+                <div className="text-[12px]" style={{ color: "var(--text-secondary)" }}>
+                  {event.event_type} · {event.processed ? "processed" : "pending"}
+                </div>
+              </div>
+            )) : (
+              <div className="text-[14px]" style={{ color: "var(--text-secondary)" }}>
+                No agent events in the last 24 hours.
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </PageWrapper>
   );

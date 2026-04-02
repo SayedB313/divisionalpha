@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { chatCompletion, type ChatMessage } from '@/lib/minimax'
 
-// Ceremony Agent — handles special sprint events
-// Week 0: Squad Reveal, Week 1: Kickoff, Week 3: Dip Intervention, Week 6: Completion
+// Ceremony Agent — handles special sprint events inside the 40-day journey
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,7 +56,7 @@ Sprint ${sprint.number} starts on ${sprint.start_date}.
 Write the reveal in this format:
 1. Open with the squad name and a brief energizing line
 2. List each member with their name, what they do, and their type
-3. Give the squad one task: introduce themselves in the thread (who are you beyond your goal, what scares you about the next 6 weeks, one non-work thing)
+    3. Give the squad one task: introduce themselves in the thread (who are you beyond your goal, what scares you about the next 40 days, one non-work thing)
 4. Close with a "This is the Bio Thread" line
 
 Keep under 200 words. Direct, warm. Not corporate.`
@@ -77,13 +76,13 @@ Keep under 200 words. Direct, warm. Not corporate.`
           // Week 1 — The inaugural meeting
           const memberNames = members.map((m: any) => m.profile.display_name).join(', ')
 
-          const prompt = `You are the Sprint Facilitator running the Week 1 Kickoff for Division Alpha squad "${squad.name}".
+          const prompt = `You are the Sprint Facilitator running the kickoff for Division Alpha squad "${squad.name}".
 
 Members: ${memberNames}
-Sprint ${sprint.number}, ${sprint.duration_weeks} weeks.
+Sprint ${sprint.number}, a 40-day proving ground.
 
 Generate the kickoff ceremony message. Include:
-1. Welcome — set the tone ("For the next six weeks, you're not alone.")
+1. Welcome — set the tone ("For the next 40 days, you're not alone.")
 2. Sprint Covenant — "We agree to be honest. Struggling is okay, hiding is not."
 3. Ask each member to type "I commit" or "I'm in"
 4. Remind them of the rhythm: Monday declarations, Wednesday check-ins, Friday reflections
@@ -112,7 +111,7 @@ Keep under 250 words. Direct, serious but warm. This is a commitment moment.`
             .limit(1)
             .maybeSingle()
 
-          const prompt = `You are the Sprint Facilitator running the Week 3 "Dip Intervention" for Division Alpha squad "${squad.name}".
+          const prompt = `You are the Sprint Facilitator running the midpoint "Dip Intervention" for Division Alpha squad "${squad.name}".
 
 Research shows motivation drops at the midpoint of any commitment. This is designed to catch the dip.
 
@@ -122,7 +121,7 @@ Squad health: ${analytics?.health_score || '?'}/100
 Avg completion: ${analytics?.avg_completion_rate || '?'}%
 
 Generate the Dip Intervention message:
-1. Celebrate the half — "You've made it 3 weeks. Let's look at what you've accomplished."
+1. Celebrate the half — "You've made it to the midpoint. Let's look at what you've accomplished."
 2. Normalize the dip — "Mid-sprint energy dips are normal. Research confirms this."
 3. Goal Adjustment Amnesty — "If any goals are too big, too small, or wrong — now is the time to adjust. No shame."
 4. "Why Reset" prompt — ask them to write down in 60 seconds: Why did you join? What will be different if you finish strong?
@@ -175,7 +174,7 @@ Keep under 200 words. Compassionate but direct.`
             .limit(1)
             .maybeSingle()
 
-          const prompt = `You are the Sprint Facilitator running the Week 6 Completion Ceremony for Division Alpha squad "${squad.name}".
+          const prompt = `You are the Sprint Facilitator running the completion ceremony for Division Alpha squad "${squad.name}".
 
 Members: ${memberNames}
 Sprint ${sprint.number} is complete.
@@ -209,7 +208,7 @@ Keep under 300 words. This is the emotional peak of the sprint. Make it land.`
               title: 'Sprint Complete — Cast Your Vote',
               body: `${squad.name} has completed Sprint ${sprint.number}. Choose: Continue Together, Reshuffle, or Pause.`,
               type: 'ceremony',
-              action_page: 'completion',
+              action_page: 'journey',
             })
           }
           break

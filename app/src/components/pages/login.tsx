@@ -57,7 +57,7 @@ export function LoginPage() {
     if (error) {
       setError(friendlyError(error.message));
     } else {
-      navigateTo("home");
+      navigateTo("boss");
     }
   };
 
@@ -82,7 +82,7 @@ export function LoginPage() {
           </div>
           <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-2">Welcome back, operator.</h1>
           <p className="text-[15px]" style={{ color: "var(--text-secondary)" }}>
-            Your squad is waiting.
+            The Boss remembers where you left off.
           </p>
         </div>
 

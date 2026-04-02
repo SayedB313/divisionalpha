@@ -6,48 +6,80 @@ import { PageWrapper } from "../page-wrapper";
 
 const STORAGE_KEY = "da_apply_draft";
 
+const FIELD_KEYS = {
+  fullName: "Full name",
+  email: "Email",
+  timezone: "Timezone",
+  oneLiner: "In one sentence, what do you do?",
+  goals: "What are the 1-3 outcomes you want to achieve in the next 40 days?",
+  whyNow: "Why now?",
+  referral: "How did you hear about Division Alpha? (optional)",
+  focus: "Primary focus",
+  stage: "Current stage",
+  accountability: "How should the Boss push you when you drift?",
+  supportInstinct: "When another operator is slipping, what's your instinct?",
+  persona: "Which best describes your current operating mode?",
+  commitment: "Can you commit to daily Boss check-ins plus the Monday/Wednesday/Friday rhythm for 40 days?",
+  honesty: "Are you willing to answer honestly when the Boss asks for your progress — and your struggles?",
+  noGhosting: "Do you understand that ghosting the system isn't an option?",
+  communication: "How often do you want to hear from the Boss?",
+} as const;
+
 const STEPS = [
   {
-    label: "Step 1 \u00B7 Identity",
+    label: "Step 1 · Operator Profile",
     fields: [
-      { type: "text", label: "Full name", placeholder: "Your name" },
-      { type: "email", label: "Email", placeholder: "you@email.com" },
-      { type: "text", label: "Timezone", placeholder: "e.g. EST, GMT+1, PST" },
-      { type: "text", label: "In one sentence, what do you do?", placeholder: "e.g. Building a SaaS for restaurants" },
+      { type: "text", label: FIELD_KEYS.fullName, placeholder: "Your name" },
+      { type: "email", label: FIELD_KEYS.email, placeholder: "you@email.com" },
+      { type: "text", label: FIELD_KEYS.timezone, placeholder: "e.g. EST, GMT+1, PST" },
+      { type: "text", label: FIELD_KEYS.oneLiner, placeholder: "e.g. Building a SaaS for restaurants" },
     ],
     options: [],
   },
   {
-    label: "Step 2 \u00B7 Goals",
+    label: "Step 2 · What You're Proving",
     fields: [
-      { type: "textarea", label: "What are the 1-3 goals you want to accomplish in the next 6 weeks?", placeholder: "Be specific. Not 'work on my business' \u2014 what does done look like?" },
+      {
+        type: "textarea",
+        label: FIELD_KEYS.goals,
+        placeholder: "Be concrete. What does a strong 40-day finish actually look like?",
+      },
     ],
     options: [
-      { label: "Primary focus", choices: ["Professional", "Personal", "Spiritual", "All three"] },
-      { label: "Current stage", choices: ["Just Starting Out", "Building & Growing", "Scaling", "Pivoting"] },
+      { label: FIELD_KEYS.focus, choices: ["Professional", "Personal", "Spiritual", "All three"] },
+      { label: FIELD_KEYS.stage, choices: ["Just Starting Out", "Building & Growing", "Scaling", "Pivoting"] },
     ],
     extraFields: [
-      { type: "textarea", label: "Why are you applying?", placeholder: "What\u2019s driving you to seek accountability right now?" },
-      { type: "text", label: "How did you hear about Division Alpha? (optional)", placeholder: "e.g. a friend, Discord, LinkedIn, community name" },
+      { type: "textarea", label: FIELD_KEYS.whyNow, placeholder: "Why are you stepping into the arena now?" },
+      { type: "text", label: FIELD_KEYS.referral, placeholder: "e.g. a friend, LinkedIn, community, podcast" },
     ],
   },
   {
-    label: "Step 3 \u00B7 Accountability Style",
+    label: "Step 3 · How You Respond",
     fields: [],
     options: [
-      { label: "How do you respond best to accountability?", choices: ["Direct and Challenging", "Supportive and Encouraging", "Data-Driven and Analytical", "Mix of All"] },
-      { label: "When someone in your squad is struggling, what\u2019s your instinct?", choices: ["Ask how I can help", "Give them space", "Push them harder", "Help them problem-solve"] },
-      { label: "Are you more of a...", choices: ["Builder \u2014 launching projects, needs deadlines", "Rewirer \u2014 changing habits, needs consistency", "Pivot \u2014 changing direction, needs clarity"] },
+      {
+        label: FIELD_KEYS.accountability,
+        choices: ["Direct and Challenging", "Supportive and Encouraging", "Data-Driven and Analytical", "Mix of All"],
+      },
+      {
+        label: FIELD_KEYS.supportInstinct,
+        choices: ["Ask how I can help", "Give them space", "Push them harder", "Help them problem-solve"],
+      },
+      {
+        label: FIELD_KEYS.persona,
+        choices: ["Builder — shipping and launching", "Rewirer — changing habits and staying consistent", "Pivot — regaining clarity and direction"],
+      },
     ],
   },
   {
-    label: "Step 4 \u00B7 Commitment",
+    label: "Step 4 · Commitment",
     fields: [],
     options: [
-      { label: "Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?", choices: ["Yes \u2014 I\u2019m ready", "Not right now"] },
-      { label: "Are you willing to share your progress \u2014 and your struggles \u2014 openly with your squad?", choices: ["Yes", "I need to think about it"] },
-      { label: "Do you understand that ghosting your squad isn\u2019t an option?", choices: ["Yes \u2014 if life happens, I communicate", "I understand"] },
-      { label: "How often do you want to hear from your coach?", choices: ["Daily check-ins", "A few times a week", "Weekly only", "Only when I reach out"] },
+      { label: FIELD_KEYS.commitment, choices: ["Yes — I'm ready", "Not right now"] },
+      { label: FIELD_KEYS.honesty, choices: ["Yes", "I need to think about it"] },
+      { label: FIELD_KEYS.noGhosting, choices: ["Yes — if life happens, I communicate", "I understand"] },
+      { label: FIELD_KEYS.communication, choices: ["Daily", "Somewhere in between", "Only check-ins"] },
     ],
   },
 ];
@@ -59,7 +91,6 @@ export function ApplyPage() {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const formRef = useRef<Record<string, string>>({});
 
-  // Restore draft from localStorage on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -79,7 +110,9 @@ export function ApplyPage() {
   };
 
   const clearDraft = () => {
-    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
   };
 
   const selectOption = (label: string, choice: string) => {
@@ -89,6 +122,7 @@ export function ApplyPage() {
   };
 
   const currentStep = STEPS[step];
+  const isFinalStep = step === STEPS.length - 1;
   const inputStyle = {
     background: "var(--surface)",
     border: "1px solid var(--border-subtle)",
@@ -110,9 +144,9 @@ export function ApplyPage() {
           >
             &#10003;
           </div>
-          <h2 className="text-2xl font-bold mb-2">Application Received</h2>
-          <p className="text-[15px] leading-relaxed max-w-[400px] mx-auto" style={{ color: "var(--text-secondary)" }}>
-            Sprint 4 begins April 6. Your squad will be announced 5 days before launch. Check your email for next steps.
+          <h2 className="text-2xl font-bold mb-2">Application Saved</h2>
+          <p className="text-[15px] leading-relaxed max-w-[420px] mx-auto" style={{ color: "var(--text-secondary)" }}>
+            We saved your application, but checkout did not open correctly. We&apos;ll follow up by email with the next step.
           </p>
         </div>
       </PageWrapper>
@@ -121,12 +155,12 @@ export function ApplyPage() {
 
   return (
     <PageWrapper page="apply">
-      <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-1">Apply to Division Alpha</h1>
+      <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-1">Apply to Enter the Arena</h1>
       <p className="text-[15px] leading-relaxed mb-8" style={{ color: "var(--text-secondary)" }}>
-        This isn&apos;t a signup form. It&apos;s an application. We use your answers to build squads that actually work.
+        You are applying to <strong>ENTER</strong>, the 40-day proving ground. Everyone gets a chance.
+        PROVEN and squads are earned later through your score and your behavior.
       </p>
 
-      {/* Progress */}
       <div className="flex gap-1 mb-8">
         {STEPS.map((_, i) => (
           <div
@@ -160,7 +194,10 @@ export function ApplyPage() {
                 style={inputStyle}
                 placeholder={f.placeholder}
                 defaultValue={formRef.current[f.label] || ""}
-                onChange={(e) => { formRef.current[f.label] = e.target.value; saveDraft(formRef.current, selectedOptions, step); }}
+                onChange={(e) => {
+                  formRef.current[f.label] = e.target.value;
+                  saveDraft(formRef.current, selectedOptions, step);
+                }}
                 onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
                 aria-label={f.label}
@@ -172,7 +209,10 @@ export function ApplyPage() {
                 style={inputStyle}
                 placeholder={f.placeholder}
                 defaultValue={formRef.current[f.label] || ""}
-                onChange={(e) => { formRef.current[f.label] = e.target.value; saveDraft(formRef.current, selectedOptions, step); }}
+                onChange={(e) => {
+                  formRef.current[f.label] = e.target.value;
+                  saveDraft(formRef.current, selectedOptions, step);
+                }}
                 onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
                 onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
                 aria-label={f.label}
@@ -187,20 +227,20 @@ export function ApplyPage() {
               {opt.label}
             </label>
             <div className="flex flex-col gap-2">
-              {opt.choices.map((c) => (
+              {opt.choices.map((choice) => (
                 <button
-                  key={c}
-                  onClick={() => selectOption(opt.label, c)}
+                  key={choice}
+                  onClick={() => selectOption(opt.label, choice)}
                   className="py-3.5 px-4 text-sm text-left cursor-pointer transition-all duration-150"
                   style={{
-                    background: selectedOptions[opt.label] === c ? "var(--accent-surface)" : "var(--surface)",
-                    border: `1px solid ${selectedOptions[opt.label] === c ? "var(--accent)" : "var(--border-subtle)"}`,
-                    color: selectedOptions[opt.label] === c ? "var(--text)" : "var(--text-secondary)",
+                    background: selectedOptions[opt.label] === choice ? "var(--accent-surface)" : "var(--surface)",
+                    border: `1px solid ${selectedOptions[opt.label] === choice ? "var(--accent)" : "var(--border-subtle)"}`,
+                    color: selectedOptions[opt.label] === choice ? "var(--text)" : "var(--text-secondary)",
                     borderRadius: "4px",
                     fontFamily: "inherit",
                   }}
                 >
-                  {c}
+                  {choice}
                 </button>
               ))}
             </div>
@@ -217,7 +257,10 @@ export function ApplyPage() {
               style={inputStyle}
               placeholder={f.placeholder}
               defaultValue={formRef.current[f.label] || ""}
-              onChange={(e) => { formRef.current[f.label] = e.target.value; saveDraft(formRef.current, selectedOptions, step); }}
+              onChange={(e) => {
+                formRef.current[f.label] = e.target.value;
+                saveDraft(formRef.current, selectedOptions, step);
+              }}
               onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
               onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
               aria-label={f.label}
@@ -226,7 +269,29 @@ export function ApplyPage() {
         ))}
       </div>
 
-      {/* Navigation */}
+      {isFinalStep && (
+        <div
+          className="py-4 px-5 mb-6"
+          style={{ background: "var(--accent-surface)", border: "1px solid var(--accent)", borderRadius: "4px" }}
+        >
+          <div
+            className="text-[10px] uppercase tracking-[0.08em] mb-1"
+            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+          >
+            What happens next
+          </div>
+          <p className="text-[14px] leading-[1.6] mb-3" style={{ color: "var(--text-secondary)" }}>
+            After this step, you&apos;ll continue to secure checkout for <strong>ENTER ($19/mo)</strong>.
+            Once payment goes through, we&apos;ll email your next step and get you ready for Sprint 4.
+          </p>
+          <div className="space-y-2 text-[13px]" style={{ color: "var(--text-secondary)" }}>
+            <div>• Daily Boss pulse and 40-day proving ground</div>
+            <div>• Weekly operator session and embedded human support</div>
+            <div>• PROVEN and squads are earned later at 70+</div>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-2.5 mt-2">
         {step > 0 && (
           <button
@@ -246,70 +311,68 @@ export function ApplyPage() {
         <button
           disabled={submitting}
           onClick={async () => {
-            if (step < STEPS.length - 1) {
+            if (!isFinalStep) {
               const next = step + 1;
               setStep(next);
               saveDraft(formRef.current, selectedOptions, next);
-            } else {
-              // Submit application to Supabase
-              setSubmitting(true);
-              try {
-                const supabase = createClient();
-
-                // Map persona type from the long form
-                let personaType = selectedOptions["Are you more of a..."] || "";
-                if (personaType.startsWith("Builder")) personaType = "Builder";
-                else if (personaType.startsWith("Rewirer")) personaType = "Rewirer";
-                else if (personaType.startsWith("Pivot")) personaType = "Pivot";
-
-                await supabase.from("applications").insert({
-                  full_name: formRef.current["Full name"] || "",
-                  email: formRef.current["Email"] || "",
-                  timezone: formRef.current["Timezone"] || "",
-                  one_liner: formRef.current["In one sentence, what do you do?"] || "",
-                  goals_text: formRef.current["What are the 1-3 goals you want to accomplish in the next 6 weeks?"] || "",
-                  primary_focus: selectedOptions["Primary focus"] || null,
-                  current_stage: selectedOptions["Current stage"] || null,
-                  why_applying: formRef.current["Why are you applying?"] || "",
-                  referral_source: formRef.current["How did you hear about Division Alpha? (optional)"] || null,
-                  accountability_style: selectedOptions["How do you respond best to accountability?"] || null,
-                  support_instinct: selectedOptions["When someone in your squad is struggling, what\u2019s your instinct?"] || null,
-                  persona_type: personaType || null,
-                  can_commit_3x_week: selectedOptions["Can you commit to 3 check-ins per week (Mon/Wed/Fri) for 6 weeks?"]?.startsWith("Yes") || false,
-                  willing_to_share: selectedOptions["Are you willing to share your progress \u2014 and your struggles \u2014 openly with your squad?"] === "Yes",
-                  no_ghosting_understood: true,
-                  communication_freq: selectedOptions["How often do you want to hear from your coach?"] || null,
-                  status: "submitted",
-                });
-              } catch (err) {
-                console.error("Application submit error:", err);
-              }
-
-              // Redirect to Stripe Checkout
-              try {
-                const res = await fetch("/api/checkout", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    email: formRef.current["Email"] || "",
-                    name: formRef.current["Full name"] || "",
-                  }),
-                });
-                const data = await res.json();
-                if (data.url) {
-                  clearDraft();
-                  window.location.href = data.url;
-                  return; // Don't show submitted state, user is redirecting
-                }
-              } catch (err) {
-                console.error("Checkout redirect error:", err);
-              }
-
-              // Fallback if Stripe redirect fails
-              clearDraft();
-              setSubmitting(false);
-              setSubmitted(true);
+              return;
             }
+
+            setSubmitting(true);
+
+            try {
+              const supabase = createClient();
+
+              let personaType = selectedOptions[FIELD_KEYS.persona] || "";
+              if (personaType.startsWith("Builder")) personaType = "Builder";
+              else if (personaType.startsWith("Rewirer")) personaType = "Rewirer";
+              else if (personaType.startsWith("Pivot")) personaType = "Pivot";
+
+              await supabase.from("applications").insert({
+                full_name: formRef.current[FIELD_KEYS.fullName] || "",
+                email: formRef.current[FIELD_KEYS.email] || "",
+                timezone: formRef.current[FIELD_KEYS.timezone] || "",
+                one_liner: formRef.current[FIELD_KEYS.oneLiner] || "",
+                goals_text: formRef.current[FIELD_KEYS.goals] || "",
+                primary_focus: selectedOptions[FIELD_KEYS.focus] || null,
+                current_stage: selectedOptions[FIELD_KEYS.stage] || null,
+                why_applying: formRef.current[FIELD_KEYS.whyNow] || "",
+                referral_source: formRef.current[FIELD_KEYS.referral] || null,
+                accountability_style: selectedOptions[FIELD_KEYS.accountability] || null,
+                support_instinct: selectedOptions[FIELD_KEYS.supportInstinct] || null,
+                persona_type: personaType || null,
+                can_commit_3x_week: selectedOptions[FIELD_KEYS.commitment]?.startsWith("Yes") || false,
+                willing_to_share: selectedOptions[FIELD_KEYS.honesty] === "Yes",
+                no_ghosting_understood: !!selectedOptions[FIELD_KEYS.noGhosting],
+                communication_freq: selectedOptions[FIELD_KEYS.communication] || null,
+                status: "submitted",
+              });
+            } catch (err) {
+              console.error("Application submit error:", err);
+            }
+
+            try {
+              const res = await fetch("/api/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: formRef.current[FIELD_KEYS.email] || "",
+                  name: formRef.current[FIELD_KEYS.fullName] || "",
+                }),
+              });
+              const data = await res.json();
+              if (data.url) {
+                clearDraft();
+                window.location.href = data.url;
+                return;
+              }
+            } catch (err) {
+              console.error("Checkout redirect error:", err);
+            }
+
+            clearDraft();
+            setSubmitting(false);
+            setSubmitted(true);
           }}
           className="flex-1 py-3.5 text-sm font-medium border-none cursor-pointer transition-colors duration-150"
           style={{
@@ -320,7 +383,7 @@ export function ApplyPage() {
             opacity: submitting ? 0.7 : 1,
           }}
         >
-          {submitting ? "Submitting..." : step < STEPS.length - 1 ? "Continue" : "Submit Application"}
+          {submitting ? "Preparing checkout..." : isFinalStep ? "Continue to Checkout" : "Continue"}
         </button>
       </div>
     </PageWrapper>

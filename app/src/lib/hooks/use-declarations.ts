@@ -62,14 +62,14 @@ export function useDeclarations(weekNumber?: number) {
       blockers?: string
       help_request?: string
     }) => {
-      if (!user || !sprint || !squad || !week) throw new Error('Missing context')
+      if (!user || !sprint || !week) throw new Error('Missing context')
 
       const { data, error } = await supabase
         .from('declarations')
         .upsert({
           user_id: user.id,
           sprint_id: sprint.id,
-          squad_id: squad.id,
+          squad_id: squad?.id ?? null,
           week_number: week,
           goals: payload.goals,
           blockers: payload.blockers || null,
@@ -85,7 +85,9 @@ export function useDeclarations(weekNumber?: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['declaration'] })
-      queryClient.invalidateQueries({ queryKey: ['squad-declarations'] })
+      if (squad) {
+        queryClient.invalidateQueries({ queryKey: ['squad-declarations'] })
+      }
     },
   })
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { useApp } from "@/lib/app-context";
 import { useDeclarations } from "@/lib/hooks/use-declarations";
 import { useCheckins, type CheckinSignal } from "@/lib/hooks/use-checkins";
 import { PageWrapper } from "../page-wrapper";
@@ -15,13 +17,16 @@ const MOCK_GOALS = [
 type Signal = "green" | "yellow" | "red" | null;
 
 export function CheckinPage() {
+  const { user } = useAuth();
+  const { squad } = useApp();
   const { declaration } = useDeclarations();
   const { checkin, submit } = useCheckins();
+  const hasSquad = Boolean(squad);
 
   // Load goals from this week's declaration, or fall back to mock
   const goalTexts = declaration?.goals
     ? (declaration.goals as { text: string; order: number }[]).map(g => g.text)
-    : MOCK_GOALS;
+    : user ? [] : MOCK_GOALS;
 
   const [signals, setSignals] = useState<Signal[]>(goalTexts.map(() => null));
   const [notes, setNotes] = useState<(string | null)[]>(goalTexts.map(() => null));
@@ -60,6 +65,8 @@ export function CheckinPage() {
   };
 
   const handleSubmit = async () => {
+    if (goalTexts.length === 0) return;
+
     const checkinSignals: CheckinSignal[] = signals.map((signal, i) => ({
       goal_index: i,
       signal: signal || "green",
@@ -80,68 +87,88 @@ export function CheckinPage() {
     <PageWrapper page="checkin">
       <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-2">Mid-week signal</h1>
       <p className="text-[15px] leading-relaxed mb-9" style={{ color: "var(--text-secondary)" }}>
-        For each goal, give your squad an honest signal.
+        {hasSquad
+          ? "For each goal, give your squad an honest signal."
+          : "For each goal, give the Boss an honest signal. The fastest way to lose score is to hide."}
       </p>
 
-      {goalTexts.map((goal, i) => (
+      {goalTexts.length === 0 ? (
         <div
-          key={i}
-          className="py-4"
-          style={{ borderBottom: i < goalTexts.length - 1 ? "1px solid var(--border-subtle)" : "none" }}
+          className="py-5 px-5 mb-6"
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border-subtle)",
+            borderRadius: "4px",
+          }}
         >
-          <div className="text-[15px] mb-2.5">
-            {i + 1}. {goal}
+          <div className="text-[15px] font-medium mb-1">Nothing to check in on yet.</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            Submit your Monday declaration first so the Boss has goals to score against on Wednesday.
           </div>
-          <div className="flex gap-1.5">
-            {(["green", "yellow", "red"] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => selectSignal(i, s)}
-                className="flex-1 py-2.5 text-[11px] font-medium uppercase tracking-[0.06em] text-center cursor-pointer transition-all duration-150"
-                style={{
-                  fontFamily: "var(--font-dm-mono), monospace",
-                  border: `1px solid ${signals[i] === s ? `var(--${s})` : "var(--border)"}`,
-                  background: signals[i] === s ? `var(--${s}-soft)` : "none",
-                  color: signals[i] === s ? `var(--${s})` : "var(--text-muted)",
-                  borderRadius: "2px",
-                }}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
-          </div>
-          {(signals[i] === "yellow" || signals[i] === "red") && (
-            <div className="mt-2">
-              <input
-                type="text"
-                value={notes[i] || ""}
-                onChange={(e) => updateNote(i, e.target.value)}
-                className="w-full py-2.5 px-3.5 text-[13px] outline-none transition-colors duration-150"
-                style={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--border-subtle)",
-                  color: "var(--text)",
-                  borderRadius: "4px",
-                  fontFamily: "inherit",
-                }}
-                placeholder="What's blocking you?"
-                onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
-                onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
-              />
-            </div>
-          )}
         </div>
-      ))}
+      ) : (
+        goalTexts.map((goal, i) => (
+          <div
+            key={i}
+            className="py-4"
+            style={{ borderBottom: i < goalTexts.length - 1 ? "1px solid var(--border-subtle)" : "none" }}
+          >
+            <div className="text-[15px] mb-2.5">
+              {i + 1}. {goal}
+            </div>
+            <div className="flex gap-1.5">
+              {(["green", "yellow", "red"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => selectSignal(i, s)}
+                  className="flex-1 py-2.5 text-[11px] font-medium uppercase tracking-[0.06em] text-center cursor-pointer transition-all duration-150"
+                  style={{
+                    fontFamily: "var(--font-dm-mono), monospace",
+                    border: `1px solid ${signals[i] === s ? `var(--${s})` : "var(--border)"}`,
+                    background: signals[i] === s ? `var(--${s}-soft)` : "none",
+                    color: signals[i] === s ? `var(--${s})` : "var(--text-muted)",
+                    borderRadius: "2px",
+                  }}
+                >
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+            {(signals[i] === "yellow" || signals[i] === "red") && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  value={notes[i] || ""}
+                  onChange={(e) => updateNote(i, e.target.value)}
+                  className="w-full py-2.5 px-3.5 text-[13px] outline-none transition-colors duration-150"
+                  style={{
+                    background: "var(--surface)",
+                    border: "1px solid var(--border-subtle)",
+                    color: "var(--text)",
+                    borderRadius: "4px",
+                    fontFamily: "inherit",
+                  }}
+                  placeholder="What's blocking you?"
+                  onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
+                  onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
+                />
+              </div>
+            )}
+          </div>
+        ))
+      )}
 
       <button
         onClick={handleSubmit}
+        disabled={goalTexts.length === 0}
         className="w-full py-3.5 mt-6 text-[15px] font-medium border-none cursor-pointer transition-all duration-150 hover:-translate-y-px"
         style={{
           background: submitted ? "var(--green)" : "var(--accent)",
           color: "var(--accent-text)",
           borderRadius: "2px",
           fontFamily: "inherit",
-          pointerEvents: submitted ? "none" : "auto",
+          pointerEvents: submitted || goalTexts.length === 0 ? "none" : "auto",
+          opacity: goalTexts.length === 0 ? 0.65 : 1,
         }}
       >
         {submitted ? "Submitted \u2713" : "Submit check-in"}

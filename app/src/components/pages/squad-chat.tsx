@@ -35,9 +35,10 @@ export function SquadChatPage() {
 
   const squadName = squad?.name || "Alpha Vanguard";
   const memberCount = squad?.member_count ?? 7;
+  const hasSquad = Boolean(squad);
 
   // Convert realtime messages to display format, or use mocks
-  const displayMessages: DisplayMessage[] = (user && realtimeMessages.length > 0)
+  const displayMessages: DisplayMessage[] = user
     ? realtimeMessages.map((m: SquadMessage) => ({
         id: m.id,
         sender: m.profile?.display_name || "Unknown",
@@ -67,6 +68,32 @@ export function SquadChatPage() {
   const onlineAvatars = squadMembers.length > 0
     ? squadMembers.filter(m => m.user_id !== profile?.id).slice(0, 4).map(m => m.profile.initials)
     : ["SR", "MH", "FN", "OT"];
+
+  if (user && !hasSquad) {
+    return (
+      <PageWrapper page="squad-chat">
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => navigateTo("squad")}
+            className="text-sm cursor-pointer bg-transparent border-none py-1 px-2 transition-colors duration-150"
+            style={{ color: "var(--text-muted)", fontFamily: "inherit" }}
+          >
+            &larr; Back
+          </button>
+        </div>
+
+        <div
+          className="py-5 px-5"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
+        >
+          <div className="text-lg font-semibold mb-1">Squad chat unlocks with PROVEN.</div>
+          <div className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            Complete ENTER first. When you earn your squad, this is where the live operator conversation starts.
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper page="squad-chat">
@@ -107,54 +134,68 @@ export function SquadChatPage() {
 
       {/* Messages */}
       <div className="space-y-5 mb-6">
-        {displayMessages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`max-w-[88%] ${msg.isMe ? "ml-auto" : "mr-auto"}`}
-            style={{ animation: "fadeUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
-          >
-            <div className="flex items-center gap-1.5 mb-1">
-              {!msg.isMe && (
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[7px] font-semibold"
-                  style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}
-                >
-                  {msg.avatar}
-                </div>
-              )}
-              <span
-                className="text-[10px] uppercase tracking-[0.06em]"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+        {displayMessages.length > 0 ? (
+          <>
+            {displayMessages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`max-w-[88%] ${msg.isMe ? "ml-auto" : "mr-auto"}`}
+                style={{ animation: "fadeUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
               >
-                {msg.isMe ? "You" : msg.sender} &middot; {msg.time}
-              </span>
-              {msg.type === "facilitator" && (
-                <span
-                  className="text-[8px] uppercase tracking-[0.06em] py-[1px] px-1.5"
+                <div className="flex items-center gap-1.5 mb-1">
+                  {!msg.isMe && (
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[7px] font-semibold"
+                      style={{ background: "var(--surface-hover)", color: "var(--text-secondary)" }}
+                    >
+                      {msg.avatar}
+                    </div>
+                  )}
+                  <span
+                    className="text-[10px] uppercase tracking-[0.06em]"
+                    style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+                  >
+                    {msg.isMe ? "You" : msg.sender} &middot; {msg.time}
+                  </span>
+                  {msg.type === "facilitator" && (
+                    <span
+                      className="text-[8px] uppercase tracking-[0.06em] py-[1px] px-1.5"
+                      style={{
+                        fontFamily: "var(--font-dm-mono), monospace",
+                        background: "var(--accent-surface)",
+                        color: "var(--accent)",
+                        borderRadius: "2px",
+                      }}
+                    >
+                      Facilitator
+                    </span>
+                  )}
+                </div>
+                <div
+                  className="py-3 px-4 text-sm leading-relaxed"
                   style={{
-                    fontFamily: "var(--font-dm-mono), monospace",
-                    background: "var(--accent-surface)",
-                    color: "var(--accent)",
-                    borderRadius: "2px",
+                    background: msg.isMe ? "var(--accent-surface)" : msg.type === "facilitator" ? "var(--accent-surface)" : "var(--surface)",
+                    border: `1px solid ${msg.isMe ? "var(--accent)" : msg.type === "facilitator" ? "var(--accent)" : "var(--border-subtle)"}`,
+                    color: msg.isMe ? "var(--text)" : "var(--text-secondary)",
+                    borderRadius: "4px",
                   }}
                 >
-                  Facilitator
-                </span>
-              )}
-            </div>
-            <div
-              className="py-3 px-4 text-sm leading-relaxed"
-              style={{
-                background: msg.isMe ? "var(--accent-surface)" : msg.type === "facilitator" ? "var(--accent-surface)" : "var(--surface)",
-                border: `1px solid ${msg.isMe ? "var(--accent)" : msg.type === "facilitator" ? "var(--accent)" : "var(--border-subtle)"}`,
-                color: msg.isMe ? "var(--text)" : "var(--text-secondary)",
-                borderRadius: "4px",
-              }}
-            >
-              {msg.text}
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+          </>
+        ) : (
+          <div
+            className="py-5 px-5"
+            style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
+          >
+            <div className="text-[15px] font-medium mb-1">No messages yet.</div>
+            <div className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              The first message usually starts the rhythm. Ask for help, share progress, or set the tone for the week.
             </div>
           </div>
-        ))}
+        )}
         <div ref={messagesEndRef} />
       </div>
 

@@ -31,18 +31,18 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Division Alpha — Accountability Squads for Founders Who Take Their Commitments Seriously",
-  description: "AI-orchestrated peer accountability. 5-6 person squads, 6-week sprints, Monday/Wednesday/Friday rhythm. $49/mo. Your squad holds you to your word.",
+  title: "Division Alpha — 40-Day Proving Ground for Operators",
+  description: "Everyone gets a chance. The Boss tracks execution daily. Enter for $19/month, earn your squad at 70+, and climb toward ELITE at 90+.",
   openGraph: {
-    title: "Division Alpha — Your Q2 Starts Here",
-    description: "Accountability squads for founders who take their commitments seriously. AI handles the infrastructure. Your squad handles the accountability. $49/mo.",
+    title: "Division Alpha — Everyone Gets a Chance. The Best Earn Their Squad.",
+    description: "A 40-day proving ground for operators. Daily Boss pulse, real-time score, embedded human support, and earned progression from ENTER to PROVEN.",
     siteName: "Division Alpha",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Division Alpha — Your Q2 Starts Here",
-    description: "Accountability squads for founders who take their commitments seriously. AI handles the infrastructure. Your squad handles the accountability.",
+    title: "Division Alpha — 40-Day Proving Ground for Operators",
+    description: "Enter for $19/month. The Boss tracks execution daily. The best earn their squad.",
   },
 };
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { chatCompletion, type ChatMessage } from '@/lib/minimax'
+import { listEligibleScoreUsers, recalculateAndPersistOperatorScore } from '@/lib/operator-score'
 
 // Analytics Agent — calculates Operator Scores, squad health, generates summaries
 // Triggered by: cron (Friday night), on check-in submit, or manual POST
@@ -52,146 +53,26 @@ export async function POST(request: NextRequest) {
 }
 
 async function calculateOperatorScore(supabase: any, sprint: any, userId: string) {
-  const week = sprint.current_week
-
-  // 1. Goal Completion (25%) — declarations submitted / goals marked green in check-ins
-  const { data: declarations } = await supabase
-    .from('declarations')
-    .select('goals')
-    .eq('user_id', userId)
-    .eq('sprint_id', sprint.id)
-
-  const { data: checkins } = await supabase
-    .from('checkins')
-    .select('signals')
-    .eq('user_id', userId)
-    .eq('sprint_id', sprint.id)
-
-  let totalGoals = 0
-  let greenGoals = 0
-  for (const c of (checkins || [])) {
-    const sigs = c.signals as { signal: string }[]
-    totalGoals += sigs.length
-    greenGoals += sigs.filter((s: any) => s.signal === 'green').length
-  }
-  const goalCompletion = totalGoals > 0 ? (greenGoals / totalGoals) * 100 : 0
-
-  // 2. Attendance (20%) — submissions / expected
-  const { count: declCount } = await supabase
-    .from('declarations').select('*', { count: 'exact', head: true })
-    .eq('user_id', userId).eq('sprint_id', sprint.id)
-  const { count: checkinCount } = await supabase
-    .from('checkins').select('*', { count: 'exact', head: true })
-    .eq('user_id', userId).eq('sprint_id', sprint.id)
-  const { count: reflectCount } = await supabase
-    .from('reflections').select('*', { count: 'exact', head: true })
-    .eq('user_id', userId).eq('sprint_id', sprint.id)
-
-  const expected = week * 3 // 3 submissions per week
-  const actual = (declCount || 0) + (checkinCount || 0) + (reflectCount || 0)
-  const attendance = expected > 0 ? Math.min((actual / expected) * 100, 100) : 0
-
-  // 3. Squad Contribution (20%) — messages + appreciations received
-  const { data: memberData } = await supabase
-    .from('squad_members')
-    .select('squad_id')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .limit(1)
-    .maybeSingle()
-
-  let contribution = 50 // default
-  if (memberData) {
-    const { count: msgCount } = await supabase
-      .from('squad_messages').select('*', { count: 'exact', head: true })
-      .eq('sender_id', userId).eq('squad_id', memberData.squad_id)
-
-    const { data: appreciations } = await supabase
-      .from('reflections')
-      .select('appreciated_user_ids')
-      .eq('sprint_id', sprint.id)
-      .contains('appreciated_user_ids', [userId])
-
-    const msgScore = Math.min(((msgCount || 0) / (week * 3)) * 100, 100) // ~3 msgs/week = 100
-    const appreciationScore = Math.min(((appreciations?.length || 0) / week) * 100, 100)
-    contribution = msgScore * 0.6 + appreciationScore * 0.4
-  }
-
-  // 4. Leadership (15%) — captain status + helping on yellows/reds
-  const isCaptain = memberData ? await supabase
-    .from('squad_members').select('role').eq('user_id', userId).eq('squad_id', memberData.squad_id).single()
-    .then((r: any) => r.data?.role === 'captain') : false
-  const leadership = isCaptain ? 85 : Math.min(contribution * 0.7, 75)
-
-  // 5. Growth (10%) — week-over-week improvement trend
-  const weeklyRates = (checkins || []).map((c: any) => {
-    const sigs = c.signals as { signal: string }[]
-    const greens = sigs.filter(s => s.signal === 'green').length
-    return sigs.length > 0 ? (greens / sigs.length) * 100 : 0
-  })
-  let growth = 50
-  if (weeklyRates.length >= 2) {
-    const recent = weeklyRates[weeklyRates.length - 1]
-    const earlier = weeklyRates[0]
-    growth = recent >= earlier ? Math.min(70 + (recent - earlier), 100) : Math.max(30, 50 - (earlier - recent))
-  }
-
-  // 6. Communication (10%) — reflection quality (has content), message length
-  const { data: reflections } = await supabase
-    .from('reflections')
-    .select('wins, misses, learnings')
-    .eq('user_id', userId)
-    .eq('sprint_id', sprint.id)
-
-  let communication = 50
-  if (reflections?.length) {
-    const avgQuality = reflections.reduce((sum: number, r: any) => {
-      let score = 0
-      if (r.wins && r.wins.length > 20) score += 33
-      if (r.misses && r.misses.length > 20) score += 33
-      if (r.learnings && r.learnings.length > 20) score += 34
-      return sum + score
-    }, 0) / reflections.length
-    communication = Math.min(avgQuality + 20, 100)
-  }
-
-  // Weighted total
-  const totalScore =
-    goalCompletion * 0.25 +
-    attendance * 0.20 +
-    contribution * 0.20 +
-    leadership * 0.15 +
-    growth * 0.10 +
-    communication * 0.10
-
-  // Upsert score
-  await supabase.from('operator_scores').upsert({
-    user_id: userId,
-    sprint_id: sprint.id,
-    week_number: null, // sprint-level
-    total_score: Math.round(totalScore * 100) / 100,
-    goal_completion: Math.round(goalCompletion * 100) / 100,
-    attendance: Math.round(attendance * 100) / 100,
-    squad_contribution: Math.round(contribution * 100) / 100,
-    leadership: Math.round(leadership * 100) / 100,
-    growth: Math.round(growth * 100) / 100,
-    communication: Math.round(communication * 100) / 100,
-  }, { onConflict: 'user_id,sprint_id,week_number' })
+  const summary = await recalculateAndPersistOperatorScore(supabase, sprint, userId)
 
   return NextResponse.json({
     user_id: userId,
-    total_score: Math.round(totalScore),
-    factors: { goalCompletion: Math.round(goalCompletion), attendance: Math.round(attendance), contribution: Math.round(contribution), leadership: Math.round(leadership), growth: Math.round(growth), communication: Math.round(communication) },
+    total_score: Math.round(summary.total_score),
+    current_streak: summary.current_streak,
+    factors: {
+      goalCompletion: Math.round(summary.goal_completion),
+      attendance: Math.round(summary.attendance),
+      contribution: Math.round(summary.squad_contribution),
+      leadership: Math.round(summary.leadership),
+      growth: Math.round(summary.growth),
+      communication: Math.round(summary.communication),
+    },
   })
 }
 
 async function calculateAllScores(supabase: any, sprint: any) {
-  const { data: members } = await supabase
-    .from('squad_members')
-    .select('user_id')
-    .eq('status', 'active')
-
-  const uniqueUsers = [...new Set((members || []).map((m: any) => m.user_id))]
+  const users = await listEligibleScoreUsers(supabase)
+  const uniqueUsers = users.map((user: any) => user.id)
   const results = []
 
   for (const userId of uniqueUsers) {
@@ -475,20 +356,15 @@ async function predictChurn(supabase: any, sprint: any, userId: string) {
 }
 
 async function allChurnPredictions(supabase: any, sprint: any) {
-  const { data: members } = await supabase
-    .from('squad_members')
-    .select('user_id, profile:profiles(display_name)')
-    .eq('status', 'active')
-
-  const uniqueUsers = [...new Map((members || []).map((m: any) => [m.user_id, m])).values()]
+  const users = await listEligibleScoreUsers(supabase)
   const predictions = []
 
-  for (const member of uniqueUsers) {
-    const res = await predictChurn(supabase, sprint, (member as any).user_id)
+  for (const user of users) {
+    const res = await predictChurn(supabase, sprint, user.id)
     const data = await res.json()
     predictions.push({
       ...data,
-      display_name: (member as any).profile?.display_name,
+      display_name: user.display_name,
     })
   }
 

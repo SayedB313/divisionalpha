@@ -1,16 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useApp } from "@/lib/app-context";
 import { useDeclarations } from "@/lib/hooks/use-declarations";
 import { PageWrapper } from "../page-wrapper";
 
 export function DeclarePage() {
+  const { squad } = useApp();
   const { declaration, submit } = useDeclarations();
   const [goalCount, setGoalCount] = useState(3);
   const [submitted, setSubmitted] = useState(false);
   const [goalValues, setGoalValues] = useState<string[]>(["", "", ""]);
   const [blockers, setBlockers] = useState("");
   const initialized = useRef(false);
+  const hasSquad = Boolean(squad);
 
   // Load existing declaration if one exists for this week
   useEffect(() => {
@@ -56,8 +59,31 @@ export function DeclarePage() {
         What will you deliver this week?
       </h1>
       <p className="text-[15px] leading-relaxed mb-9" style={{ color: "var(--text-secondary)" }}>
-        Declare your commitments to your squad. Be specific. Be measurable.
+        {hasSquad
+          ? "Declare your commitments to your squad. Be specific. Be measurable."
+          : "Declare your commitments to the Boss. Be specific. Be measurable. This is how ENTER keeps score before squad access is earned."}
       </p>
+
+      {!hasSquad && (
+        <div
+          className="mb-7 py-4 px-5"
+          style={{
+            background: "var(--accent-surface)",
+            border: "1px solid var(--accent)",
+            borderRadius: "4px",
+          }}
+        >
+          <div
+            className="text-[10px] uppercase tracking-[0.08em] mb-1"
+            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+          >
+            ENTER mode
+          </div>
+          <div className="text-[14px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            No squad yet. The Boss is watching for consistency, honesty, and follow-through. Score 70+ across the sprint to earn PROVEN.
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2.5 mb-4">
         {Array.from({ length: goalCount }, (_, i) => (
@@ -124,7 +150,9 @@ export function DeclarePage() {
           }}
           value={blockers}
           onChange={(e) => setBlockers(e.target.value)}
-          placeholder="What might get in the way this week? How can your squad help?"
+          placeholder={hasSquad
+            ? "What might get in the way this week? How can your squad help?"
+            : "What might get in the way this week? What should the Boss watch for?"}
           onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
           onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
           aria-label="Blockers"
@@ -142,7 +170,7 @@ export function DeclarePage() {
           pointerEvents: submitted ? "none" : "auto",
         }}
       >
-        {submitted ? "Submitted \u2713" : "Declare to your squad"}
+        {submitted ? "Submitted \u2713" : hasSquad ? "Declare to your squad" : "Declare your week"}
       </button>
 
       {/* Closing verse */}

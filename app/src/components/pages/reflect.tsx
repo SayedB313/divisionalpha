@@ -7,10 +7,8 @@ import { useCheckins } from "@/lib/hooks/use-checkins";
 import { useDeclarations } from "@/lib/hooks/use-declarations";
 import { PageWrapper } from "../page-wrapper";
 
-const MOCK_PEERS = ["Sara R.", "Fatima N.", "Marcus H.", "Omar T.", "James L.", "Priya K."];
-
 export function ReflectPage() {
-  const { profile, sprint, squadMembers } = useApp();
+  const { profile, sprint, squad, squadMembers } = useApp();
   const { submit } = useReflections();
   const { checkin } = useCheckins();
   const { declaration } = useDeclarations();
@@ -21,6 +19,7 @@ export function ReflectPage() {
   const [learnings, setLearnings] = useState("");
   const [carryForward, setCarryForward] = useState("");
   const [appreciationNote, setAppreciationNote] = useState("");
+  const hasSquad = Boolean(squad);
 
   // Calculate goals hit/total from real check-in and declaration data
   const goalsTotal = useMemo(() => {
@@ -36,7 +35,7 @@ export function ReflectPage() {
   // Use real squad members or mock
   const peers = squadMembers.length > 0
     ? squadMembers.filter(m => m.user_id !== profile?.id).map(m => ({ id: m.user_id, name: m.profile.display_name }))
-    : MOCK_PEERS.map((name, i) => ({ id: `mock-${i}`, name }));
+    : [];
 
   const currentWeek = sprint?.current_week ?? 4;
 
@@ -163,46 +162,71 @@ export function ReflectPage() {
       </div>
 
       {/* Peer shoutout */}
-      <div
-        className="py-4 px-5"
-        style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
-      >
+      {hasSquad ? (
         <div
-          className="text-[10px] uppercase tracking-[0.08em] mb-2"
-          style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+          className="py-4 px-5"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          Peer appreciation
+          <div
+            className="text-[10px] uppercase tracking-[0.08em] mb-2"
+            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+          >
+            Peer appreciation
+          </div>
+          {peers.length > 0 ? (
+            <>
+              <div className="flex gap-1.5 flex-wrap mb-2">
+                {peers.map((peer) => (
+                  <button
+                    key={peer.id}
+                    onClick={() => togglePeer(peer.id)}
+                    className="py-1.5 px-3 text-xs cursor-pointer transition-all duration-150"
+                    style={{
+                      background: selectedPeers.has(peer.id) ? "var(--accent-surface)" : "none",
+                      border: `1px solid ${selectedPeers.has(peer.id) ? "var(--accent)" : "var(--border)"}`,
+                      color: selectedPeers.has(peer.id) ? "var(--accent)" : "var(--text-secondary)",
+                      borderRadius: "2px",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    {peer.name}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                className="w-full py-3 px-4 text-[13px] outline-none transition-colors duration-150"
+                style={inputStyle}
+                placeholder="What did they do that helped you?"
+                value={appreciationNote}
+                onChange={(e) => setAppreciationNote(e.target.value)}
+                onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
+                aria-label="Peer appreciation note"
+              />
+            </>
+          ) : (
+            <div className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              Your squad roster is still syncing. Peer appreciation will open here once your members are loaded.
+            </div>
+          )}
         </div>
-        <div className="flex gap-1.5 flex-wrap mb-2">
-          {peers.map((peer) => (
-            <button
-              key={peer.id}
-              onClick={() => togglePeer(peer.id)}
-              className="py-1.5 px-3 text-xs cursor-pointer transition-all duration-150"
-              style={{
-                background: selectedPeers.has(peer.id) ? "var(--accent-surface)" : "none",
-                border: `1px solid ${selectedPeers.has(peer.id) ? "var(--accent)" : "var(--border)"}`,
-                color: selectedPeers.has(peer.id) ? "var(--accent)" : "var(--text-secondary)",
-                borderRadius: "2px",
-                fontFamily: "inherit",
-              }}
-            >
-              {peer.name}
-            </button>
-          ))}
+      ) : (
+        <div
+          className="py-4 px-5"
+          style={{ background: "var(--accent-surface)", border: "1px solid var(--accent)", borderRadius: "4px" }}
+        >
+          <div
+            className="text-[10px] uppercase tracking-[0.08em] mb-2"
+            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+          >
+            PROVEN unlock
+          </div>
+          <div className="text-[14px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            Peer appreciation opens once you earn a PROVEN squad. For now, keep the reflection honest and the score will tell the truth.
+          </div>
         </div>
-        <input
-          type="text"
-          className="w-full py-3 px-4 text-[13px] outline-none transition-colors duration-150"
-          style={inputStyle}
-          placeholder="What did they do that helped you?"
-          value={appreciationNote}
-          onChange={(e) => setAppreciationNote(e.target.value)}
-          onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
-          onBlur={(e) => (e.target.style.borderColor = "var(--border-subtle)")}
-          aria-label="Peer appreciation note"
-        />
-      </div>
+      )}
 
       <button
         onClick={handleSubmit}
