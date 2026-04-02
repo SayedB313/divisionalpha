@@ -106,12 +106,14 @@ Old standalone pages like `declare`, `checkin`, `reflect`, `kickoff`, `completio
 - ELITE should feel rarer through composition and language, not through a new color palette.
 
 ## Layout
-- **Single-column editorial layout**
-- **No persistent sidebar**
-- **Max width:** 660px
+- **Authenticated desktop:** slim editorial rail on the left
+- **Public pages:** top-aligned editorial header
+- **Mobile:** bottom nav and More menu remain the primary navigation model
+- **Page width expands by context:** editorial, two-column, and three-column canvases
 - **Mobile mirrors desktop IA** instead of becoming a different product
 - **Sections breathe**: generous vertical spacing, minimal clutter
 - **Cards are editorial panels**, not generic analytics widgets
+- **The rail overlays when expanded** rather than reflowing the whole canvas
 
 ### Boss Home
 Boss Home is the true dashboard. It must always answer:
@@ -127,6 +129,22 @@ Required modules:
 - sprint state / next ritual
 - locked or unlocked previews
 - one coach whisper
+
+### Desktop Rail Rules
+- Authenticated desktop uses a collapsed rail by default with hover and focus-within expansion
+- The rail should feel editorial and quiet, not like enterprise software chrome
+- Use minimal iconography, strong type, soft separators, and warm surfaces
+- The expanded flyout reveals context and utilities; the main canvas should only reserve the collapsed rail width
+- Utilities like score, notifications, theme, and account actions belong in the rail on desktop
+
+### Page Width Strategy
+- `boss`: two-column desktop layout
+- `journey`: two-column desktop layout, still closer to editorial pacing
+- `squad`: broader room layout with thread, roster, and room-health separation
+- `proof`: broad evidence layout with multiple proof panels
+- `coach`: mainly editorial, optional narrow context column
+- `settings`: moderate two-column calmness
+- `admin`: broadest and densest layout in the product
 
 ## Tier Design Model
 ### ENTER
@@ -190,7 +208,7 @@ Required modules:
 - Respect reduced motion
 
 ## Anti-Patterns
-- Sidebars
+- Generic SaaS sidebars
 - Generic SaaS stat-card grids as the main experience
 - Purple, neon, or blue-primary palettes
 - Glassmorphism
@@ -213,7 +231,8 @@ Required modules:
 | 2026-03-24 | Warm Editorial direction chosen | Rejected generic SaaS, militant, glass, and retro treatments. Warm editorial felt premium, intimate, and durable. |
 | 2026-03-24 | DM Sans promoted to primary display font | Readability won. Instrument Serif is now reserved for score-only scarcity. |
 | 2026-03-24 | Sage palette locked | Calm authority, distinct from common startup palettes. |
-| 2026-03-24 | Single-column layout locked | Division Alpha should read like a private operating journal, not a spreadsheet. |
+| 2026-03-24 | Single-column posture locked as the baseline | Division Alpha should read like a private operating journal, not a spreadsheet. |
 | 2026-03-24 | Light mode set as primary | The product should feel like morning review energy first, evening review second. |
 | 2026-04-01 | Boss-first adaptive app locked | The app now centers on Boss, Journey, Squad, Coach, and Proof within one unified shell. |
 | 2026-04-01 | Tier progression made explicit in UI | ENTER, PROVEN, and ELITE are visible as one ladder instead of disconnected future ideas. |
+| 2026-04-02 | Editorial desktop rail approved | Authenticated desktop now uses a left rail and wider page-specific canvases without adopting generic dashboard UI. |

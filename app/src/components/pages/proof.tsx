@@ -24,7 +24,7 @@ export function ProofPage() {
   ].filter((factor) => factor.value > 0);
 
   return (
-    <PageWrapper page="proof">
+    <PageWrapper page="proof" layout="three_column">
       <div className="mb-8">
         <div
           className="text-[10px] uppercase tracking-[0.1em] mb-2"
@@ -32,9 +32,7 @@ export function ProofPage() {
         >
           Proof
         </div>
-        <h1 className="text-[1.9rem] font-bold leading-[1.12] mb-2">
-          Your score tells the truth.
-        </h1>
+        <h1 className="text-[1.9rem] font-bold leading-[1.12] mb-2">Your score tells the truth.</h1>
         <p className="text-[15px] leading-[1.7]" style={{ color: "var(--text-secondary)" }}>
           The Boss is not here to flatter you. This is where the streak, score, unlock rules, badges, and leaderboard
           all line up into one clean read on whether you are rising.
@@ -58,7 +56,7 @@ export function ProofPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-[280px]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 min-w-[280px]">
             {[
               { label: "Current tier", value: tier.activeTier.toUpperCase() },
               { label: "Current streak", value: String(tier.currentStreak) },
@@ -75,10 +73,7 @@ export function ProofPage() {
                 >
                   {item.label}
                 </div>
-                <div
-                  className="text-[1rem] font-medium"
-                  style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text)" }}
-                >
+                <div className="text-[1rem] font-medium" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text)" }}>
                   {item.value}
                 </div>
               </div>
@@ -86,25 +81,19 @@ export function ProofPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 mb-5">
           <div
             className="py-4 px-4"
             style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
           >
             <div className="flex items-center justify-between gap-3 mb-2">
               <div className="text-[13px] font-medium">PROVEN line</div>
-              <div
-                className="text-[10px] uppercase tracking-[0.08em]"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
-              >
+              <div className="text-[10px] uppercase tracking-[0.08em]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}>
                 70+
               </div>
             </div>
             <div className="w-full h-[6px] mb-2" style={{ background: "var(--surface)", borderRadius: "999px" }}>
-              <div
-                className="h-full"
-                style={{ width: `${redLineProgress}%`, background: getProgressTone(redLineProgress), borderRadius: "999px" }}
-              />
+              <div className="h-full" style={{ width: `${redLineProgress}%`, background: getProgressTone(redLineProgress), borderRadius: "999px" }} />
             </div>
             <p className="text-[13px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
               {tier.provenUnlocked
@@ -119,18 +108,12 @@ export function ProofPage() {
           >
             <div className="flex items-center justify-between gap-3 mb-2">
               <div className="text-[13px] font-medium">ELITE line</div>
-              <div
-                className="text-[10px] uppercase tracking-[0.08em]"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
-              >
+              <div className="text-[10px] uppercase tracking-[0.08em]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}>
                 90+
               </div>
             </div>
             <div className="w-full h-[6px] mb-2" style={{ background: "var(--surface)", borderRadius: "999px" }}>
-              <div
-                className="h-full"
-                style={{ width: `${eliteLineProgress}%`, background: getProgressTone(eliteLineProgress), borderRadius: "999px" }}
-              />
+              <div className="h-full" style={{ width: `${eliteLineProgress}%`, background: getProgressTone(eliteLineProgress), borderRadius: "999px" }} />
             </div>
             <p className="text-[13px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
               {tier.eliteEligible
@@ -144,66 +127,45 @@ export function ProofPage() {
           <button
             onClick={() => setScoreOpen(true)}
             className="py-3 px-5 text-sm font-medium cursor-pointer transition-all duration-150 hover:-translate-y-px"
-            style={{
-              background: "var(--accent)",
-              border: "none",
-              color: "var(--accent-text)",
-              borderRadius: "2px",
-              fontFamily: "inherit",
-            }}
+            style={{ background: "var(--accent)", border: "none", color: "var(--accent-text)", borderRadius: "2px", fontFamily: "inherit" }}
           >
             Open score overlay
           </button>
           <button
             onClick={() => navigateTo("journey")}
             className="py-3 px-5 text-sm font-medium cursor-pointer transition-all duration-150 hover:-translate-y-px"
-            style={{
-              background: "transparent",
-              border: "1px solid var(--border)",
-              color: "var(--text-secondary)",
-              borderRadius: "2px",
-              fontFamily: "inherit",
-            }}
+            style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-secondary)", borderRadius: "2px", fontFamily: "inherit" }}
           >
             Return to journey
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 mb-6">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)_minmax(300px,0.9fr)] xl:items-start mb-6">
         <section
           className="p-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <div
-                className="text-[10px] uppercase tracking-[0.08em] mb-2"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-              >
-                Factor breakdown
-              </div>
-              <h2 className="text-[1.2rem] font-semibold">What is moving the score</h2>
-            </div>
+          <div className="text-[10px] uppercase tracking-[0.08em] mb-2" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
+            Factor breakdown
           </div>
-
+          <h2 className="text-[1.2rem] font-semibold mb-4">What is moving the score</h2>
           <div className="space-y-3">
-            {factors.length > 0 ? factors.map((factor) => (
-              <div key={factor.label} className="flex items-center gap-3">
-                <div className="w-[132px] text-[13px]" style={{ color: "var(--text-secondary)" }}>
-                  {factor.label}
+            {factors.length > 0 ? (
+              factors.map((factor) => (
+                <div key={factor.label} className="flex items-center gap-3">
+                  <div className="w-[132px] text-[13px]" style={{ color: "var(--text-secondary)" }}>
+                    {factor.label}
+                  </div>
+                  <div className="flex-1 h-[6px]" style={{ background: "var(--bg-page)", borderRadius: "999px" }}>
+                    <div className="h-full" style={{ width: `${factor.value}%`, background: "var(--accent)", borderRadius: "999px" }} />
+                  </div>
+                  <div className="w-8 text-right text-[12px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text)" }}>
+                    {factor.value}
+                  </div>
                 </div>
-                <div className="flex-1 h-[6px]" style={{ background: "var(--bg-page)", borderRadius: "999px" }}>
-                  <div
-                    className="h-full"
-                    style={{ width: `${factor.value}%`, background: "var(--accent)", borderRadius: "999px" }}
-                  />
-                </div>
-                <div className="w-8 text-right text-[12px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text)" }}>
-                  {factor.value}
-                </div>
-              </div>
-            )) : (
+              ))
+            ) : (
               <div className="text-[14px]" style={{ color: "var(--text-secondary)" }}>
                 Score factors will show up here once the analytics loop has enough signal.
               </div>
@@ -215,29 +177,28 @@ export function ProofPage() {
           className="p-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div
-            className="text-[10px] uppercase tracking-[0.08em] mb-2"
-            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-          >
+          <div className="text-[10px] uppercase tracking-[0.08em] mb-2" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
             Pulse trail
           </div>
           <h2 className="text-[1.2rem] font-semibold mb-4">Recent Boss answers</h2>
           <div className="space-y-2.5">
-            {recentPulses.length > 0 ? recentPulses.map((pulse) => (
-              <div
-                key={pulse.id}
-                className="flex items-center justify-between gap-4 py-3 px-4"
-                style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
-              >
-                <div className="text-[13px] font-medium">{pulse.pulse_date}</div>
-                <div className="text-[12px]" style={{ color: "var(--text-secondary)" }}>
-                  {formatPulseStatus(pulse.status)}
+            {recentPulses.length > 0 ? (
+              recentPulses.map((pulse) => (
+                <div
+                  key={pulse.id}
+                  className="flex items-center justify-between gap-4 py-3 px-4"
+                  style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
+                >
+                  <div className="text-[13px] font-medium">{pulse.pulse_date}</div>
+                  <div className="text-[12px]" style={{ color: "var(--text-secondary)" }}>
+                    {formatPulseStatus(pulse.status)}
+                  </div>
+                  <div className="text-[12px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
+                    {pulse.score_delta !== null ? `${pulse.score_delta > 0 ? "+" : ""}${pulse.score_delta}` : "—"}
+                  </div>
                 </div>
-                <div className="text-[12px]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
-                  {pulse.score_delta !== null ? `${pulse.score_delta > 0 ? "+" : ""}${pulse.score_delta}` : "—"}
-                </div>
-              </div>
-            )) : (
+              ))
+            ) : (
               <div className="text-[14px]" style={{ color: "var(--text-secondary)" }}>
                 The pulse trail starts once the daily loop has data.
               </div>
@@ -249,14 +210,11 @@ export function ProofPage() {
           className="p-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div
-            className="text-[10px] uppercase tracking-[0.08em] mb-2"
-            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-          >
+          <div className="text-[10px] uppercase tracking-[0.08em] mb-2" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
             Badges
           </div>
           <h2 className="text-[1.2rem] font-semibold mb-4">Visible proof</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-3">
             {badges.map((badge) => (
               <div
                 key={badge.label}
@@ -285,15 +243,12 @@ export function ProofPage() {
         </section>
       </div>
 
-      <div className="grid grid-cols-1 gap-5">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <section
           className="p-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div
-            className="text-[10px] uppercase tracking-[0.08em] mb-2"
-            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-          >
+          <div className="text-[10px] uppercase tracking-[0.08em] mb-2" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
             Operator leaderboard
           </div>
           <h2 className="text-[1.2rem] font-semibold mb-4">Who has earned visibility</h2>
@@ -334,10 +289,7 @@ export function ProofPage() {
           className="p-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div
-            className="text-[10px] uppercase tracking-[0.08em] mb-2"
-            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-          >
+          <div className="text-[10px] uppercase tracking-[0.08em] mb-2" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
             Squad leaderboard
           </div>
           <h2 className="text-[1.2rem] font-semibold mb-4">Rooms that are holding the line</h2>

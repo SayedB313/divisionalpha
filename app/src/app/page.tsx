@@ -16,6 +16,7 @@ import { AdminPage } from "@/components/pages/admin";
 
 // Pages that require authentication (redirect to landing if not logged in)
 const AUTH_PAGES = new Set(["boss", "journey", "squad", "coach", "proof", "settings", "admin"]);
+const PUBLIC_PAGES = new Set(["landing", "login", "apply"]);
 
 export default function Page() {
   const { user, loading } = useAuth();
@@ -47,8 +48,8 @@ export default function Page() {
     if (!user) hasRedirected.current = false;
   }, [user]);
 
-  // Show loading state while auth resolves
-  if (loading) {
+  // Public pages should render immediately; only protected pages need auth resolution first.
+  if (loading && AUTH_PAGES.has(currentPage)) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div
@@ -64,9 +65,13 @@ export default function Page() {
   return (
     <>
       {/* Public pages */}
-      <LandingPage />
-      <LoginPage />
-      <ApplyPage />
+      {(PUBLIC_PAGES.has(currentPage) || !user) && (
+        <>
+          <LandingPage />
+          <LoginPage />
+          <ApplyPage />
+        </>
+      )}
 
       {/* Protected pages — only render if authenticated */}
       {user && (

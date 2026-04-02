@@ -5,9 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/lib/auth-context";
 import { AppProvider } from "@/lib/app-context";
 import { QueryProvider } from "@/lib/query-provider";
-import { Topbar } from "@/components/topbar";
-import { MobileNav } from "@/components/mobile-nav";
-import { ScoreOverlay } from "@/components/score-overlay";
+import { AppFrame } from "@/components/app-frame";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -63,12 +61,7 @@ export default function RootLayout({
           <AuthProvider>
             <AppProvider>
               <ThemeProvider>
-                <Topbar />
-                <main className="pt-[52px] min-h-screen">
-                  {children}
-                </main>
-                <MobileNav />
-                <ScoreOverlay />
+                <AppFrame>{children}</AppFrame>
               </ThemeProvider>
             </AppProvider>
           </AuthProvider>

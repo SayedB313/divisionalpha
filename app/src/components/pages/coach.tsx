@@ -52,7 +52,7 @@ export function CoachPage() {
   };
 
   return (
-    <PageWrapper page="coach">
+    <PageWrapper page="coach" layout="two_column">
       <div className="mb-8">
         <div
           className="text-[10px] uppercase tracking-[0.1em] mb-2"
@@ -69,130 +69,150 @@ export function CoachPage() {
         </p>
       </div>
 
-      <div
-        className="p-5 mb-5"
-        style={{ background: "var(--accent-surface)", border: "1px solid var(--accent)", borderRadius: "4px" }}
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[
-            { label: "Operator", value: profile?.display_name || "Operator" },
-            { label: "Tier", value: tier.activeTier.toUpperCase() },
-            { label: "Current score", value: String(tier.score) },
-          ].map((item) => (
-            <div key={item.label}>
-              <div
-                className="text-[10px] uppercase tracking-[0.08em] mb-1"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
-              >
-                {item.label}
-              </div>
-              <div className="text-[14px] font-medium">{item.value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div
-        className="p-5"
-        style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
-      >
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_300px] xl:items-start">
         <div
-          className="text-[10px] uppercase tracking-[0.08em] mb-3"
-          style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+          className="p-5"
+          style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          Private thread
-        </div>
-
-        <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1 mb-5" ref={threadRef}>
-          {displayMessages.length > 0 ? displayMessages.map((message) => (
-            <div
-              key={message.id}
-              className={message.from === "user" ? "ml-auto max-w-[88%]" : "mr-auto max-w-[88%]"}
-              style={{ animation: "fadeUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
-            >
-              <div
-                className="text-[10px] uppercase tracking-[0.06em] mb-1"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-              >
-                {message.meta}
-              </div>
-              <div
-                className="py-3.5 px-4 text-[14px] leading-[1.7]"
-                style={{
-                  background: message.from === "user" ? "var(--accent-surface)" : "var(--bg-page)",
-                  border: `1px solid ${message.from === "user" ? "var(--accent)" : "var(--border-subtle)"}`,
-                  borderRadius: "4px",
-                  color: message.from === "user" ? "var(--text)" : "var(--text-secondary)",
-                }}
-              >
-                {message.text}
-              </div>
-            </div>
-          )) : (
-            <div className="text-[14px] leading-[1.7]" style={{ color: "var(--text-secondary)" }}>
-              Ask the Boss for help with the thing you keep avoiding, the line that is breaking, or the truth you want surfaced without excuses.
-            </div>
-          )}
-
-          {isCoachTyping && (
-            <div className="mr-auto max-w-[88%]">
-              <div
-                className="text-[10px] uppercase tracking-[0.06em] mb-1"
-                style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
-              >
-                Boss · thinking
-              </div>
-              <div
-                className="py-3.5 px-4 text-[14px] inline-flex gap-1"
-                style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px", color: "var(--text-muted)" }}
-              >
-                <span className="animate-bounce" style={{ animationDelay: "0ms" }}>.</span>
-                <span className="animate-bounce" style={{ animationDelay: "150ms" }}>.</span>
-                <span className="animate-bounce" style={{ animationDelay: "300ms" }}>.</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(event) => setInputValue(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                handleSend();
-              }
-            }}
-            className="flex-1 py-3 px-4 text-[14px] outline-none transition-colors duration-150"
-            style={{
-              background: "var(--bg-page)",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text)",
-              borderRadius: "4px",
-              fontFamily: "inherit",
-            }}
-            placeholder="Message the Boss..."
-            onFocus={(event) => (event.target.style.borderColor = "var(--accent)")}
-            onBlur={(event) => (event.target.style.borderColor = "var(--border-subtle)")}
-            disabled={isCoachTyping}
-          />
-          <button
-            onClick={handleSend}
-            disabled={isCoachTyping || !inputValue.trim()}
-            className="py-3 px-5 text-sm font-medium border-none cursor-pointer transition-colors duration-150"
-            style={{
-              background: isCoachTyping ? "var(--border)" : "var(--accent)",
-              color: "var(--accent-text)",
-              borderRadius: "2px",
-              fontFamily: "inherit",
-              opacity: isCoachTyping || !inputValue.trim() ? 0.6 : 1,
-            }}
+          <div
+            className="text-[10px] uppercase tracking-[0.08em] mb-3"
+            style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
           >
-            Send
-          </button>
+            Private thread
+          </div>
+
+          <div className="space-y-4 max-h-[420px] overflow-y-auto pr-1 mb-5" ref={threadRef}>
+            {displayMessages.length > 0 ? displayMessages.map((message) => (
+              <div
+                key={message.id}
+                className={message.from === "user" ? "ml-auto max-w-[88%]" : "mr-auto max-w-[88%]"}
+                style={{ animation: "fadeUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+              >
+                <div
+                  className="text-[10px] uppercase tracking-[0.06em] mb-1"
+                  style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+                >
+                  {message.meta}
+                </div>
+                <div
+                  className="py-3.5 px-4 text-[14px] leading-[1.7]"
+                  style={{
+                    background: message.from === "user" ? "var(--accent-surface)" : "var(--bg-page)",
+                    border: `1px solid ${message.from === "user" ? "var(--accent)" : "var(--border-subtle)"}`,
+                    borderRadius: "4px",
+                    color: message.from === "user" ? "var(--text)" : "var(--text-secondary)",
+                  }}
+                >
+                  {message.text}
+                </div>
+              </div>
+            )) : (
+              <div className="text-[14px] leading-[1.7]" style={{ color: "var(--text-secondary)" }}>
+                Ask the Boss for help with the thing you keep avoiding, the line that is breaking, or the truth you want surfaced without excuses.
+              </div>
+            )}
+
+            {isCoachTyping && (
+              <div className="mr-auto max-w-[88%]">
+                <div
+                  className="text-[10px] uppercase tracking-[0.06em] mb-1"
+                  style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+                >
+                  Boss · thinking
+                </div>
+                <div
+                  className="py-3.5 px-4 text-[14px] inline-flex gap-1"
+                  style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px", color: "var(--text-muted)" }}
+                >
+                  <span className="animate-bounce" style={{ animationDelay: "0ms" }}>.</span>
+                  <span className="animate-bounce" style={{ animationDelay: "150ms" }}>.</span>
+                  <span className="animate-bounce" style={{ animationDelay: "300ms" }}>.</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(event) => setInputValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  handleSend();
+                }
+              }}
+              className="flex-1 py-3 px-4 text-[14px] outline-none transition-colors duration-150"
+              style={{
+                background: "var(--bg-page)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text)",
+                borderRadius: "4px",
+                fontFamily: "inherit",
+              }}
+              placeholder="Message the Boss..."
+              onFocus={(event) => (event.target.style.borderColor = "var(--accent)")}
+              onBlur={(event) => (event.target.style.borderColor = "var(--border-subtle)")}
+              disabled={isCoachTyping}
+            />
+            <button
+              onClick={handleSend}
+              disabled={isCoachTyping || !inputValue.trim()}
+              className="py-3 px-5 text-sm font-medium border-none cursor-pointer transition-colors duration-150"
+              style={{
+                background: isCoachTyping ? "var(--border)" : "var(--accent)",
+                color: "var(--accent-text)",
+                borderRadius: "2px",
+                fontFamily: "inherit",
+                opacity: isCoachTyping || !inputValue.trim() ? 0.6 : 1,
+              }}
+            >
+              Send
+            </button>
+          </div>
         </div>
+
+        <aside className="space-y-5 xl:sticky xl:top-8">
+          <div
+            className="p-5"
+            style={{ background: "var(--accent-surface)", border: "1px solid var(--accent)", borderRadius: "4px" }}
+          >
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { label: "Operator", value: profile?.display_name || "Operator" },
+                { label: "Tier", value: tier.activeTier.toUpperCase() },
+                { label: "Current score", value: String(tier.score) },
+              ].map((item) => (
+                <div key={item.label}>
+                  <div
+                    className="text-[10px] uppercase tracking-[0.08em] mb-1"
+                    style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
+                  >
+                    {item.label}
+                  </div>
+                  <div className="text-[14px] font-medium">{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="p-5"
+            style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
+          >
+            <div
+              className="text-[10px] uppercase tracking-[0.08em] mb-2"
+              style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
+            >
+              What belongs here
+            </div>
+            <p className="text-[13px] leading-[1.7]" style={{ color: "var(--text-secondary)" }}>
+              Use this thread for blockage, pattern recognition, recommitment, and the hard thing you need called out
+              without ego.
+            </p>
+          </div>
+        </aside>
       </div>
     </PageWrapper>
   );

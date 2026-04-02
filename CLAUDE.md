@@ -16,13 +16,16 @@ Division Alpha is a 40-day proving ground for operators. The Boss (AI-powered, h
 
 **Positioning:** Division Alpha is NOT a self-help tool. It's a proving ground. Public claim depends on ICP: broad entry = everyone gets a chance, operator-facing = earn your squad, elite-facing = "85% don't make it." Same doctrine, different emphasis.
 
-## Current Status (2026-04-01)
+## Current Status (2026-04-02)
 
 - **Adaptive redesign implemented in repo:** the live shell is now `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, `admin`
+- **Desktop editorial rail shipped:** authenticated desktop now uses a collapsed left rail with hover/focus flyout while public pages stay top-aligned and mobile keeps the bottom-nav model
 - **Public funnel updated:** landing, apply, login, and checkout all reinforce `ENTER first, PROVEN earned later`
+- **Public shell QA fix shipped:** `page.tsx` no longer waits on auth resolution before rendering `landing`, `login`, or `apply`, so the public app does not flash a blank loading shell first
 - **Boss loop built:** `/api/agents/boss`, `/api/boss/pulse`, streak/score orchestration, daily pulse UI, and Boss-triggered admin controls are all in the codebase
 - **Admin updated:** business logic now reflects `ENTER $19 / PROVEN $49 / ELITE $149` and `30 / 70 / 90`
 - **Correctness fixes shipped:** coach duplicate insert fixed, cron installer now matches GET cron route, stale 6-week / Operator Fund copy removed from active surfaces
+- **Verification status:** public desktop/mobile browser QA completed, authenticated shell smoke coverage added via tests, `npm test` passes `30/30`, and `npm run build` passes
 - **Important live follow-up:** Supabase migrations `016_allow_enter_without_squad.sql` and `017_daily_boss_loop.sql` still need to be applied before the Boss-first model works in production
 
 ## Three Tiers (Earned Progression)
@@ -101,7 +104,7 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 **Direction:** Warm Editorial — private club meets personal journal
 - **Fonts:** DM Sans (display + body) + DM Mono (data) + Instrument Serif (score reveal only)
 - **Palette:** Sage green accent (#3d6b4a light / #5a9a6e dark) on warm cream/warm black
-- **Layout:** Single-column (660px), day-contextual, no sidebar
+- **Layout:** editorial rail on authenticated desktop, public top header, mobile bottom nav, and page-specific editorial/two-column/three-column canvases
 - **Scale:** zoom: 1.3 (30% global increase)
 - **Light mode primary**, dark mode secondary
 
@@ -114,7 +117,8 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - v5: First Warm Editorial attempt — approved direction but needed refinement
 - v6: (skipped)
 - **v7:** Full interactive prototype — day-contextual, ceremonies, onboarding, coach DM
-- **v8 (current repo shell):** Adaptive Boss-led redesign — Boss Home, Journey, Squad, Coach, Proof, rebuilt admin, earned progression states
+- **v8:** Adaptive Boss-led redesign — Boss Home, Journey, Squad, Coach, Proof, rebuilt admin, earned progression states
+- **v9 (current repo shell):** Editorial desktop rail, shell-aware page widths, and wider desktop layouts for Boss/Journey/Squad/Proof/Settings/Admin
 
 ## Project Structure
 
@@ -155,8 +159,11 @@ divisionalpha/
 │       └── 017_daily_boss_loop.sql           ← Daily Boss pulses, streak state, score metadata
 ├── app/                                       ← Next.js production app
 │   ├── src/
+│   │   ├── __tests__/
+│   │   │   ├── page-gating.test.tsx         ← Regression coverage for public-page auth gating and immediate rendering
+│   │   │   └── shell-chrome.test.tsx        ← Shell smoke tests for public header, desktop rail, and mobile nav
 │   │   ├── app/
-│   │   │   ├── layout.tsx                    ← Root layout: fonts, AuthProvider, ThemeProvider, Topbar, MobileNav, ScoreOverlay
+│   │   │   ├── layout.tsx                    ← Root layout: fonts/providers; AppFrame mounts shell chrome
 │   │   │   ├── page.tsx                      ← Single-route SPA: auth gating, renders adaptive shell pages
 │   │   │   ├── globals.css                   ← Full design system CSS variables (light/dark), zoom: 1.3
 │   │   │   └── api/
@@ -208,9 +215,10 @@ divisionalpha/
 │   │   │       └── use-notifications.ts      ← Notification preferences + unread count
 │   │   ├── middleware.ts                     ← Next.js middleware (auth session refresh)
 │   │   └── components/
-│   │       ├── topbar.tsx                    ← Adaptive desktop nav: Boss / Journey / Squad / Coach / Proof
+│   │       ├── app-frame.tsx                 ← Shell frame: public header vs member rail, main offsets, mobile nav, score overlay
+│   │       ├── topbar.tsx                    ← Public header + authenticated desktop rail + authenticated mobile header
 │   │       ├── mobile-nav.tsx                ← Adaptive mobile nav mirroring the same IA
-│   │       ├── page-wrapper.tsx              ← Shared page container: 660px max-width, fadeUp animation
+│   │       ├── page-wrapper.tsx              ← Shared page container with editorial/two/three-column width variants
 │   │       ├── score-overlay.tsx             ← Score reveal + quick proof summary
 │   │       ├── theme-provider.tsx            ← Theme context: light/dark toggle via data-theme attribute
 │   │       └── pages/
@@ -232,13 +240,14 @@ divisionalpha/
 ## Architecture Notes
 
 - **SPA routing:** All pages render from a single Next.js route (`page.tsx`). Navigation is handled client-side via `navigation-context.tsx` — no file-based routing for pages.
-- **Auth gating:** `page.tsx` checks auth state. Unauthenticated users see Landing / Login / Apply. Authenticated users land in `boss`.
+- **Auth gating:** `page.tsx` checks auth state. Public pages render immediately without waiting on auth resolution; authenticated users land in `boss`.
 - **Page type union:** Every new page must be added to the `Page` type in both `navigation-context.tsx` and `page-wrapper.tsx`, then rendered in `page.tsx`.
 - **Adaptive shell:** primary member IA is `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, `admin`.
 - **Legacy page map:** old pages like `home`, `declare`, `checkin`, `reflect`, `leaderboard`, `kickoff`, `completion`, and `squad-chat` now map into the new shell instead of being primary destinations.
-- **Desktop nav:** `Boss / Journey / Squad / Coach / Proof` + `More` (`Settings`, `Admin` when allowed).
+- **Desktop nav:** collapsed left editorial rail with `Boss / Journey / Squad / Coach / Proof`, secondary `Settings / Admin`, and embedded utilities for score, notifications, theme, and account.
 - **Mobile nav:** `Boss / Journey / Squad / Proof` + `More` (`Coach`, `Settings`, `Admin`, `Sign Out`).
-- **Profile avatar:** dynamic initials from profile; opens settings/admin/sign-out controls.
+- **Public shell:** public pages keep the fixed top editorial header rather than inheriting the member rail.
+- **Page wrapper variants:** member pages can now opt into `editorial`, `two_column`, `three_column`, and `wide` canvases while preserving the same design language.
 - **Fonts loaded via `next/font/google`** in `layout.tsx` — DM Sans, DM Mono, Instrument Serif.
 - **CSS custom properties** for all colors/spacing in `globals.css` — supports light/dark themes.
 - **Adaptive read models:** `useTierState`, `useDashboardSnapshot`, `useJourneyState`, `useSquadState`, and `useProofState` compose the Boss-first experience from existing tables.
@@ -347,7 +356,7 @@ Legacy pages still exist in the codebase as implementation details or historical
 ## What's Next
 
 - Apply Supabase migrations `016_allow_enter_without_squad.sql` and `017_daily_boss_loop.sql`
-- Run a browser QA pass across `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, `admin`
+- Run a true signed-in browser QA across `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, and `admin` once a Supabase test member session is available
 - Smoke-test the live Boss loop end-to-end:
   - dispatch `/api/agents/boss` with `dispatch_daily_pulse`
   - answer the pulse in-app
