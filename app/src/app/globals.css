@@ -12,8 +12,9 @@
 /* ══════ LIGHT THEME (Primary — morning journal energy) ══════ */
 :root,
 [data-theme="light"] {
-  --shell-rail: 84px;
-  --shell-flyout: 258px;
+  --shell-rail: 56px;
+  --shell-flyout: 220px;
+  --shell-topbar: 40px;
   --bg: #f5f0e6;
   --bg-page: #faf7f0;
   --surface: #ede8dc;
@@ -41,8 +42,9 @@
 
 /* ══════ DARK THEME (Secondary — evening review energy) ══════ */
 [data-theme="dark"] {
-  --shell-rail: 84px;
-  --shell-flyout: 258px;
+  --shell-rail: 56px;
+  --shell-flyout: 220px;
+  --shell-topbar: 40px;
   --bg: #111110;
   --bg-page: #151514;
   --surface: #1c1b19;

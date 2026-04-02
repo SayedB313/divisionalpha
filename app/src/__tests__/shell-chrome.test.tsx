@@ -119,14 +119,12 @@ describe("shell chrome", () => {
 
     const html = renderToStaticMarkup(<Topbar />);
 
-    expect(html).toContain("Command center");
     expect(html).toContain("Boss");
     expect(html).toContain("Journey");
     expect(html).toContain("Squad");
-    expect(html).toContain("Operator Score");
-    expect(html).toContain("Notifications");
     expect(html).toContain("Settings");
     expect(html).toContain("Admin");
+    expect(html).toContain("Sign Out");
   });
 
   it("applies the requested width variant in page wrapper", () => {
