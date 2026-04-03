@@ -30,17 +30,17 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   title: "Division Alpha — 40-Day Proving Ground for Operators",
-  description: "Everyone gets a chance. The Boss tracks execution daily. Enter for $19/month, earn your squad at 70+, and climb toward ELITE at 90+.",
+  description: "Everyone gets a chance. The Boss tracks execution daily. Recruit for $9/month, earn your squad at 30+, and climb toward OPERATOR at 70+.",
   openGraph: {
     title: "Division Alpha — Everyone Gets a Chance. The Best Earn Their Squad.",
-    description: "A 40-day proving ground for operators. Daily Boss pulse, real-time score, embedded human support, and earned progression from ENTER to PROVEN.",
+    description: "A 40-day proving ground for operators. Daily Boss pulse, real-time score, embedded human support, and earned progression from RECRUIT to QUALIFIED.",
     siteName: "Division Alpha",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Division Alpha — 40-Day Proving Ground for Operators",
-    description: "Enter for $19/month. The Boss tracks execution daily. The best earn their squad.",
+    description: "Recruit for $9/month. The Boss tracks execution daily. The best earn their squad.",
   },
 };
 

@@ -438,11 +438,11 @@ export function HomePage() {
               className="text-[10px] uppercase tracking-[0.08em] mb-1"
               style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
             >
-              PROVEN unlock
+              QUALIFIED unlock
             </div>
             <div className="text-[15px] font-medium mb-1">Your squad is earned, not assigned on day one.</div>
             <div className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-              Finish the 40-day proving ground with a 70+ score to unlock PROVEN squad access.
+              Finish the 40-day proving ground with a 30+ score to unlock QUALIFIED squad access.
             </div>
           </div>
           <div className="text-sm" style={{ color: "var(--accent)" }}>&rarr;</div>

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe()
     const { email, name } = await request.json()
-    const priceId = process.env.STRIPE_PRICE_ID_ENTER || process.env.STRIPE_PRICE_ID_SPRINT_ACCESS
+    const priceId = process.env.STRIPE_PRICE_ID_RECRUIT || process.env.STRIPE_PRICE_ID_ENTER || process.env.STRIPE_PRICE_ID_SPRINT_ACCESS
 
     if (!email) {
       return NextResponse.json({ error: 'Email required' }, { status: 400 })
@@ -36,15 +36,15 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata: {
-        product_tier: 'ENTER',
-        product_name: 'Division Alpha ENTER',
+        product_tier: 'RECRUIT',
+        product_name: 'Division Alpha RECRUIT',
         proving_ground_length: '40 days',
         applicant_name: name || '',
         applicant_email: email,
       },
       subscription_data: {
         metadata: {
-          product_tier: 'ENTER',
+          product_tier: 'RECRUIT',
         },
       },
       success_url: `${origin}?checkout=success`,

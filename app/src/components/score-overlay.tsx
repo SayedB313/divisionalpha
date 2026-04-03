@@ -162,9 +162,9 @@ export function ScoreOverlay() {
           className="p-4 text-center text-[13px] leading-relaxed"
           style={{ background: "var(--accent-surface)", border: "1px solid var(--accent)", borderRadius: "4px", color: "var(--accent)" }}
         >
-          {tier.provenUnlocked
-            ? "PROVEN is earned. Your next question is whether the score and your behavior justify stronger responsibility."
-            : `ENTER is open. PROVEN unlocks at 70+. You are ${Math.max(0, 70 - tier.score)} points away.`}
+          {tier.qualifiedUnlocked
+            ? "QUALIFIED is earned. Your next question is whether the score and your behavior justify stronger responsibility."
+            : `RECRUIT is open. QUALIFIED unlocks at 30+. You are ${Math.max(0, 30 - tier.score)} points away.`}
         </div>
 
         <button

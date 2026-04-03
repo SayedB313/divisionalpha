@@ -61,7 +61,7 @@ export function DeclarePage() {
       <p className="text-[15px] leading-relaxed mb-9" style={{ color: "var(--text-secondary)" }}>
         {hasSquad
           ? "Declare your commitments to your squad. Be specific. Be measurable."
-          : "Declare your commitments to the Boss. Be specific. Be measurable. This is how ENTER keeps score before squad access is earned."}
+          : "Declare your commitments to the Boss. Be specific. Be measurable. This is how RECRUIT keeps score before squad access is earned."}
       </p>
 
       {!hasSquad && (
@@ -77,10 +77,10 @@ export function DeclarePage() {
             className="text-[10px] uppercase tracking-[0.08em] mb-1"
             style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
           >
-            ENTER mode
+            RECRUIT mode
           </div>
           <div className="text-[14px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            No squad yet. The Boss is watching for consistency, honesty, and follow-through. Score 70+ across the sprint to earn PROVEN.
+            No squad yet. The Boss is watching for consistency, honesty, and follow-through. Score 30+ across the sprint to earn QUALIFIED.
           </div>
         </div>
       )}

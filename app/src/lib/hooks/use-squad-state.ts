@@ -21,7 +21,7 @@ export function useSquadState() {
     : null
 
   return {
-    isLocked: !tier.provenUnlocked,
+    isLocked: !tier.qualifiedUnlocked,
     tier,
     squad,
     memberCount,

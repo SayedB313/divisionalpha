@@ -6,8 +6,8 @@ import { PageWrapper } from "../page-wrapper";
 
 interface DashboardData {
   sprint: { name: string; number: number; current_week: number; status: string; duration_weeks: number } | null;
-  pricing: { enter: number; proven: number; elite: number };
-  thresholds: { enter: number; proven: number; elite: number };
+  pricing: { recruit: number; qualified: number; operator: number };
+  thresholds: { recruit: number | null; qualified: number; operator: number };
   kpis: {
     total_users: number;
     active_users: number;
@@ -18,7 +18,7 @@ interface DashboardData {
     monthly_revenue_estimate: number;
     arr_estimate: number;
   };
-  tiers: { enter: number; proven: number; elite: number };
+  tiers: { recruit: number; qualified: number; operator: number };
   boss: {
     pulses_sent_today: number;
     answered_today: number;
@@ -30,8 +30,8 @@ interface DashboardData {
   funnel: {
     submitted_applications: number;
     paying_users: number;
-    proven_unlock_volume: number;
-    elite_candidate_pipeline: number;
+    qualified_unlock_volume: number;
+    operator_candidate_pipeline: number;
   };
   squads: {
     active_count: number;
@@ -135,9 +135,9 @@ export function AdminPage() {
           { label: "Paying", value: data.kpis.paying_users, color: "var(--accent)" },
           { label: "MRR", value: `$${data.kpis.monthly_revenue_estimate.toLocaleString()}`, color: "var(--accent)" },
           { label: "Avg score", value: data.kpis.avg_operator_score || "—", color: "var(--text)" },
-          { label: "ENTER", value: data.tiers.enter, color: "var(--text)" },
-          { label: "PROVEN", value: data.tiers.proven, color: "var(--accent)" },
-          { label: "ELITE", value: data.tiers.elite, color: "var(--accent)" },
+          { label: "RECRUIT", value: data.tiers.recruit, color: "var(--text)" },
+          { label: "QUALIFIED", value: data.tiers.qualified, color: "var(--accent)" },
+          { label: "OPERATOR", value: data.tiers.operator, color: "var(--accent)" },
           { label: "Apps", value: data.funnel.submitted_applications, color: "var(--text)" },
         ].map((item) => (
           <div key={item.label} className="py-4 px-3 text-center" style={card}>
@@ -160,9 +160,9 @@ export function AdminPage() {
             </div>
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
               {[
-                { name: "ENTER", price: `$${data.pricing.enter}`, line: `${data.thresholds.enter}+ visible floor` },
-                { name: "PROVEN", price: `$${data.pricing.proven}`, line: `${data.thresholds.proven}+ unlock line` },
-                { name: "ELITE", price: `$${data.pricing.elite}`, line: `${data.thresholds.elite}+ candidate line` },
+                { name: "RECRUIT", price: `$${data.pricing.recruit}`, line: "Entry tier" },
+                { name: "QUALIFIED", price: `$${data.pricing.qualified}`, line: `${data.thresholds.qualified}+ unlock line` },
+                { name: "OPERATOR", price: `$${data.pricing.operator}`, line: `${data.thresholds.operator}+ candidate line` },
               ].map((item) => (
                 <div key={item.name} className="py-4 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
                   <div className="flex items-center justify-between gap-3 mb-2">
@@ -213,8 +213,8 @@ export function AdminPage() {
                 {[
                   { label: "Applications", value: data.funnel.submitted_applications },
                   { label: "Paying users", value: data.funnel.paying_users },
-                  { label: "PROVEN ready", value: data.funnel.proven_unlock_volume },
-                  { label: "ELITE pipeline", value: data.funnel.elite_candidate_pipeline },
+                  { label: "QUALIFIED ready", value: data.funnel.qualified_unlock_volume },
+                  { label: "OPERATOR pipeline", value: data.funnel.operator_candidate_pipeline },
                 ].map((item) => (
                   <div key={item.label} className="py-4 px-4" style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}>
                     <div className="text-[1.1rem] font-medium mb-1" style={{ ...mono }}>
@@ -317,7 +317,7 @@ export function AdminPage() {
                     <div>
                       <div className="text-[14px] font-medium">{member.name}</div>
                       <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                        {member.squad_name || "ENTER"} · {member.latest_event}
+                        {member.squad_name || "RECRUIT"} · {member.latest_event}
                       </div>
                     </div>
                     <div className="text-[10px] py-1 px-2" style={{ ...mono, background: "var(--red-soft)", color: "var(--red)", borderRadius: "2px" }}>

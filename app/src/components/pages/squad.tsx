@@ -76,7 +76,7 @@ export function SquadPage() {
           </div>
           <h1 className="text-[1.9rem] font-bold leading-[1.12] mb-2">The room is visible before it is yours.</h1>
           <p className="text-[15px] leading-[1.7]" style={{ color: "var(--text-secondary)" }}>
-            ENTER proves the individual first. At 70+, PROVEN unlocks the squad, shared pressure, roster visibility,
+            RECRUIT proves the individual first. At 30+, QUALIFIED unlocks the squad, shared pressure, roster visibility,
             and the kind of consequence that only works when everyone earned their way in.
           </p>
         </div>
@@ -127,7 +127,7 @@ export function SquadPage() {
               >
                 Unlock rule
               </div>
-              <h2 className="text-[1.2rem] font-semibold mb-2">Cross 70+ to earn PROVEN.</h2>
+              <h2 className="text-[1.2rem] font-semibold mb-2">Cross 30+ to earn QUALIFIED.</h2>
               <p className="text-[14px] leading-[1.65]" style={{ color: "var(--text-secondary)" }}>
                 Your score is {tier.score}. Keep answering the Boss, protect the streak, and finish the sprint with
                 enough proof that a stronger room makes sense.
@@ -168,7 +168,7 @@ export function SquadPage() {
                 className="py-3 px-5 text-sm font-medium cursor-pointer transition-all duration-150 hover:-translate-y-px"
                 style={{ background: "var(--accent)", border: "none", color: "var(--accent-text)", borderRadius: "2px", fontFamily: "inherit" }}
               >
-                See the PROVEN path
+                See the QUALIFIED path
               </button>
               <button
                 onClick={() => navigateTo("journey")}
@@ -195,7 +195,7 @@ export function SquadPage() {
         </div>
         <h1 className="text-[1.9rem] font-bold leading-[1.12] mb-2">{squad?.name || "Your earned room"}</h1>
         <p className="text-[15px] leading-[1.7]" style={{ color: "var(--text-secondary)" }}>
-          PROVEN adds shared consequence to the same system. The Boss still runs the loop, but now the room feels your
+          QUALIFIED adds shared consequence to the same system. The Boss still runs the loop, but now the room feels your
           line with you.
         </p>
       </div>

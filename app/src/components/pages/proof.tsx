@@ -87,18 +87,18 @@ export function ProofPage() {
             style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
           >
             <div className="flex items-center justify-between gap-3 mb-2">
-              <div className="text-[13px] font-medium">PROVEN line</div>
+              <div className="text-[13px] font-medium">QUALIFIED line</div>
               <div className="text-[10px] uppercase tracking-[0.08em]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}>
-                70+
+                30+
               </div>
             </div>
             <div className="w-full h-[6px] mb-2" style={{ background: "var(--surface)", borderRadius: "999px" }}>
               <div className="h-full" style={{ width: `${redLineProgress}%`, background: getProgressTone(redLineProgress), borderRadius: "999px" }} />
             </div>
             <p className="text-[13px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
-              {tier.provenUnlocked
+              {tier.qualifiedUnlocked
                 ? "You crossed the red line. Squad access is now earned rather than theoretical."
-                : `${tier.gapToNext} more points until PROVEN unlocks.`}
+                : `${tier.gapToNext} more points until QUALIFIED unlocks.`}
             </p>
           </div>
 
@@ -107,18 +107,18 @@ export function ProofPage() {
             style={{ background: "var(--bg-page)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
           >
             <div className="flex items-center justify-between gap-3 mb-2">
-              <div className="text-[13px] font-medium">ELITE line</div>
+              <div className="text-[13px] font-medium">OPERATOR line</div>
               <div className="text-[10px] uppercase tracking-[0.08em]" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}>
-                90+
+                70+
               </div>
             </div>
             <div className="w-full h-[6px] mb-2" style={{ background: "var(--surface)", borderRadius: "999px" }}>
               <div className="h-full" style={{ width: `${eliteLineProgress}%`, background: getProgressTone(eliteLineProgress), borderRadius: "999px" }} />
             </div>
             <p className="text-[13px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
-              {tier.eliteEligible
-                ? "You have the score profile for ELITE consideration once multi-sprint proof holds."
-                : "ELITE is visible now so the standard stays clear before the room is open."}
+              {tier.operatorEligible
+                ? "You have the score profile for OPERATOR consideration once multi-sprint proof holds."
+                : "OPERATOR is visible now so the standard stays clear before the room is open."}
             </p>
           </div>
         </div>
@@ -280,7 +280,7 @@ export function ProofPage() {
             </div>
           ) : (
             <div className="text-[14px] leading-[1.65]" style={{ color: "var(--text-secondary)" }}>
-              The leaderboard becomes meaningful once PROVEN operators start stacking visible proof.
+              The leaderboard becomes meaningful once QUALIFIED operators start stacking visible proof.
             </div>
           )}
         </section>

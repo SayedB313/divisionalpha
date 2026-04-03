@@ -157,8 +157,8 @@ export function ApplyPage() {
     <PageWrapper page="apply">
       <h1 className="text-[1.75rem] font-bold leading-[1.2] mb-1">Apply to Enter the Arena</h1>
       <p className="text-[15px] leading-relaxed mb-8" style={{ color: "var(--text-secondary)" }}>
-        You are applying to <strong>ENTER</strong>, the 40-day proving ground. Everyone gets a chance.
-        PROVEN and squads are earned later through your score and your behavior.
+        You are applying to <strong>RECRUIT</strong>, the 40-day proving ground. Everyone gets a chance.
+        QUALIFIED and squads are earned later through your score and your behavior.
       </p>
 
       <div className="flex gap-1 mb-8">
@@ -281,13 +281,13 @@ export function ApplyPage() {
             What happens next
           </div>
           <p className="text-[14px] leading-[1.6] mb-3" style={{ color: "var(--text-secondary)" }}>
-            After this step, you&apos;ll continue to secure checkout for <strong>ENTER ($19/mo)</strong>.
+            After this step, you&apos;ll continue to secure checkout for <strong>RECRUIT ($9/mo)</strong>.
             Once payment goes through, we&apos;ll email your next step and get you ready for Sprint 4.
           </p>
           <div className="space-y-2 text-[13px]" style={{ color: "var(--text-secondary)" }}>
             <div>• Daily Boss pulse and 40-day proving ground</div>
             <div>• Weekly operator session and embedded human support</div>
-            <div>• PROVEN and squads are earned later at 70+</div>
+            <div>• QUALIFIED and squads are earned later at 30+</div>
           </div>
         </div>
       )}

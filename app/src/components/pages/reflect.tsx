@@ -220,10 +220,10 @@ export function ReflectPage() {
             className="text-[10px] uppercase tracking-[0.08em] mb-2"
             style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}
           >
-            PROVEN unlock
+            QUALIFIED unlock
           </div>
           <div className="text-[14px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            Peer appreciation opens once you earn a PROVEN squad. For now, keep the reflection honest and the score will tell the truth.
+            Peer appreciation opens once you earn a QUALIFIED squad. For now, keep the reflection honest and the score will tell the truth.
           </div>
         </div>
       )}

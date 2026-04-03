@@ -359,11 +359,11 @@ export function Topbar() {
               {tierLabel}
             </span>
             <span className="text-[10px]" style={{ color: "var(--text-muted)", fontFamily: "var(--font-dm-mono), monospace" }}>
-              {tier.activeTier === "enter"
+              {tier.activeTier === "recruit"
                 ? "Build your proof"
-                : tier.activeTier === "proven"
+                : tier.activeTier === "qualified"
                   ? "Squad earned"
-                  : "Elite operator"}
+                  : "Operator status"}
             </span>
           </span>
           {sprint && (

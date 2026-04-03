@@ -20,19 +20,47 @@ Division Alpha is a 40-day proving ground for operators. The Boss (AI-powered, h
 
 - **Adaptive redesign implemented in repo:** the live shell is now `boss`, `journey`, `squad`, `coach`, `proof`, `settings`, `admin`
 - **Desktop editorial rail shipped:** authenticated desktop now uses a collapsed left rail with hover/focus flyout while public pages stay top-aligned and mobile keeps the bottom-nav model
-- **Public funnel updated:** landing, apply, login, and checkout all reinforce `ENTER first, PROVEN earned later`
+- **Public funnel updated:** landing, apply, login, and checkout all reinforce `RECRUIT first, QUALIFIED earned later`
 - **Public shell QA fix shipped:** `page.tsx` no longer waits on auth resolution before rendering `landing`, `login`, or `apply`, so the public app does not flash a blank loading shell first
 - **Boss loop built:** `/api/agents/boss`, `/api/boss/pulse`, streak/score orchestration, daily pulse UI, and Boss-triggered admin controls are all in the codebase
-- **Admin updated:** business logic now reflects `ENTER $19 / PROVEN $49 / ELITE $149` and `30 / 70 / 90`
+- **Admin updated:** business logic now reflects `RECRUIT $9 / QUALIFIED $99 / OPERATOR $349` and `none / 30 / 70`
 - **Correctness fixes shipped:** coach duplicate insert fixed, cron installer now matches GET cron route, stale 6-week / Operator Fund copy removed from active surfaces
 - **Verification status:** public desktop/mobile browser QA completed, authenticated shell smoke coverage added via tests, `npm test` passes `30/30`, and `npm run build` passes
 - **Important live follow-up:** Supabase migrations `016_allow_enter_without_squad.sql` and `017_daily_boss_loop.sql` still need to be applied before the Boss-first model works in production
 
 ## Three Tiers (Earned Progression)
 
-1. **ENTER ($19/mo):** AI Boss daily check-ins, 5-min micro-sessions (Mon-Fri), streak counter, real-time Operator Score (65% passive), cohort feed, Boss-orchestrated weekly call + monthly 1:1 + Guardian escalation. 40-day proving ground. Works from user #1.
-2. **PROVEN ($49/mo):** Requires Score 70+ after completing a 40-day sprint. Squad access (4-5 proven operators), leaderboard, badges, squad damage mechanic, Boss-orchestrated weekly squad sessions, bi-weekly 1:1 coaching.
-3. **ELITE ($149/mo + equity):** Top 5% across 2+ sprints. Venture formation, Musharakah-compliant funding, mastermind calls, advisory. 10-20 max. **NOT YET BUILT — deferred until PROVEN validates.**
+1. **RECRUIT ($9/mo):** AI Boss daily check-ins, 5-min micro-sessions (Mon-Fri), streak counter, real-time Operator Score (65% passive), cohort feed, Boss-orchestrated weekly call + monthly 1:1 + Guardian escalation. 40-day proving ground. Works from user #1.
+2. **QUALIFIED ($99/mo):** Requires Score 30+ after completing a 40-day sprint. Squad access (4-5 qualified operators), leaderboard, badges, squad damage mechanic, Boss-orchestrated weekly squad sessions, bi-weekly 1:1 coaching.
+3. **OPERATOR ($349/mo + equity):** Top operators across 2+ sprints (70+). Venture funding, elite network, tools, frameworks, Musharakah-compliant funding, mastermind calls, advisory. 10-20 max. Introductory pricing — will go higher.
+
+### OPERATOR Venture Fund Model
+
+- **Contract type:** Permanent Musharakah (Musharakah Daimah) — AAOIFI Shariah Standard 12
+- **70% of all OPERATOR tier revenue** flows into the venture fund quarterly
+- **100% of the quarterly fund** goes to the winning team (not a split — full allocation)
+- **Cohort return:** Winning team proposes a **self-set % of venture profits** back to the cohort that funded them — forever (perpetual Musharakah obligation)
+- The self-proposed % is part of the pitch strategy: offer too little and voters won't back you, offer too much and you lose upside. The market decides.
+- **"Win and help win"** — non-winning teams get perpetual profit-share positions in the winning venture
+- **Profit definition:** AAOIFI standard — net revenue minus operating costs. Active partner draws pre-agreed salary. Surplus is distributable.
+- **Board member:** Winning team accepts a board member from the cohort/DA as condition of receiving the fund (Musharakah right to manage)
+- **Fund released in milestones/tranches** — Division Alpha is a partner, not a prize-giver
+- **If venture pivots:** Obligation follows the team, not the idea
+- **If venture fails:** Cohort absorbs the loss (Musharakah — shared risk)
+- **Past winners:** Full re-entry allowed, no restrictions. If they dominate, they dominate. Multiple re-entry rule options being explored (sit out a round, new venture only, mentorship requirement).
+- Selection via **judges, pitches, metrics, and votes** (multi-layer: metrics 30-40%, panel 25-35%, peer vote 25%, Boss Score ~20%)
+- **Cohort size:** 4-8 teams per round (dynamic, minimum 3 for a valid round)
+- **Round frequency:** Quarterly (~3 sprints / ~120 days)
+- **Minimum fund threshold:** $5,000 per round (roll over if not met)
+- **Musharakah-compliant:** profit/loss sharing, no interest, shared risk
+- **Running plan:** `Obsidian: 02-Ops/Agents/division-alpha/OPERATOR Venture Fund — Running Plan.md`
+
+### Fund Math Example (Illustrative)
+
+At 10 OPERATOR members ($349/mo × 70% × 3 months):
+- Quarterly fund: ~$7,329
+- Winning team gets: $7,329 (100%)
+- If venture profits $100K/yr and team offered 15%: cohort gets $15,000/yr split among ~4-7 other teams
 
 ## Tech Stack (Production)
 
@@ -47,7 +75,7 @@ Division Alpha is a 40-day proving ground for operators. The Boss (AI-powered, h
 
 ## 6 System Agents (Built in Repo)
 
-1. **Boss** (`/api/agents/boss`) — Dispatches daily Boss pulses, sends nudges, reconciles missed pulses, and drives the ENTER-first loop.
+1. **Boss** (`/api/agents/boss`) — Dispatches daily Boss pulses, sends nudges, reconciles missed pulses, and drives the RECRUIT-first loop.
 2. **Matchmaker** (`/api/agents/matchmaker`) — Forms squads based on goals, personality, timezone, commitment level. Runs at sprint enrollment close.
 3. **Facilitator** (`/api/agents/facilitator`) — Runs the weekly rhythm (Mon/Wed/Fri prompts, reminders, summaries). Scheduled via cron.
 4. **Coach** (`/api/coach`) — Private 1-on-1 performance coaching via MiniMax 2.7 with full operator context and conversation history.
@@ -86,7 +114,7 @@ Score updates DAILY (not sprint-end). ~65% passive or AI-inferred, ~35% active i
 - Community (passive): 10% — kudos, feed interactions, call attendance
 - Growth (minimal report): 10% — Fri reflection, carry-forward goals
 
-Score 70+ qualifies for PROVEN invitation. Top performers at 90+ across 2+ sprints qualify for ELITE consideration.
+Score 30+ qualifies for QUALIFIED invitation. Top performers at 70+ across 2+ sprints qualify for OPERATOR consideration.
 
 ## Permission Model
 
@@ -155,7 +183,7 @@ divisionalpha/
 │       ├── 013_notification_prefs.sql        ← Notification preferences per user
 │       ├── 014_fix_anon_applications.sql     ← Allow unauthenticated applications
 │       ├── 015_add_referral_source.sql       ← Referral tracking column on applications
-│       ├── 016_allow_enter_without_squad.sql ← ENTER works before squad assignment
+│       ├── 016_allow_enter_without_squad.sql ← RECRUIT works before squad assignment
 │       └── 017_daily_boss_loop.sql           ← Daily Boss pulses, streak state, score metadata
 ├── app/                                       ← Next.js production app
 │   ├── src/
@@ -205,7 +233,7 @@ divisionalpha/
 │   │   │       ├── use-journey-state.ts      ← Journey page read model
 │   │   │       ├── use-proof-state.ts        ← Proof page read model
 │   │   │       ├── use-squad-state.ts        ← Squad page read model
-│   │   │       ├── use-tier-state.ts         ← ENTER/PROVEN/ELITE state model
+│   │   │       ├── use-tier-state.ts         ← RECRUIT/QUALIFIED/OPERATOR state model
 │   │   │       ├── use-declarations.ts       ← Monday declarations CRUD
 │   │   │       ├── use-checkins.ts           ← Wednesday check-ins CRUD
 │   │   │       ├── use-reflections.ts        ← Friday reflections CRUD
@@ -226,7 +254,7 @@ divisionalpha/
 │   │           ├── login.tsx                 ← Magic link login page
 │   │           ├── boss.tsx                  ← Boss Home
 │   │           ├── journey.tsx               ← Journey page with declaration / signal / reflection modules
-│   │           ├── squad.tsx                 ← Locked preview in ENTER, live squad hub in PROVEN
+│   │           ├── squad.tsx                 ← Locked preview in RECRUIT, live squad hub in QUALIFIED
 │   │           ├── coach.tsx                 ← Unified Boss-side private thread
 │   │           ├── proof.tsx                 ← Score, thresholds, badges, leaderboard
 │   │           ├── apply.tsx                 ← 4-step onboarding → Stripe checkout
@@ -263,7 +291,7 @@ divisionalpha/
 ### Authenticated (6 + admin)
 4. **Boss** — Boss Home: daily pulse, today’s command, score/streak/progression strip, next ritual, unlock previews, coach whisper
 5. **Journey** — 40-day arc, milestone timeline, and embedded declaration / signal / reflection modules
-6. **Squad** — Locked preview in ENTER, live squad hub and thread in PROVEN
+6. **Squad** — Locked preview in RECRUIT, live squad hub and thread in QUALIFIED
 7. **Coach** — Unified Boss-side private thread with real MiniMax responses
 8. **Proof** — Score, red-line / elite-line progress, badges, operator leaderboard, squad leaderboard
 9. **Settings** — Profile, preferences, notifications, account
@@ -279,8 +307,8 @@ Legacy pages still exist in the codebase as implementation details or historical
 - `profiles` — extends `auth.users` (identity, persona, tier, subscription, role)
 - `applications` — 4-step onboarding + referral + checkout capture
 - `sprints` — 40-day sprint definitions (~6 calendar weeks of scheduling)
-- `squads` / `squad_members` — earned rooms for PROVEN operators
-- `declarations` / `checkins` / `reflections` — weekly rhythm tables; `squad_id` can now be null so ENTER works before squad assignment
+- `squads` / `squad_members` — earned rooms for QUALIFIED operators
+- `declarations` / `checkins` / `reflections` — weekly rhythm tables; `squad_id` can now be null so RECRUIT works before squad assignment
 - `squad_messages` — real-time room thread
 - `coach_messages` — private Boss/coach conversation history
 - `operator_scores` — sprint score + streak metadata (`current_streak`, `best_streak`, `last_pulse_*`)
@@ -317,22 +345,22 @@ Legacy pages still exist in the codebase as implementation details or historical
 - **v6 Single Experience Model (2026-04-01):** Boss IS the system. Human moments embedded inside (weekly call, monthly 1:1, Guardian escalation). Split hybrid fails when AI and humans feel separate. Division Alpha is one experience.
 - **Adaptive shell shipped in repo (2026-04-01):** Boss Home, Journey, Squad, Coach, Proof, Settings, Admin replaced the old Home/Declare/Check-in/Reflect/Leaderboard primary IA.
 - **Elite Proving Ground positioning:** Division Alpha is a proving ground, not a self-help tool. Public claim changes by ICP: everyone gets a chance, earn your squad, 85% don't make it.
-- **Earned progression:** ENTER 30+ → PROVEN 70+ → ELITE 90+. Behavior gates, not price gates.
-- **ENTER works from user #1 in code:** weekly rhythm no longer requires immediate squad assignment; Boss-first progression comes before squad assignment.
+- **Earned progression:** RECRUIT → QUALIFIED 30+ → OPERATOR 70+. Behavior gates, not price gates.
+- **RECRUIT works from user #1 in code:** weekly rhythm no longer requires immediate squad assignment; Boss-first progression comes before squad assignment.
 - **Daily Boss loop exists in code:** pulse dispatch, pulse submission, streak state, score updates, and Boss-triggered nudges are implemented, but require DB migration apply before production use.
 - **6-layer retention engine:** Daily pulse (variable rewards), 5-min micro-sessions, streak system, passive-first scoring (65% automatic), cohort feed (default-on), Boss personality (context-aware, escalating, references human interactions).
 - **Pivot history:** v1 generic pods (76 KILL) → v2 Muslim pivot (CONDITIONAL GO) → v3 elite proving ground (65 RETHINK) → v6 single experience model (53 RETHINK). All in under 1 week.
 - Brand stays universal, marketing targets Muslim founders
 - Islamic values integration (Tawakkul, Amal, Ikhlas) — subtle, not heavy-handed
-- Musharakah (Islamic partnership) for ELITE tier ventures — profit/loss sharing, no interest
+- Musharakah (Islamic partnership) for OPERATOR tier ventures — profit/loss sharing, no interest
 - Design should feel like a **high-end members club** — not generic SaaS, not military bunker
 - DM Sans is the primary font everywhere — user strongly prefers its readability
 - Instrument Serif only for Operator Score number (one place in the entire app)
 - MiniMax 2.7 for all AI agents — cost-effective, good quality
 - Self-hosted via Coolify (not Vercel) — full control, Docker + Traefik
-- ELITE deferred — ship ENTER first, build PROVEN once Sprint 4 validates, build ELITE once PROVEN has 500+ members
+- OPERATOR deferred — ship RECRUIT first, build QUALIFIED once Sprint 4 validates, build OPERATOR once QUALIFIED has 500+ members
 - **No financial stakes** (Beeminder-style deposits rejected by founder — doesn't fit brand)
-- **Captain pipeline:** PROVEN operators at 90+ score → facilitate for free PROVEN + ELITE pathway. Exact mechanics deferred until real data.
+- **Captain pipeline:** QUALIFIED operators at 70+ score → facilitate for free QUALIFIED + OPERATOR pathway. Exact mechanics deferred until real data.
 
 ## Server Infrastructure
 
@@ -364,21 +392,21 @@ Legacy pages still exist in the codebase as implementation details or historical
   - verify email/notification behavior
 - Push/deploy the redesign once the migration-backed smoke test passes
 - Start outreach once the live product and funnel are verified
-- Run matchmaker only after real PROVEN qualifiers exist or once the first earned-squad cohort is intentionally formed
-- Keep ELITE deferred until PROVEN validates with real users
-- Keep captain pipeline deferred until real 90+ PROVEN operators emerge
+- Run matchmaker only after real QUALIFIED qualifiers exist or once the first earned-squad cohort is intentionally formed
+- Keep OPERATOR deferred until QUALIFIED validates with real users
+- Keep captain pipeline deferred until real 70+ QUALIFIED operators emerge
 
 ## Go-To-Market Strategy (Updated April 1, 2026)
 
 ### Competitive Position
 
-Division Alpha combines what no competitor does: **low entry ($19) + behavior filtering + single-experience Boss system + earned squad progression.**
+Division Alpha combines what no competitor does: **low entry ($9) + behavior filtering + single-experience Boss system + earned squad progression.**
 
 Key competitors: Focusmate ($10/mo, 50K+), Commit Action ($199/mo, 8K+), Boss as a Service ($25/mo), Shelpful ($35-65/mo, AI+human hybrid).
 
 **Division Alpha's moats:**
 1. Single-experience Boss system (Boss IS the system, human moments embedded) — nobody else
-2. Earned progression (ENTER → PROVEN → ELITE) — behavior gates, not price gates
+2. Earned progression (RECRUIT → QUALIFIED → OPERATOR) — behavior gates, not price gates
 3. Proactive, not passive (Boss comes to YOU via email/SMS, not another dashboard)
 4. Speed (concept → production in ~2 weeks, 6 strategic iterations in <1 week)
 5. Islamic framing for Muslim founder niche (real but limits TAM)
@@ -414,7 +442,7 @@ Position as **professional performance tool**, NOT personal self-help. This keep
 
 **Campaign 2 — RE Agents:**
 - Subject: "What your broker doesn't provide"
-- Angle: "Most agents pay $400+/mo for a coach whose main value is accountability. Division Alpha starts at $19/mo, with the stronger room earned through proof."
+- Angle: "Most agents pay $400+/mo for a coach whose main value is accountability. Division Alpha starts at $9/mo, with the stronger room earned through proof."
 
 **Campaign 3 — SDRs:**
 - Subject: "The 15-month wall"

@@ -51,10 +51,10 @@ export function useDashboardSnapshot() {
     {
       key: 'squad',
       title: 'Squad',
-      body: tier.provenUnlocked
+      body: tier.qualifiedUnlocked
         ? 'Your earned room, with health, pressure, activity, and live operator chat.'
-        : 'Locked until 70+. The room gets stronger when it is earned.',
-      state: tier.provenUnlocked ? 'open' as const : 'locked' as const,
+        : 'Locked until 30+. The room gets stronger when it is earned.',
+      state: tier.qualifiedUnlocked ? 'open' as const : 'locked' as const,
     },
     {
       key: 'proof',

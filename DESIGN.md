@@ -2,7 +2,7 @@
 
 ## Product Context
 - **What this is:** A 40-day proving ground for operators. The Boss is the system: AI-powered, human-amplified, one unified experience with one memory.
-- **Model:** One adaptive app that evolves across `ENTER`, `PROVEN`, and `ELITE` without becoming three separate products.
+- **Model:** One adaptive app that evolves across `RECRUIT`, `QUALIFIED`, and `OPERATOR` without becoming three separate products.
 - **Front-door truth:** Everyone gets a chance.
 - **Operator truth:** The best earn their squad.
 - **Elite truth:** 85% do not make it.
@@ -103,7 +103,7 @@ Old standalone pages like `declare`, `checkin`, `reflect`, `kickoff`, `completio
 - Sage is the only accent family.
 - Use accent sparingly so it still means “important.”
 - Lock states should read as calm and withheld, not greyed out to death.
-- ELITE should feel rarer through composition and language, not through a new color palette.
+- OPERATOR should feel rarer through composition and language, not through a new color palette.
 
 ## Layout
 - **Authenticated desktop:** slim editorial rail on the left
@@ -147,14 +147,14 @@ Required modules:
 - `admin`: broadest and densest layout in the product
 
 ## Tier Design Model
-### ENTER
+### RECRUIT
 - Boss-first
 - Solo-capable
 - Proof-building
 - Locked squad preview visible
 - Daily rhythm dominates
 
-### PROVEN
+### QUALIFIED
 - Same shell, deeper social layer
 - Live squad hub
 - Leaderboard relevance
@@ -162,9 +162,10 @@ Required modules:
 - Session prep and follow-up
 - Earned-status cues
 
-### ELITE
+### OPERATOR
 - Same shell, strategic depth
 - Build / council / captain / venture readiness
+- Venture funding, elite network, tools, frameworks
 - Rare by posture, not by flashy treatment
 
 ### Tier UI Rules
@@ -234,5 +235,5 @@ Required modules:
 | 2026-03-24 | Single-column posture locked as the baseline | Division Alpha should read like a private operating journal, not a spreadsheet. |
 | 2026-03-24 | Light mode set as primary | The product should feel like morning review energy first, evening review second. |
 | 2026-04-01 | Boss-first adaptive app locked | The app now centers on Boss, Journey, Squad, Coach, and Proof within one unified shell. |
-| 2026-04-01 | Tier progression made explicit in UI | ENTER, PROVEN, and ELITE are visible as one ladder instead of disconnected future ideas. |
+| 2026-04-01 | Tier progression made explicit in UI | RECRUIT, QUALIFIED, and OPERATOR are visible as one ladder instead of disconnected future ideas. |
 | 2026-04-02 | Editorial desktop rail approved | Authenticated desktop now uses a left rail and wider page-specific canvases without adopting generic dashboard UI. |

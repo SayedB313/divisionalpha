@@ -13,26 +13,26 @@ function getPulseColor(status?: string | null) {
 }
 
 function getTierAccent(tier: string) {
-  if (tier === "elite") {
+  if (tier === "operator") {
     return {
       border: "rgba(61, 107, 74, 0.45)",
       background: "linear-gradient(180deg, var(--accent-surface) 0%, var(--surface) 100%)",
-      label: "ELITE",
+      label: "OPERATOR",
     };
   }
 
-  if (tier === "proven") {
+  if (tier === "qualified") {
     return {
       border: "var(--accent)",
       background: "var(--accent-surface)",
-      label: "PROVEN",
+      label: "QUALIFIED",
     };
   }
 
   return {
     border: "var(--border-subtle)",
     background: "var(--surface)",
-    label: "ENTER",
+    label: "RECRUIT",
   };
 }
 
@@ -59,7 +59,7 @@ export function BossPage() {
   const pulseHistory = [...recentPulses].reverse();
   const tierAccent = getTierAccent(tier.activeTier);
   const currentScore = tier.score;
-  const nextTierLabel = tier.nextTier ? tier.nextTier.toUpperCase() : "ELITE";
+  const nextTierLabel = tier.nextTier ? tier.nextTier.toUpperCase() : "OPERATOR";
   const pulseStatus = pulse?.status ?? "pending";
 
   return (
@@ -282,7 +282,7 @@ export function BossPage() {
                   {tier.nextTier ? `${tier.gapToNext} points from ${nextTierLabel}.` : "You are operating at the highest unlocked layer."}
                 </h2>
                 <p className="text-[14px] leading-[1.65]" style={{ color: "var(--text-secondary)" }}>
-                  ENTER stays open. PROVEN is earned at 70+. ELITE opens at 90+ across the kind of evidence the room respects.
+                  RECRUIT stays open. QUALIFIED is earned at 30+. OPERATOR opens at 70+ across the kind of evidence the room respects.
                 </p>
               </div>
               <button
@@ -329,7 +329,7 @@ export function BossPage() {
                     className="text-[1.15rem] font-medium mb-2"
                     style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text)" }}
                   >
-                    {card.threshold}+
+                    {card.threshold !== null ? `${card.threshold}+` : "—"}
                   </div>
                   <p className="text-[13px] leading-[1.6] mb-3" style={{ color: "var(--text-secondary)" }}>
                     {card.body}

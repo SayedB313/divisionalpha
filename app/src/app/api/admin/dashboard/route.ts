@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase/server'
 
-const ENTER_PRICE = 19
-const PROVEN_PRICE = 49
-const ELITE_PRICE = 149
+const RECRUIT_PRICE = 9
+const QUALIFIED_PRICE = 99
+const OPERATOR_PRICE = 349
 
 function isPaying(status: string | null | undefined) {
   return status === 'active' || status === 'trialing'
@@ -72,31 +72,31 @@ export async function GET(_request: NextRequest) {
 
     const scoreMap = new Map<string, number>(scores.map((score: any) => [score.user_id, Number(score.total_score ?? 0)] as const))
 
-    let enterCount = 0
-    let provenCount = 0
-    let eliteCount = 0
+    let recruitCount = 0
+    let qualifiedCount = 0
+    let operatorCount = 0
     let payingCount = 0
 
     for (const member of profiles as any[]) {
       const active = member.status === 'active'
       const score = Number(scoreMap.get(member.id) ?? 0)
-      const elite = member.tier === 3 || (score >= 90 && (member.sprints_completed ?? 0) >= 2)
-      const proven = !elite && (member.tier === 2 || score >= 70)
+      const operator = member.tier === 3 || (score >= 70 && (member.sprints_completed ?? 0) >= 2)
+      const qualified = !operator && (member.tier === 2 || score >= 30)
 
       if (isPaying(member.subscription_status)) payingCount += 1
 
       if (!active) continue
 
-      if (elite) eliteCount += 1
-      else if (proven) provenCount += 1
-      else enterCount += 1
+      if (operator) operatorCount += 1
+      else if (qualified) qualifiedCount += 1
+      else recruitCount += 1
     }
 
-    const activeUsers = enterCount + provenCount + eliteCount
+    const activeUsers = recruitCount + qualifiedCount + operatorCount
     const pausedUsers = profiles.filter((member: any) => member.status === 'paused').length
     const churnedUsers = profiles.filter((member: any) => member.status === 'churned').length
 
-    const estimatedMrr = enterCount * ENTER_PRICE + provenCount * PROVEN_PRICE + eliteCount * ELITE_PRICE
+    const estimatedMrr = recruitCount * RECRUIT_PRICE + qualifiedCount * QUALIFIED_PRICE + operatorCount * OPERATOR_PRICE
     const avgScore = scores.length > 0
       ? Math.round(scores.reduce((sum: number, score: any) => sum + Number(score.total_score ?? 0), 0) / scores.length)
       : 0
@@ -118,10 +118,10 @@ export async function GET(_request: NextRequest) {
         .map((pulse: any) => pulse.user_id),
     )
 
-    const provenReady = scores.filter((score: any) => Number(score.total_score ?? 0) >= 70).length
-    const eliteCandidates = profiles.filter((member: any) => {
+    const qualifiedReady = scores.filter((score: any) => Number(score.total_score ?? 0) >= 30).length
+    const operatorCandidates = profiles.filter((member: any) => {
       const score = scoreMap.get(member.id) ?? 0
-      return Number(score) >= 90 && (member.sprints_completed ?? 0) >= 2
+      return Number(score) >= 70 && (member.sprints_completed ?? 0) >= 2
     }).length
 
     return NextResponse.json({
@@ -134,14 +134,14 @@ export async function GET(_request: NextRequest) {
         duration_weeks: sprint.duration_weeks,
       } : null,
       pricing: {
-        enter: ENTER_PRICE,
-        proven: PROVEN_PRICE,
-        elite: ELITE_PRICE,
+        recruit: RECRUIT_PRICE,
+        qualified: QUALIFIED_PRICE,
+        operator: OPERATOR_PRICE,
       },
       thresholds: {
-        enter: 30,
-        proven: 70,
-        elite: 90,
+        recruit: null,
+        qualified: 30,
+        operator: 70,
       },
       kpis: {
         total_users: profiles.length,
@@ -154,9 +154,9 @@ export async function GET(_request: NextRequest) {
         arr_estimate: estimatedMrr * 12,
       },
       tiers: {
-        enter: enterCount,
-        proven: provenCount,
-        elite: eliteCount,
+        recruit: recruitCount,
+        qualified: qualifiedCount,
+        operator: operatorCount,
       },
       boss: {
         pulses_sent_today: pulsesToday.length,
@@ -172,8 +172,8 @@ export async function GET(_request: NextRequest) {
       funnel: {
         submitted_applications: applicationsRes.count || 0,
         paying_users: payingCount,
-        proven_unlock_volume: provenReady,
-        elite_candidate_pipeline: eliteCandidates,
+        qualified_unlock_volume: qualifiedReady,
+        operator_candidate_pipeline: operatorCandidates,
       },
       squads: {
         active_count: squads.length,

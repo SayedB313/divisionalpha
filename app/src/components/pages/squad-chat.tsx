@@ -86,9 +86,9 @@ export function SquadChatPage() {
           className="py-5 px-5"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div className="text-lg font-semibold mb-1">Squad chat unlocks with PROVEN.</div>
+          <div className="text-lg font-semibold mb-1">Squad chat unlocks with QUALIFIED.</div>
           <div className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            Complete ENTER first. When you earn your squad, this is where the live operator conversation starts.
+            Complete RECRUIT first. When you earn your squad, this is where the live operator conversation starts.
           </div>
         </div>
       </PageWrapper>

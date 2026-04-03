@@ -94,7 +94,7 @@ export function SettingsPage() {
               <div className="min-w-0">
                 <div className="text-[1.1rem] font-semibold">{profile?.display_name || "Operator"}</div>
                 <div className="text-[11px] mb-2" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}>
-                  {squad?.name || "ENTER"} · S{profile?.sprints_completed ?? 0} operator
+                  {squad?.name || "RECRUIT"} · S{profile?.sprints_completed ?? 0} operator
                 </div>
                 <p className="text-[13px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
                   {profile?.bio || "Building with purpose."}
@@ -136,9 +136,9 @@ export function SettingsPage() {
             <div className="text-[10px] uppercase tracking-[0.08em] mb-1" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}>
               Current plan
             </div>
-            <div className="text-[1rem] font-semibold mb-1">ENTER</div>
+            <div className="text-[1rem] font-semibold mb-1">RECRUIT</div>
             <div className="text-[13px]" style={{ color: "var(--text-secondary)" }}>
-              $19/mo · 40-day proving ground with earned progression to PROVEN.
+              $9/mo · 40-day proving ground with earned progression to QUALIFIED.
             </div>
           </div>
         </aside>
@@ -328,9 +328,9 @@ export function SettingsPage() {
                 <div className="text-[10px] uppercase tracking-[0.08em] mb-1" style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--accent)" }}>
                   Current plan
                 </div>
-                <div className="text-lg font-semibold mb-1">ENTER</div>
+                <div className="text-lg font-semibold mb-1">RECRUIT</div>
                 <div className="text-[13px] mb-3" style={{ color: "var(--text-secondary)" }}>
-                  $19/mo · 40-day proving ground with earned progression to PROVEN
+                  $9/mo · 40-day proving ground with earned progression to QUALIFIED
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button
@@ -344,7 +344,7 @@ export function SettingsPage() {
                     className="text-[12px] font-medium py-2 px-4 cursor-pointer transition-colors duration-150"
                     style={{ background: "none", border: "1px solid var(--accent)", borderRadius: "4px", color: "var(--accent)", fontFamily: "inherit" }}
                   >
-                    View PROVEN path
+                    View QUALIFIED path
                   </button>
                 </div>
               </div>

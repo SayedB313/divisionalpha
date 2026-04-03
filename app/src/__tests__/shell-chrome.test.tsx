@@ -21,7 +21,7 @@ const appState = {
 };
 
 const tierState = {
-  activeTier: "enter",
+  activeTier: "recruit",
   score: 32,
   currentStreak: 4,
 };
@@ -61,12 +61,12 @@ vi.mock("@/lib/app-context", () => ({
 vi.mock("@/lib/hooks/use-tier-state", () => ({
   useTierState: () => ({
     ...tierState,
-    nextTier: "proven",
-    nextThreshold: 70,
-    gapToNext: 38,
-    provenUnlocked: false,
-    eliteEligible: false,
-    eliteUnlocked: false,
+    nextTier: "qualified",
+    nextThreshold: 30,
+    gapToNext: 0,
+    qualifiedUnlocked: false,
+    operatorEligible: false,
+    operatorUnlocked: false,
     completedSprints: 0,
     bestStreak: 6,
     tiers: [],

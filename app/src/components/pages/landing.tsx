@@ -160,7 +160,7 @@ export function LandingPage() {
         </h1>
 
         <p className="text-[17px] leading-[1.7] mb-8" style={{ color: "var(--text-secondary)" }}>
-          Division Alpha starts at <strong>ENTER</strong>. For 40 days, the Boss tracks what you said
+          Division Alpha starts at <strong>RECRUIT</strong>. For 40 days, the Boss tracks what you said
           you would do, what you actually did, and whether your score says you belong higher.
           <br />
           <br />
@@ -192,7 +192,7 @@ export function LandingPage() {
           className="mt-6 text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          Sprint {sprintNum} begins {sprintDate} &middot; {spotsLeft} spots remaining &middot; ENTER $19/mo &middot; PROVEN unlocks at 70+
+          Sprint {sprintNum} begins {sprintDate} &middot; {spotsLeft} spots remaining &middot; RECRUIT $9/mo &middot; QUALIFIED unlocks at 30+
         </div>
       </div>
 
@@ -227,7 +227,7 @@ export function LandingPage() {
             {
               day: "Earned",
               title: "Progression",
-              desc: "ENTER is open. PROVEN is earned at 70+. ELITE is 90+ across multiple sprints. Access rises with evidence.",
+              desc: "RECRUIT is open. QUALIFIED is earned at 30+. OPERATOR is 70+ across multiple sprints. Access rises with evidence.",
             },
           ].map((item) => (
             <div
@@ -270,19 +270,19 @@ export function LandingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
-              name: "ENTER",
-              stat: "$19",
+              name: "RECRUIT",
+              stat: "$9",
               desc: "40-day proving ground. Daily Boss pulse, streak, score, weekly operator session, and embedded human support.",
             },
             {
-              name: "PROVEN",
-              stat: "70+",
+              name: "QUALIFIED",
+              stat: "30+",
               desc: "Earned squad access. Matched operators, weekly squad sessions, leaderboard pressure, and squad damage.",
             },
             {
-              name: "ELITE",
-              stat: "90+",
-              desc: "Top-end operator signal across multiple sprints. Venture formation, advisory, and high-trust building with the best.",
+              name: "OPERATOR",
+              stat: "70+",
+              desc: "Venture funding, elite network, tools, frameworks, and high-trust building with the best.",
             },
           ].map((tier) => (
             <div
@@ -323,7 +323,7 @@ export function LandingPage() {
             },
             {
               title: "Your score tells the truth",
-              desc: "The score is not decoration. It determines whether you stay at ENTER, unlock PROVEN, or eventually reach ELITE.",
+              desc: "The score is not decoration. It determines whether you stay at RECRUIT, unlock QUALIFIED, or eventually reach OPERATOR.",
             },
             {
               title: "Squads are earned",
@@ -366,7 +366,7 @@ export function LandingPage() {
             "You want a system that notices when you drift instead of waiting for you to ask for help",
             "You can handle the truth of a visible score and a broken streak",
             "You want the chance to prove yourself before you earn a stronger room",
-            "You are willing to pay $19 to step in and let your behavior decide what opens next",
+            "You are willing to pay $9 to step in and let your behavior decide what opens next",
           ].map((item, i) => (
             <div key={i} className="flex gap-3 py-2">
               <span className="text-[13px] shrink-0 mt-0.5" style={{ color: "var(--accent)" }}>
@@ -381,7 +381,7 @@ export function LandingPage() {
       </div>
 
       <div className="py-12" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-        <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-2">ENTER &middot; $19/month.</h2>
+        <h2 className="text-[1.5rem] font-bold leading-[1.25] mb-2">RECRUIT &middot; $9/month.</h2>
         <p className="text-[15px] leading-[1.7] mb-6" style={{ color: "var(--text-secondary)" }}>
           The entry point is deliberately low-friction. Everyone gets a chance to step in.
           The filter is not price. The filter is whether you can hold your line for 40 days.
@@ -394,7 +394,7 @@ export function LandingPage() {
           className="py-5 px-6"
           style={{ background: "var(--surface)", border: "1px solid var(--border-subtle)", borderRadius: "4px" }}
         >
-          <div className="text-lg font-semibold mb-3">ENTER &middot; $19/mo</div>
+          <div className="text-lg font-semibold mb-3">RECRUIT &middot; $9/mo</div>
           <div className="space-y-2">
             {[
               "40-day proving ground with daily Boss pulse",
@@ -402,7 +402,7 @@ export function LandingPage() {
               "Visible streak + real-time Operator Score",
               "Weekly operator session, monthly 1:1, Guardian escalation",
               "Private AI coach with full context on your goals and patterns",
-              "PROVEN invitation when you finish at 70+",
+              "QUALIFIED invitation when you finish at 30+",
               "Cancel anytime. No contracts.",
             ].map((item, i) => (
               <div key={i} className="flex gap-2 text-[14px]" style={{ color: "var(--text-secondary)" }}>
@@ -452,7 +452,7 @@ export function LandingPage() {
           className="mt-4 text-center text-[11px]"
           style={{ fontFamily: "var(--font-dm-mono), monospace", color: "var(--text-muted)" }}
         >
-          {spotsLeft} spots remaining &middot; ENTER starts at $19/mo &middot; Applications reviewed within 48 hours
+          {spotsLeft} spots remaining &middot; RECRUIT starts at $9/mo &middot; Applications reviewed within 48 hours
         </div>
       </div>
 
